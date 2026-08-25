@@ -1,0 +1,5 @@
+# rust-toolchain.toml
+[toolchain]
+channel    = "1.98.0"
+components = ["rustfmt", "clippy", "rust-src", "rust-analyzer"]
+

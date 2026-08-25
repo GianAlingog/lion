@@ -1,0 +1,30 @@
+# Cargo.toml
+[workspace]
+resolver = "3"
+members  = ["crates/*"]
+
+# inherited by every member via `edition.workspace = true`
+[workspace.package]
+edition      = "2024"
+rust-version = "1.98"
+license      = "MIT"
+
+# shared dependency versions live here; members write `serde.workspace = true`
+[workspace.dependencies]
+
+# lints defined once, opted into by each crate
+[workspace.lints.rust]
+unsafe_code = "deny"
+
+[workspace.lints.clippy]
+all      = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+
+[profile.release]
+lto           = "thin"
+codegen-units = 1
+
+# release speed, but keeps symbols so profilers can read the stack
+[profile.profiling]
+inherits = "release"
+debug    = true
