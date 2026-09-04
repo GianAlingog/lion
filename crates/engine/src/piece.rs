@@ -1,4 +1,5 @@
 #[repr(u8)]
+#[derive(Copy, Clone)]
 pub enum Piece {
     I,
     O,
@@ -8,6 +9,8 @@ pub enum Piece {
     J,
     L,
 }
+
+#[derive(Copy, Clone)]
 pub enum Rot {
     N,
     E,
@@ -15,6 +18,7 @@ pub enum Rot {
     W,
 } // spawn, cw, 180, ccw
 
+#[derive(Copy, Clone)]
 pub struct Placement {
     pub piece: Piece,
     pub rot: Rot,
