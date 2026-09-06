@@ -1,10 +1,11 @@
 pub mod bag;
 pub mod board;
 pub mod piece;
+pub mod srs;
 
 #[cfg(test)]
 mod tests {
-    use crate::{board::Board, piece::*, bag::Bag};
+    use crate::{bag::Bag, board::Board, piece::*};
 
     #[test]
     fn print_empty_board() {

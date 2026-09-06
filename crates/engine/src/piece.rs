@@ -1,5 +1,5 @@
 #[repr(u8)]
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Piece {
     I,
     O,
@@ -10,7 +10,8 @@ pub enum Piece {
     L,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[repr(u8)]
+#[derive(Clone, Copy, Debug)]
 pub enum Rot {
     N,
     E,
@@ -18,7 +19,19 @@ pub enum Rot {
     W,
 } // spawn, cw, 180, ccw
 
-#[derive(Copy, Clone, Debug)]
+impl Rot {
+    pub fn from_index(index: usize) -> Option<Self> {
+        match index {
+            0 => Some(Rot::N),
+            1 => Some(Rot::E),
+            2 => Some(Rot::S),
+            3 => Some(Rot::W),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
 pub struct Placement {
     pub piece: Piece,
     pub rot: Rot,
