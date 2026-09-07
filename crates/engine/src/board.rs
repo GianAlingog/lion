@@ -23,6 +23,14 @@ impl Board {
     // Set up guards on the bounds?
     // Consider swapping to i8
     pub fn get(&self, x: i32, y: i32) -> bool {
+        if x < 0 || x >= Self::WIDTH as i32 || y < 0 {
+            return true;
+        }
+
+        if y >= Self::HEIGHT as i32 {
+            return false;
+        }
+
         (self.rows[y as usize] >> x) & 1 == 1
     }
 
