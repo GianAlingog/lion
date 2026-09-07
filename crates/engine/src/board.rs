@@ -8,6 +8,7 @@ pub struct Board {
 impl Board {
     pub const WIDTH: usize = 10;
     pub const HEIGHT: usize = 40;
+    pub const VIEW_HEIGHT: usize = 20;
     pub const FULL_ROW: u16 = 0b11_1111_1111;
 
     pub fn empty() -> Self {

@@ -1,6 +1,6 @@
 use std::collections::VecDeque;
 
-use crate::{bag::Bag, board::Board, piece::{Piece, Placement}, srs::SpinKind};
+use crate::{bag::Bag, board::Board, piece::{Piece, Placement, Rot}, srs::SpinKind};
 
 pub struct Game {
     pub board: Board,
@@ -52,7 +52,35 @@ impl Game {
         self.can_hold = false;
     }
 
-    // pub fn topped_out(&self) -> bool;
+    pub fn topped_out(&self) -> bool {
+        let mut p = Placement {
+            piece: *self.queue.front().expect("Queue was empty on top out check"),
+            rot: Rot::N,
+            x: 0,
+            y: 0,
+        };
+
+        // WARN: Offsets and piece widths are hardcoded!
+        // p.x = (remove piece) / 2
+        // p.y = (top - 1) - dist to bottom cell
+        match p.piece {
+            Piece::I => {
+                p.x = (Board::WIDTH as i8 - 4) / 2;
+                p.y = Board::VIEW_HEIGHT as i8 - 3;
+                self.board.collides(p)
+            },
+            Piece::O => {
+                p.x = (Board::WIDTH as i8 - 2) / 2;
+                p.y = Board::VIEW_HEIGHT as i8 - 1;
+                self.board.collides(p)
+            },
+            _ => {
+                p.x = (Board::WIDTH as i8 - 3) / 2;
+                p.y = Board::VIEW_HEIGHT as i8 - 2;
+                self.board.collides(p)
+            },
+        }
+    }
 }
 
 pub struct Outcome {
