@@ -124,10 +124,49 @@ pub enum SpinKind {
 pub fn detect_spin(board: &Board, p: Placement, kick: u8) -> SpinKind {
     match p.piece {
         Piece::T => {
-            todo!("Check 3 corners of the T piece")
-            // Two front: Full
-            // Two back: Mini
-            // Exception: kick test case 5 (indexed 4) is always full
+            // Check at least 3 corners of the T piece
+            let mut filled_corners = 0_u8;
+            let mut front_corners = 0_u8;
+
+            for (dx , dy) in [(0_i8, 0_i8), (0, 2), (2, 0), (2, 2)] {
+                // Find corner
+                let cx = p.x + dx;
+                let cy = p.y + dy;
+
+                if board.get(cx as i32, cy as i32) {
+                    filled_corners += 1;
+
+                    let mut adjacent_cells = 0_u8;
+                    for (nx, ny) in [(-1_i8, 0_i8), (0, -1), (0, 1), (1, 0)] {
+                        // Find cell pieces
+                        let ax = cx + nx;
+                        let ay = cy + ny;
+
+                        if p.piece.cells(p.rot).contains(&(ax, ay)) {
+                            adjacent_cells += 1;
+                        }
+                    }
+
+                    if adjacent_cells == 2 {
+                        front_corners += 2;
+                    }
+                }
+            }
+
+            if filled_corners >= 3_u8 {
+                if kick == 4 {
+                    // Exception: kick test case 5 (indexed 4) is always full
+                    SpinKind::Full
+                } else {
+                    match front_corners {
+                        2 => SpinKind::Full,
+                        1 => SpinKind::Mini,
+                        _ => SpinKind::None,
+                    }
+                }
+            } else {
+                SpinKind::None
+            }
         }
         _ => SpinKind::None,
     }
