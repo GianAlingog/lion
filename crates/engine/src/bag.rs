@@ -1,6 +1,6 @@
 use crate::piece::Piece;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Rng(u64);
 
 impl Rng {
@@ -22,7 +22,7 @@ impl Rng {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct Bag {
     // Use its own rng, so multiple bags can be used in the future (arena)
     rng: Rng,
