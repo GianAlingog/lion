@@ -40,7 +40,52 @@ impl Game {
     }
 
     // Drives action, calls all internal logic
-    // pub fn advance(&mut self, p: Placement, spin: SpinKind) -> Outcome;
+    pub fn advance(&mut self, p: Placement, spin: SpinKind) -> Outcome {
+        assert!(self.board.is_grounded(p));
+        
+        let current_piece = self.queue.pop_front().expect("Queue was empty on advance");
+
+        let cleared_lines = self.board.lock(p);
+
+        // WARN: Hardcoded b2b on quads only
+        let mut b2b_broken = false;
+        if cleared_lines == 4 {
+            self.b2b += 1;
+        } else if 0 < cleared_lines && cleared_lines < 4 {
+            if self.b2b > 0 {
+                b2b_broken = true;
+            }
+
+            self.b2b = 0;
+        }
+
+        if cleared_lines == 0 {
+            self.combo = 0;
+        } else {
+            self.combo += 1;
+        }
+
+        let perfect_clear = cleared_lines > 0 && self.board.is_empty();
+
+        // TODO: Actually compute attack
+        let attack: u32 = 0;
+
+        // TODO: Handle garbage cancelling
+
+        // Refill bag
+        self.queue.push_back(self.bag.next());
+
+        // See design doc for reasoning, swap_hold is called by client before advance
+        self.can_hold = true;
+
+        Outcome {
+            lines: cleared_lines,
+            spin,
+            attack,
+            perfect_clear,
+            b2b_broken,
+        }
+    }
 
     pub fn swap_hold(&mut self) {
         assert!(self.can_hold);
@@ -86,7 +131,7 @@ impl Game {
 pub struct Outcome {
     pub lines: u32,
     pub spin: SpinKind,
-    // pub attack: u32,
+    pub attack: u32,
     pub perfect_clear: bool,
     pub b2b_broken: bool,
 }
