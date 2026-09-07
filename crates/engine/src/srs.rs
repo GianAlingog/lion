@@ -36,15 +36,16 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
                     [(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)],
                 ],
             ];
-            
+
             // Seems inefficient right now, but it is possibly a low value fix
             for test in 0..5_u8 {
                 let mut new_p = p.clone();
-                
+
                 new_p.rot = match dir {
                     Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
                     Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
-                }.expect("Rotation from index failed");
+                }
+                .expect("Rotation from index failed");
 
                 let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
 
@@ -57,11 +58,12 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
 
                 return Some((new_p, test));
             }
-            
+
             None
-        },
+        }
         _ => {
             // O, T, S, Z, J, L
+            // Note: The O piece passes through here and passes test 1.
             const KICKS_TABLE: [[[(i8, i8); 5]; 2]; 4] = [
                 [
                     // N to E, N to W
@@ -84,15 +86,16 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
                     [(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)],
                 ],
             ];
-            
+
             // Seems inefficient right now, but it is possibly a low value fix
             for test in 0..5_u8 {
                 let mut new_p = p.clone();
-                
+
                 new_p.rot = match dir {
                     Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
                     Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
-                }.expect("Rotation from index failed");
+                }
+                .expect("Rotation from index failed");
 
                 let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
 
@@ -105,8 +108,27 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
 
                 return Some((new_p, test));
             }
-            
+
             None
-        },
+        }
+    }
+}
+
+// Spin detections
+pub enum SpinKind {
+    None,
+    Mini,
+    Full,
+}
+
+pub fn detect_spin(board: &Board, p: Placement, kick: u8) -> SpinKind {
+    match p.piece {
+        Piece::T => {
+            todo!("Check 3 corners of the T piece")
+            // Two front: Full
+            // Two back: Mini
+            // Exception: kick test case 5 (indexed 4) is always full
+        }
+        _ => SpinKind::None,
     }
 }
