@@ -115,6 +115,7 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
 }
 
 // Spin detections
+#[derive(Debug, PartialEq, Eq)]
 pub enum SpinKind {
     None,
     Mini,
@@ -128,7 +129,8 @@ pub fn detect_spin(board: &Board, p: Placement, kick: u8) -> SpinKind {
             let mut filled_corners = 0_u8;
             let mut front_corners = 0_u8;
 
-            for (dx , dy) in [(0_i8, 0_i8), (0, 2), (2, 0), (2, 2)] {
+            // TODO: Refactor through functional programming, doable
+            for (dx, dy) in [(0_i8, 0_i8), (0, 2), (2, 0), (2, 2)] {
                 // Find corner
                 let cx = p.x + dx;
                 let cy = p.y + dy;
@@ -142,13 +144,13 @@ pub fn detect_spin(board: &Board, p: Placement, kick: u8) -> SpinKind {
                         let ax = cx + nx;
                         let ay = cy + ny;
 
-                        if p.piece.cells(p.rot).contains(&(ax, ay)) {
+                        if p.cells().contains(&(ax, ay)) {
                             adjacent_cells += 1;
                         }
                     }
 
                     if adjacent_cells == 2 {
-                        front_corners += 2;
+                        front_corners += 1;
                     }
                 }
             }
