@@ -8,7 +8,7 @@ pub mod srs;
 
 #[cfg(test)]
 mod tests {
-    use crate::{bag::Bag, board::Board, piece::*};
+    use crate::{bag::Bag, board::{self, Board}, piece::*};
 
     #[test]
     fn print_empty_board() {
@@ -30,12 +30,16 @@ mod tests {
 
         assert_eq!(board1_output, board2_output);
 
-        println!("{:?}", board2);
+        println!("{:?}\n{:?}", board1, board2);
     }
 
     #[test]
     fn clear_two_lines() {
         let mut board = Board::empty();
+        for i in 0..10 {
+            board.set(i, i);
+        }
+
         for row in [2, 4] {
             for column in 0..Board::WIDTH {
                 board.set(column as i32, row);
@@ -43,7 +47,7 @@ mod tests {
         }
 
         println!("{:?}", board);
-        board.clear_lines();
+        assert_eq!(board.clear_lines(), 2_u32);
         println!("{:?}", board);
     }
 
