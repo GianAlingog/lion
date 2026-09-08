@@ -98,9 +98,8 @@ impl Board {
     }
 
     pub fn collides(&self, p: Placement) -> bool {
-        for (dx, dy) in p.piece.cells(p.rot) {
-            // Check out of bounds as well!
-            if self.get((p.x + dx) as i32, (p.y + dy) as i32) {
+        for (x, y) in p.cells() {
+            if self.get(x as i32, y as i32) {
                 return true;
             }
         }
@@ -124,9 +123,8 @@ impl Board {
     }
 
     pub fn lock(&mut self, p: Placement) -> u32 {
-        for (dx, dy) in p.piece.cells(p.rot) {
-            // Check out of bounds as well!
-            self.set((p.x + dx) as i32, (p.y + dy) as i32);
+        for (x, y) in p.cells() {
+            self.set(x as i32, y as i32);
         }
 
         self.clear_lines()

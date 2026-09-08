@@ -100,3 +100,9 @@ impl Piece {
         CELLS_TABLE[self as usize][rot as usize]
     }
 }
+
+impl Placement {
+    pub fn cells(self) -> [(i8, i8); 4] {
+        self.piece.cells(self.rot).map(|(dx, dy)| (self.x + dx, self.y + dy))
+    }
+}
