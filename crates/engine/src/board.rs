@@ -84,7 +84,7 @@ impl Board {
         let mut holes = 0_u32;
         for y in 0..Self::HEIGHT {
             for x in 0..Self::WIDTH {
-                if self.get(x as i32, y as i32) && self.get(x as i32, y as i32 + 1) {
+                if !self.get(x as i32, y as i32) && self.get(x as i32, y as i32 + 1) {
                     holes += 1;
                 }
             }

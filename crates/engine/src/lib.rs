@@ -64,6 +64,25 @@ mod tests {
     }
 
     #[test]
+    fn count_two_holes() {
+        let mut board = Board::empty();
+        for i in 0..10 {
+            if i != 2 {
+                board.set(i, 0);
+            }
+
+            if i != 4 {
+                board.set(i, 1);
+            }
+
+            board.set(i, 2);
+        }
+
+        println!("{:?}", board);
+        assert_eq!(board.count_holes(), 2);
+    }
+
+    #[test]
     fn all_pieces_and_rotations() {
         let mut placement = Placement {
             piece: Piece::L,
