@@ -1,6 +1,11 @@
 use std::collections::VecDeque;
 
-use crate::{bag::Bag, board::Board, piece::{Piece, Placement, Rot}, srs::SpinKind};
+use crate::{
+    bag::Bag,
+    board::Board,
+    piece::{Piece, Placement, Rot},
+    srs::SpinKind,
+};
 
 pub struct Game {
     pub board: Board,
@@ -35,14 +40,20 @@ impl Game {
         game
     }
 
-    pub fn from(board: Board, hold: Option<Piece>, queue: VecDeque<Piece>, b2b: u32, combo: u32) -> Self {
+    pub fn from(
+        board: Board,
+        hold: Option<Piece>,
+        queue: VecDeque<Piece>,
+        b2b: u32,
+        combo: u32,
+    ) -> Self {
         todo!()
     }
 
     // Drives action, calls all internal logic
     pub fn advance(&mut self, p: Placement, spin: SpinKind) -> Outcome {
         assert!(self.board.is_grounded(p));
-        
+
         let current_piece = self.queue.pop_front().expect("Queue was empty on advance");
 
         let cleared_lines = self.board.lock(p);
@@ -99,7 +110,10 @@ impl Game {
 
     pub fn topped_out(&self) -> bool {
         let mut p = Placement {
-            piece: *self.queue.front().expect("Queue was empty on top out check"),
+            piece: *self
+                .queue
+                .front()
+                .expect("Queue was empty on top out check"),
             rot: Rot::N,
             x: 0,
             y: 0,
@@ -113,17 +127,17 @@ impl Game {
                 p.x = (Board::WIDTH as i8 - 4) / 2;
                 p.y = Board::VIEW_HEIGHT as i8 - 3;
                 self.board.collides(p)
-            },
+            }
             Piece::O => {
                 p.x = (Board::WIDTH as i8 - 2) / 2;
                 p.y = Board::VIEW_HEIGHT as i8 - 1;
                 self.board.collides(p)
-            },
+            }
             _ => {
                 p.x = (Board::WIDTH as i8 - 3) / 2;
                 p.y = Board::VIEW_HEIGHT as i8 - 2;
                 self.board.collides(p)
-            },
+            }
         }
     }
 }

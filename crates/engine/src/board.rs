@@ -73,9 +73,7 @@ impl Board {
     pub fn column_heights(&self) -> [u8; Self::WIDTH] {
         let mut heights = [0 as u8; Self::WIDTH];
         for x in 0..Self::WIDTH {
-            while heights[x] < Self::HEIGHT as u8
-                && self.get(x as i32, heights[x] as i32)
-            {
+            while heights[x] < Self::HEIGHT as u8 && self.get(x as i32, heights[x] as i32) {
                 heights[x] += 1;
             }
         }
