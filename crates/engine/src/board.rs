@@ -18,7 +18,16 @@ impl Board {
     }
 
     pub fn from_ascii(s: &str) -> Self {
-        todo!("Create a format for this")
+        let mut board = Board::empty();
+        for (y, row_slice) in s.lines().rev().enumerate() {
+            for (x, byte) in row_slice.bytes().enumerate().take(Self::WIDTH) {
+                if byte == b'X' {
+                    board.set(x as i32, y as i32);
+                }
+            }
+        }
+
+        board
     }
 
     // Set up guards on the bounds?
@@ -36,19 +45,23 @@ impl Board {
     }
 
     pub fn set(&mut self, x: i32, y: i32) {
+        if x < 0 || x >= Self::WIDTH as i32 || y < 0 || y >= Self::HEIGHT as i32 {
+            panic!("Out of bounds in set {} {}", x, y);
+        }
+
         self.rows[y as usize] |= 1 << x;
     }
 
     pub fn clear_lines(&mut self) -> u32 {
         let mut full_rows: u32 = 0;
         let mut new_state = Self::empty();
-        let mut current_row: usize = 0;
-        for row in 0..Self::HEIGHT {
-            if self.rows[row] == Self::FULL_ROW {
+        let mut current_y: usize = 0;
+        for y in 0..Self::HEIGHT {
+            if self.rows[y] == Self::FULL_ROW {
                 full_rows += 1;
             } else {
-                new_state.rows[current_row] = self.rows[row];
-                current_row += 1;
+                new_state.rows[current_y] = self.rows[y];
+                current_y += 1;
             }
         }
 
@@ -59,11 +72,11 @@ impl Board {
 
     pub fn column_heights(&self) -> [u8; Self::WIDTH] {
         let mut heights = [0 as u8; Self::WIDTH];
-        for column in 0..Self::WIDTH {
-            while heights[column] < Self::HEIGHT as u8
-                && self.get(column as i32, heights[column] as i32)
+        for x in 0..Self::WIDTH {
+            while heights[x] < Self::HEIGHT as u8
+                && self.get(x as i32, heights[x] as i32)
             {
-                heights[column] += 1;
+                heights[x] += 1;
             }
         }
         heights
@@ -122,11 +135,11 @@ impl Board {
 
 impl std::fmt::Debug for Board {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for row in (0..Self::HEIGHT).rev() {
-            for column in 0..Self::WIDTH {
-                match (self.rows[row] >> column) & 1 {
-                    0 => write!(f, "□")?,
-                    1 => write!(f, "▣")?,
+        for y in (0..Self::HEIGHT).rev() {
+            for x in 0..Self::WIDTH {
+                match (self.rows[y] >> x) & 1 {
+                    0 => write!(f, "O")?,
+                    1 => write!(f, "X")?,
                     _ => {}
                 }
             }
