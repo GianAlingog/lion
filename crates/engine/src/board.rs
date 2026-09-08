@@ -110,18 +110,17 @@ impl Board {
 
     pub fn drop_y(&self, p: Placement) -> i8 {
         // Only naive check for now
-        let mut shift_down: i8 = 0;
+        let mut last_y = p.y;
         loop {
             let mut new_p = p.clone();
-            new_p.y -= 1;
-            if !self.collides(new_p) {
+            new_p.y = last_y - 1;
+            if self.collides(new_p) {
                 break;
             }
-
-            shift_down += 1;
+            last_y -= 1;
         }
 
-        shift_down
+        last_y
     }
 
     pub fn lock(&mut self, p: Placement) -> u32 {

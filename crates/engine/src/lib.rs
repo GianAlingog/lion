@@ -118,10 +118,43 @@ mod tests {
         };
 
         assert!(board.collides(p));
-        
+
         p.x = 0;
 
         assert!(!board.collides(p));
+    }
+
+    #[test]
+    fn hard_drop_empty() {
+        let mut board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::I,
+            rot: Rot::N,
+            x: 3,
+            y: 19,
+        };
+
+        p.y = board.drop_y(p);
+        board.lock(p);        
+        println!("{:?}", board);
+    }
+
+    #[test]
+    fn hard_drop_onto_stack() {
+        let mut board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::I,
+            rot: Rot::N,
+            x: 3,
+            y: 19,
+        };
+
+        board.set(4, 0);
+        board.set(4, 1);
+
+        p.y = board.drop_y(p);
+        board.lock(p);
+        println!("{:?}", board);
     }
 
     #[test]
