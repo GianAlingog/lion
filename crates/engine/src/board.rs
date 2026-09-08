@@ -81,9 +81,16 @@ impl Board {
     }
 
     pub fn count_holes(&self) -> u32 {
-        // todo!("Figure out what we need count_holes to be; zero counts or wells specifically");
-        let heights = self.column_heights();
-        (heights.iter().filter(|&&x| x == 0).count()) as u32
+        let mut holes = 0_u32;
+        for y in 0..Self::HEIGHT {
+            for x in 0..Self::WIDTH {
+                if self.get(x as i32, y as i32) && self.get(x as i32, y as i32 + 1) {
+                    holes += 1;
+                }
+            }
+        }
+
+        holes
     }
 
     pub fn is_empty(&self) -> bool {
