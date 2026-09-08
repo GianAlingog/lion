@@ -52,6 +52,18 @@ mod tests {
     }
 
     #[test]
+    fn get_bounds() {
+        let mut board = Board::empty();
+        assert!(board.get(-1, 0));
+        assert!(board.get(10, 0));
+        assert!(board.get(0, -1));
+        assert!(!board.get(0, 39));
+        assert!(!board.get(1, 1));
+        board.set(1, 1);
+        assert!(board.get(1, 1));
+    }
+
+    #[test]
     fn all_pieces_and_rotations() {
         let mut placement = Placement {
             piece: Piece::L,
