@@ -17,6 +17,23 @@ mod tests {
     }
 
     #[test]
+    fn build_from_ascii() {
+        let mut board1 = Board::empty();
+        for i in 0..10 {
+            board1.set(i, i);
+        }
+
+        let board1_output = format!("{:?}", board1);
+
+        let board2 = Board::from_ascii(&board1_output);
+        let board2_output = format!("{:?}", board2);
+
+        assert_eq!(board1_output, board2_output);
+
+        println!("{:?}", board2);
+    }
+
+    #[test]
     fn clear_two_lines() {
         let mut board = Board::empty();
         for row in [2, 4] {
