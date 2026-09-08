@@ -43,7 +43,7 @@ pub struct Placement {
 
 impl Piece {
     // produce a (dx, dy) given the (x, y)
-    pub const fn cells(self, rot: Rot) -> [(i8, i8); 4] {
+    const fn cells(self, rot: Rot) -> [(i8, i8); 4] {
         const CELLS_TABLE: [[[(i8, i8); 4]; 4]; 7] = [
             // N, E, S, W order
             [
