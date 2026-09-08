@@ -186,6 +186,57 @@ mod tests {
     }
 
     #[test]
+    fn wall_kick() {
+        let mut board = Board::empty();
+        let p = Placement {
+            piece: Piece::I,
+            rot: Rot::W,
+            x: -1,
+            y: 0,
+        };
+
+        let (mut p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
+        
+        p.y = board.drop_y(p);
+        board.lock(p);
+        println!("{:?}", board);
+    }
+
+    #[test]
+    fn sz_kick_triple() {
+        let mut board = Board::empty();
+        board.set(7, 2);
+        for i in 0..7 {
+            for j in 0..3 {
+                board.set(i, j);
+            }
+        }
+
+        board.set(8, 0);
+        board.set(8, 4);
+
+        for j in 0..5 {
+            board.set(9, j);
+        }
+
+        let p = Placement {
+            piece: Piece::Z,
+            rot: Rot::N,
+            x: 6,
+            y: 2,
+        };
+
+        let (p, kick) = rotate(&board, p, Spin::Ccw).expect("Rotation failed");
+        let spin_kind = detect_spin(&board, p, kick);
+
+        assert_eq!(spin_kind, SpinKind::None);
+        // assert_eq!(board.lock(p), 3);
+        board.lock(p);
+
+        println!("{:?}", board);
+    }
+
+    #[test]
     fn t_spin_triple() {
         let mut board = Board::empty();
         for i in 1..10 {

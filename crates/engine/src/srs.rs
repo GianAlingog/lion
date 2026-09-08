@@ -68,7 +68,7 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
                 [
                     // N to E, N to W
                     [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
-                    [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
+                    [(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)],
                 ],
                 [
                     // E to S, E to N
