@@ -158,6 +158,29 @@ mod tests {
     }
 
     #[test]
+    fn hard_drop_into_line_clear() {
+        let mut board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::T,
+            rot: Rot::N,
+            x: 3,
+            y: 19,
+        };
+
+        for i in 0..10 {
+            if 3 <= i && i <= 5 {
+                continue;
+            }
+
+            board.set(i, 0);
+        }
+
+        p.y = board.drop_y(p);
+        assert_eq!(board.lock(p), 1);
+        println!("{:?}", board);
+    }
+
+    #[test]
     fn generate_random_bags() {
         let mut bag = Bag::new(0xDEADBEEF_u64);
         for _ in 0..49 {
