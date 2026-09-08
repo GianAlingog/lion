@@ -101,11 +101,11 @@ impl Board {
         for (dx, dy) in p.piece.cells(p.rot) {
             // Check out of bounds as well!
             if self.get((p.x + dx) as i32, (p.y + dy) as i32) {
-                return false;
+                return true;
             }
         }
 
-        true
+        false
     }
 
     pub fn drop_y(&self, p: Placement) -> i8 {

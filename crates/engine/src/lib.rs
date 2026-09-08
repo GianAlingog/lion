@@ -108,6 +108,23 @@ mod tests {
     }
 
     #[test]
+    fn wall_collision() {
+        let board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::I,
+            rot: Rot::N,
+            x: -1,
+            y: 0,
+        };
+
+        assert!(board.collides(p));
+        
+        p.x = 0;
+
+        assert!(!board.collides(p));
+    }
+
+    #[test]
     fn generate_random_bags() {
         let mut bag = Bag::new(0xDEADBEEF_u64);
         for _ in 0..49 {
