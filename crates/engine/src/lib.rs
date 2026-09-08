@@ -8,7 +8,12 @@ pub mod srs;
 
 #[cfg(test)]
 mod tests {
-    use crate::{bag::Bag, board::{self, Board}, piece::*, srs::{Spin, SpinKind, detect_spin, rotate}};
+    use crate::{
+        bag::Bag,
+        board::{self, Board},
+        piece::*,
+        srs::{Spin, SpinKind, detect_spin, rotate},
+    };
 
     #[test]
     fn print_empty_board() {
@@ -135,7 +140,7 @@ mod tests {
         };
 
         p.y = board.drop_y(p);
-        board.lock(p);        
+        board.lock(p);
         println!("{:?}", board);
     }
 
@@ -219,7 +224,7 @@ mod tests {
         board.set(1, 0);
         board.set(0, 0);
         board.set(0, 1);
-        board.set(0,2);
+        board.set(0, 2);
         for i in 3..10 {
             board.set(i, 0);
             board.set(i, 2);
@@ -254,7 +259,7 @@ mod tests {
         board.set(1, 0);
         board.set(0, 0);
         board.set(0, 1);
-        board.set(0,2);
+        board.set(0, 2);
         for i in 3..10 {
             board.set(i, 0);
             board.set(i, 2);
@@ -289,7 +294,7 @@ mod tests {
         board.set(1, 0);
         board.set(0, 0);
         board.set(0, 1);
-        board.set(0,2);
+        board.set(0, 2);
         for i in 3..10 {
             board.set(i, 0);
             board.set(i, 2);
@@ -324,7 +329,7 @@ mod tests {
         board.set(1, 0);
         board.set(0, 0);
         board.set(0, 1);
-        board.set(0,2);
+        board.set(0, 2);
         for i in 3..10 {
             board.set(i, 0);
             board.set(i, 2);

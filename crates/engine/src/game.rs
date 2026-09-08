@@ -55,7 +55,7 @@ impl Game {
             queue,
             b2b,
             combo,
-            bag: Bag::new(0xDEADBEEF_u64)
+            bag: Bag::new(0xDEADBEEF_u64),
         }
     }
 
