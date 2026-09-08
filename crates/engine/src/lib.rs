@@ -196,7 +196,7 @@ mod tests {
         };
 
         let (mut p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
-        
+
         p.y = board.drop_y(p);
         board.lock(p);
         println!("{:?}", board);
@@ -234,6 +234,29 @@ mod tests {
         board.lock(p);
 
         println!("{:?}", board);
+    }
+
+    #[test]
+    fn surrounded_piece_kick_fail() {
+        let mut board = Board::empty();
+        for i in 0..9 {
+            board.set(i, 0);
+            board.set(i, 2);
+        }
+
+        for i in 0..8 {
+            board.set(i, 1);
+        }
+
+        let p = Placement {
+            piece: Piece::T,
+            rot: Rot::W,
+            x: 8,
+            y: 0,
+        };
+
+        let response = rotate(&board, p, Spin::Ccw);
+        assert!(response.is_none());
     }
 
     #[test]
