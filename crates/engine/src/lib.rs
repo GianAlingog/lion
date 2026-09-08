@@ -449,4 +449,18 @@ mod tests {
             assert_eq!(bag1.next(), bag2.next());
         }
     }
+
+    #[test]
+    fn different_seed_bags() {
+        let mut bag1 = Bag::new(0xDEADBEEF_u64);
+        let mut bag2 = Bag::new(0xDEFEC8ED_u64);
+        let mut diff = false;
+        for _ in 0..49 {
+            if bag1.next() != bag2.next() {
+                diff = true;
+            }
+        }
+
+        assert!(diff);
+    }
 }
