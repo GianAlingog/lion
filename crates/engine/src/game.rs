@@ -47,7 +47,16 @@ impl Game {
         b2b: u32,
         combo: u32,
     ) -> Self {
-        todo!()
+        // TODO: Decide what to do about the bag
+        Game {
+            board,
+            hold,
+            can_hold: true,
+            queue,
+            b2b,
+            combo,
+            bag: Bag::new(0xDEADBEEF_u64)
+        }
     }
 
     // Drives action, calls all internal logic
