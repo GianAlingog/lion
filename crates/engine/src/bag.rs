@@ -17,9 +17,10 @@ impl Rng {
         self.0
     }
 
-    // Spec to u32
-    pub fn below(&mut self, n: u64) -> u64 {
-        self.next_u64() % n
+    // For randomization, it is fine to truncate the bits
+    #[allow(clippy::cast_possible_truncation)]
+    pub fn below(&mut self, n: usize) -> usize {
+        self.next_u64() as usize % n
     }
 }
 
@@ -34,12 +35,13 @@ pub struct Bag {
 impl Bag {
     // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
     fn shuffle_buf(&mut self) {
-        for i in (0..7_u64).rev() {
+        for i in (0..7_usize).rev() {
             let j = self.rng.below(i + 1);
-            self.buf.swap(i as usize, j as usize);
+            self.buf.swap(i, j);
         }
     }
 
+    #[must_use]
     pub fn new(seed: u64) -> Self {
         let mut bag = Bag {
             rng: Rng(seed),
@@ -60,7 +62,7 @@ impl Bag {
         bag
     }
 
-    pub fn next(&mut self) -> Piece {
+    pub fn next_piece(&mut self) -> Piece {
         let piece = self.buf[self.idx];
 
         self.idx += 1;

@@ -436,7 +436,7 @@ mod tests {
     fn generate_random_bags() {
         let mut bag = Bag::new(0xDEAD_BEEF_u64);
         for _ in 0..49 {
-            print!("{:?} ", bag.next());
+            print!("{:?} ", bag.next_piece());
         }
         println!();
     }
@@ -446,7 +446,7 @@ mod tests {
         let mut bag1 = Bag::new(0xDEAD_BEEF_u64);
         let mut bag2 = Bag::new(0xDEAD_BEEF_u64);
         for _ in 0..49 {
-            assert_eq!(bag1.next(), bag2.next());
+            assert_eq!(bag1.next_piece(), bag2.next_piece());
         }
     }
 
@@ -456,7 +456,7 @@ mod tests {
         let mut bag2 = Bag::new(0xDEFE_C8ED_u64);
         let mut diff = false;
         for _ in 0..49 {
-            if bag1.next() != bag2.next() {
+            if bag1.next_piece() != bag2.next_piece() {
                 diff = true;
             }
         }

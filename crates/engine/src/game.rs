@@ -34,7 +34,7 @@ impl Game {
 
         // Initialize the queue
         while game.queue.len() < preview {
-            game.queue.push_back(game.bag.next());
+            game.queue.push_back(game.bag.next_piece());
         }
 
         game
@@ -96,7 +96,7 @@ impl Game {
         // TODO: Handle garbage cancelling
 
         // Refill bag
-        self.queue.push_back(self.bag.next());
+        self.queue.push_back(self.bag.next_piece());
 
         // See design doc for reasoning, swap_hold is called by client before advance
         self.can_hold = true;
