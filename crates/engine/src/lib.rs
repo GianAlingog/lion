@@ -18,7 +18,7 @@ mod tests {
     #[test]
     fn print_empty_board() {
         let board: Board = Board::empty();
-        println!("{:?}", board);
+        println!("{board:?}");
     }
 
     #[test]
@@ -28,14 +28,14 @@ mod tests {
             board1.set(i, i);
         }
 
-        let board1_output = format!("{:?}", board1);
+        let board1_output = format!("{board1:?}");
 
         let board2 = Board::from_ascii(&board1_output);
-        let board2_output = format!("{:?}", board2);
+        let board2_output = format!("{board2:?}");
 
         assert_eq!(board1_output, board2_output);
 
-        println!("{:?}\n{:?}", board1, board2);
+        println!("{board1:?}\n{board2:?}");
     }
 
     #[test]
@@ -45,15 +45,15 @@ mod tests {
             board.set(i, i);
         }
 
-        for row in [2, 4] {
-            for column in 0..Board::WIDTH {
-                board.set(column as i32, row);
+        for y in [2, 4] {
+            for x in 0..Board::WIDTH_I8 {
+                board.set(x, y);
             }
         }
 
-        println!("{:?}", board);
+        println!("{board:?}");
         assert_eq!(board.clear_lines(), 2_u32);
-        println!("{:?}", board);
+        println!("{board:?}");
     }
 
     #[test]
@@ -83,7 +83,7 @@ mod tests {
             board.set(i, 2);
         }
 
-        println!("{:?}", board);
+        println!("{board:?}");
         assert_eq!(board.count_holes(), 2);
     }
 
@@ -96,19 +96,19 @@ mod tests {
             y: 2,
         };
 
-        println!("{:?}", placement);
+        println!("{placement:?}");
         println!("{:?}", placement.cells());
         placement.rot = Rot::E;
-        println!("{:?}", placement);
+        println!("{placement:?}");
         println!("{:?}", placement.cells());
         placement.rot = Rot::S;
-        println!("{:?}", placement);
+        println!("{placement:?}");
         println!("{:?}", placement.cells());
         placement.rot = Rot::W;
-        println!("{:?}", placement);
+        println!("{placement:?}");
         println!("{:?}", placement.cells());
         placement.rot = Rot::N;
-        println!("{:?}", placement);
+        println!("{placement:?}");
         println!("{:?}", placement.cells());
     }
 
@@ -140,8 +140,8 @@ mod tests {
         };
 
         p.y = board.drop_y(p);
-        board.lock(p);
-        println!("{:?}", board);
+        assert_eq!(board.lock(p), 0);
+        println!("{board:?}");
     }
 
     #[test]
@@ -158,8 +158,8 @@ mod tests {
         board.set(4, 1);
 
         p.y = board.drop_y(p);
-        board.lock(p);
-        println!("{:?}", board);
+        assert_eq!(board.lock(p), 0);
+        println!("{board:?}");
     }
 
     #[test]
@@ -173,7 +173,7 @@ mod tests {
         };
 
         for i in 0..10 {
-            if 3 <= i && i <= 5 {
+            if (3..=5).contains(&i) {
                 continue;
             }
 
@@ -182,7 +182,7 @@ mod tests {
 
         p.y = board.drop_y(p);
         assert_eq!(board.lock(p), 1);
-        println!("{:?}", board);
+        println!("{board:?}");
     }
 
     #[test]
@@ -198,8 +198,8 @@ mod tests {
         let (mut p, _) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
 
         p.y = board.drop_y(p);
-        board.lock(p);
-        println!("{:?}", board);
+        assert_eq!(board.lock(p), 0);
+        println!("{board:?}");
     }
 
     #[test]
@@ -229,11 +229,13 @@ mod tests {
         let (p, kick) = rotate(&board, p, Spin::Ccw).expect("Rotation failed");
         let spin_kind = detect_spin(&board, p, kick);
 
-        assert_eq!(spin_kind, SpinKind::None);
-        // assert_eq!(board.lock(p), 3);
-        board.lock(p);
+        println!("{board:?}");
 
-        println!("{:?}", board);
+        assert_eq!(spin_kind, SpinKind::None);
+        assert_eq!(board.lock(p), 3);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
     }
 
     #[test]
@@ -283,13 +285,13 @@ mod tests {
         let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
         let spin_kind = detect_spin(&board, p, kick);
 
-        println!("{:?}", board);
-
-        board.lock(p);
+        println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Full);
-        println!("{:?}", board);
-        println!("{:?} {}", spin_kind, kick);
+        assert_eq!(board.lock(p), 3);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
     }
 
     #[test]
@@ -318,13 +320,13 @@ mod tests {
         let (p, kick) = rotate(&board, p, Spin::Ccw).expect("Rotation failed");
         let spin_kind = detect_spin(&board, p, kick);
 
-        println!("{:?}", board);
-
-        board.lock(p);
+        println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Full);
-        println!("{:?}", board);
-        println!("{:?} {}", spin_kind, kick);
+        assert_eq!(board.lock(p), 2);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
     }
 
     #[test]
@@ -353,13 +355,13 @@ mod tests {
         let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
         let spin_kind = detect_spin(&board, p, kick);
 
-        println!("{:?}", board);
-
-        board.lock(p);
+        println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Full);
-        println!("{:?}", board);
-        println!("{:?} {}", spin_kind, kick);
+        assert_eq!(board.lock(p), 1);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
     }
 
     #[test]
@@ -388,13 +390,13 @@ mod tests {
         let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
         let spin_kind = detect_spin(&board, p, kick);
 
-        println!("{:?}", board);
-
-        board.lock(p);
+        println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Mini);
-        println!("{:?}", board);
-        println!("{:?} {}", spin_kind, kick);
+        assert_eq!(board.lock(p), 1);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
     }
 
     #[test]
@@ -423,13 +425,13 @@ mod tests {
         let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
         let spin_kind = detect_spin(&board, p, kick);
 
-        println!("{:?}", board);
-
-        board.lock(p);
+        println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::None);
-        println!("{:?}", board);
-        println!("{:?} {}", spin_kind, kick);
+        assert_eq!(board.lock(p), 0);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
     }
 
     #[test]

@@ -137,7 +137,7 @@ pub fn detect_spin(board: &Board, p: Placement, kick: u8) -> SpinKind {
                 let cx = p.x + dx;
                 let cy = p.y + dy;
 
-                if board.get(cx as i32, cy as i32) {
+                if board.get(cx, cy) {
                     filled_corners += 1;
 
                     let mut adjacent_cells = 0_u8;

@@ -12,15 +12,12 @@ impl Board {
     pub const WIDTH: usize = 10;
     pub const WIDTH_U8: u8 = 10;
     pub const WIDTH_I8: i8 = 10;
-    pub const WIDTH_I32: i32 = 10;
     pub const HEIGHT: usize = 40;
     pub const HEIGHT_U8: u8 = 40;
     pub const HEIGHT_I8: i8 = 40;
-    pub const HEIGHT_I32: i32 = 40;
     pub const VIEW_HEIGHT: usize = 20;
     pub const VIEW_HEIGHT_U8: u8 = 20;
     pub const VIEW_HEIGHT_I8: i8 = 20;
-    pub const VIEW_HEIGHT_I32: i32 = 20;
     pub const FULL_ROW: u16 = 0b11_1111_1111;
 
     #[must_use]
@@ -40,7 +37,7 @@ impl Board {
         for (y, row_slice) in s.lines().rev().enumerate() {
             for (x, byte) in row_slice.bytes().enumerate().take(Self::WIDTH) {
                 if byte == b'X' {
-                    board.set(i32::try_from(x).unwrap(), i32::try_from(y).unwrap());
+                    board.set(i8::try_from(x).unwrap(), i8::try_from(y).unwrap());
                 }
             }
         }
@@ -53,12 +50,12 @@ impl Board {
     /// Provably should not panic.
     /// Rows and columns are scoped properly.
     #[must_use]
-    pub fn get(&self, x: i32, y: i32) -> bool {
-        if !(0..Self::WIDTH_I32).contains(&x) || y < 0 {
+    pub fn get(&self, x: i8, y: i8) -> bool {
+        if !(0..Self::WIDTH_I8).contains(&x) || y < 0 {
             return true;
         }
 
-        if y >= Self::HEIGHT_I32 {
+        if y >= Self::HEIGHT_I8 {
             return false;
         }
 
@@ -69,9 +66,9 @@ impl Board {
     ///
     /// Provably should not panic.
     /// Rows and columns are scoped properly.
-    pub fn set(&mut self, x: i32, y: i32) {
+    pub fn set(&mut self, x: i8, y: i8) {
         assert!(
-            (0..Self::WIDTH_I32).contains(&x) && (0..Self::HEIGHT_I32).contains(&y),
+            (0..Self::WIDTH_I8).contains(&x) && (0..Self::HEIGHT_I8).contains(&y),
             "Out of bounds in set {x} {y}"
         );
 
@@ -105,7 +102,7 @@ impl Board {
         let mut heights = [0_u8; Self::WIDTH];
         for (x, height) in heights.iter_mut().enumerate().take(Self::WIDTH) {
             while *height < Self::HEIGHT_U8
-                && self.get(i32::try_from(x).unwrap(), i32::from(*height))
+                && self.get(i8::try_from(x).unwrap(), i8::try_from(*height).unwrap())
             {
                 *height += 1;
             }
@@ -117,8 +114,8 @@ impl Board {
     #[must_use]
     pub fn count_holes(&self) -> u32 {
         let mut holes = 0_u32;
-        for y in 0..Self::HEIGHT_I32 {
-            for x in 0..Self::WIDTH_I32 {
+        for y in 0..Self::HEIGHT_I8 {
+            for x in 0..Self::WIDTH_I8 {
                 if !self.get(x, y) && self.get(x, y + 1) {
                     holes += 1;
                 }
@@ -136,7 +133,7 @@ impl Board {
     #[must_use]
     pub fn collides(&self, p: Placement) -> bool {
         for (x, y) in p.cells() {
-            if self.get(i32::from(x), i32::from(y)) {
+            if self.get(x, y) {
                 return true;
             }
         }
@@ -163,7 +160,7 @@ impl Board {
     #[must_use]
     pub fn lock(&mut self, p: Placement) -> u32 {
         for (x, y) in p.cells() {
-            self.set(i32::from(x), i32::from(y));
+            self.set(x, y);
         }
 
         self.clear_lines()
