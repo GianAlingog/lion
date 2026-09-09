@@ -55,7 +55,7 @@ impl Game {
             queue,
             b2b,
             combo,
-            bag: Bag::new(0xDEADBEEF_u64),
+            bag: Bag::new(0xDEAD_BEEF_u64),
         }
     }
 
@@ -63,7 +63,10 @@ impl Game {
     pub fn advance(&mut self, p: Placement, spin: SpinKind) -> Outcome {
         assert!(self.board.is_grounded(p));
 
-        let current_piece = self.queue.pop_front().expect("Queue was empty on advance");
+        // We need to send the displayed piece as well
+        // TODO: Decide if we pop off the displayed piece from the queue
+        // or take it from the first element. Former may be preferred
+        let _current_piece = self.queue.pop_front().expect("Queue was empty on advance");
 
         let cleared_lines = self.board.lock(p);
 

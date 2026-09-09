@@ -5,6 +5,7 @@ pub struct Rng(u64);
 
 impl Rng {
     // Never seed with 0
+    #[must_use]
     pub fn new(seed: u64) -> Self {
         Rng(seed)
     }

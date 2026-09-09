@@ -10,7 +10,7 @@ pub mod srs;
 mod tests {
     use crate::{
         bag::Bag,
-        board::{self, Board},
+        board::Board,
         piece::*,
         srs::{Spin, SpinKind, detect_spin, rotate},
     };
@@ -195,7 +195,7 @@ mod tests {
             y: 0,
         };
 
-        let (mut p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
+        let (mut p, _) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
 
         p.y = board.drop_y(p);
         board.lock(p);
@@ -434,7 +434,7 @@ mod tests {
 
     #[test]
     fn generate_random_bags() {
-        let mut bag = Bag::new(0xDEADBEEF_u64);
+        let mut bag = Bag::new(0xDEAD_BEEF_u64);
         for _ in 0..49 {
             print!("{:?} ", bag.next());
         }
@@ -443,8 +443,8 @@ mod tests {
 
     #[test]
     fn equal_seed_bags() {
-        let mut bag1 = Bag::new(0xDEADBEEF_u64);
-        let mut bag2 = Bag::new(0xDEADBEEF_u64);
+        let mut bag1 = Bag::new(0xDEAD_BEEF_u64);
+        let mut bag2 = Bag::new(0xDEAD_BEEF_u64);
         for _ in 0..49 {
             assert_eq!(bag1.next(), bag2.next());
         }
@@ -452,8 +452,8 @@ mod tests {
 
     #[test]
     fn different_seed_bags() {
-        let mut bag1 = Bag::new(0xDEADBEEF_u64);
-        let mut bag2 = Bag::new(0xDEFEC8ED_u64);
+        let mut bag1 = Bag::new(0xDEAD_BEEF_u64);
+        let mut bag2 = Bag::new(0xDEFE_C8ED_u64);
         let mut diff = false;
         for _ in 0..49 {
             if bag1.next() != bag2.next() {

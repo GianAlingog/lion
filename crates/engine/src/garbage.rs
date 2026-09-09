@@ -6,7 +6,7 @@ pub struct GarbageBatch {
 
 pub struct GarbageQueue {
     // Vec over VecDeque since this should remain small in size
-    pending: Vec<GarbageBatch>,
+    _pending: Vec<GarbageBatch>,
 }
 
 impl GarbageQueue {
@@ -14,11 +14,11 @@ impl GarbageQueue {
         todo!("Return number of incoming lines in the queue")
     }
 
-    pub fn push(&mut self, batch: GarbageBatch) {
+    pub fn push(&mut self, _batch: GarbageBatch) {
         todo!("Push the garbage to the vec; handle other initializations in the future")
     }
 
-    pub fn cancel(&mut self, amount: u32) -> u32 {
+    pub fn cancel(&mut self, _amount: u32) -> u32 {
         todo!("Should return number of attach left, use in while loop")
     }
 
