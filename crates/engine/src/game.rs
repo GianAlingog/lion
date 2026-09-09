@@ -19,6 +19,7 @@ pub struct Game {
 }
 
 impl Game {
+    #[must_use]
     pub fn new(seed: u64, preview: usize) -> Self {
         // Panic if preview is less than 0
 
@@ -40,6 +41,7 @@ impl Game {
         game
     }
 
+    #[must_use]
     pub fn from(
         board: Board,
         hold: Option<Piece>,
@@ -60,6 +62,9 @@ impl Game {
     }
 
     // Drives action, calls all internal logic
+    /// # Panics
+    ///
+    /// It must hold that Placement p is grounded to place it.
     pub fn advance(&mut self, p: Placement, spin: SpinKind) -> Outcome {
         assert!(self.board.is_grounded(p));
 
@@ -110,6 +115,9 @@ impl Game {
         }
     }
 
+    /// # Panics
+    ///
+    /// It must hold that the user can hold.
     pub fn swap_hold(&mut self) {
         assert!(self.can_hold);
         let incoming_piece = self.queue.pop_front().expect("Queue was empty on swap");
@@ -120,6 +128,11 @@ impl Game {
         self.can_hold = false;
     }
 
+    /// # Panics
+    ///
+    /// The queue should never be empty.
+    /// This method should never be called in `advance()`, where the queue is mutated.
+    #[must_use]
     pub fn topped_out(&self) -> bool {
         let mut p = Placement {
             piece: *self
@@ -136,18 +149,18 @@ impl Game {
         // p.y = (top - 1) - dist to bottom cell
         match p.piece {
             Piece::I => {
-                p.x = (Board::WIDTH as i8 - 4) / 2;
-                p.y = Board::VIEW_HEIGHT as i8 - 3;
+                p.x = (Board::WIDTH_I8 - 4) / 2;
+                p.y = Board::VIEW_HEIGHT_I8 - 3;
                 self.board.collides(p)
             }
             Piece::O => {
-                p.x = (Board::WIDTH as i8 - 2) / 2;
-                p.y = Board::VIEW_HEIGHT as i8 - 1;
+                p.x = (Board::WIDTH_I8 - 2) / 2;
+                p.y = Board::VIEW_HEIGHT_I8 - 1;
                 self.board.collides(p)
             }
             _ => {
-                p.x = (Board::WIDTH as i8 - 3) / 2;
-                p.y = Board::VIEW_HEIGHT as i8 - 2;
+                p.x = (Board::WIDTH_I8 - 3) / 2;
+                p.y = Board::VIEW_HEIGHT_I8 - 2;
                 self.board.collides(p)
             }
         }

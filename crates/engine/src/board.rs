@@ -6,14 +6,20 @@ pub struct Board {
 }
 
 impl Board {
+    // This is getting quite bad.
+    // TODO: Figure out if there's a better way to maintain these types
+    // while avoiding type conversion at runtime
     pub const WIDTH: usize = 10;
     pub const WIDTH_U8: u8 = 10;
+    pub const WIDTH_I8: i8 = 10;
     pub const WIDTH_I32: i32 = 10;
     pub const HEIGHT: usize = 40;
     pub const HEIGHT_U8: u8 = 40;
+    pub const HEIGHT_I8: i8 = 40;
     pub const HEIGHT_I32: i32 = 40;
     pub const VIEW_HEIGHT: usize = 20;
     pub const VIEW_HEIGHT_U8: u8 = 20;
+    pub const VIEW_HEIGHT_I8: i8 = 20;
     pub const VIEW_HEIGHT_I32: i32 = 20;
     pub const FULL_ROW: u16 = 0b11_1111_1111;
 
@@ -26,7 +32,7 @@ impl Board {
 
     #[must_use]
     /// # Panics
-    /// 
+    ///
     /// Provably should not panic.
     /// Rows and columns are comfortably bounded.
     pub fn from_ascii(s: &str) -> Self {
@@ -43,7 +49,7 @@ impl Board {
     }
 
     /// # Panics
-    /// 
+    ///
     /// Provably should not panic.
     /// Rows and columns are scoped properly.
     #[must_use]
@@ -60,11 +66,14 @@ impl Board {
     }
 
     /// # Panics
-    /// 
+    ///
     /// Provably should not panic.
     /// Rows and columns are scoped properly.
     pub fn set(&mut self, x: i32, y: i32) {
-        assert!((0..Self::WIDTH_I32).contains(&x) && (0..Self::HEIGHT_I32).contains(&y), "Out of bounds in set {x} {y}");
+        assert!(
+            (0..Self::WIDTH_I32).contains(&x) && (0..Self::HEIGHT_I32).contains(&y),
+            "Out of bounds in set {x} {y}"
+        );
 
         self.rows[usize::try_from(y).unwrap()] |= 1 << x;
     }
@@ -88,14 +97,16 @@ impl Board {
     }
 
     /// # Panics
-    /// 
+    ///
     /// Provably should not panic.
     /// Rows and columns are scoped properly.
     #[must_use]
     pub fn column_heights(&self) -> [u8; Self::WIDTH] {
         let mut heights = [0_u8; Self::WIDTH];
         for (x, height) in heights.iter_mut().enumerate().take(Self::WIDTH) {
-            while *height < Self::HEIGHT_U8 && self.get(i32::try_from(x).unwrap(), i32::from(*height)) {
+            while *height < Self::HEIGHT_U8
+                && self.get(i32::try_from(x).unwrap(), i32::from(*height))
+            {
                 *height += 1;
             }
         }

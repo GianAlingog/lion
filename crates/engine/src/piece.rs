@@ -1,3 +1,5 @@
+use core::panic;
+
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Piece {
@@ -20,13 +22,19 @@ pub enum Rot {
 } // spawn, cw, 180, ccw
 
 impl Rot {
-    pub fn from_index(index: usize) -> Option<Self> {
+    // TODO: This should never fail. Do not return Option. Panic here instead.
+    /// # Panics
+    ///
+    /// This call should always be within bounds [0, 4).
+    #[must_use]
+    pub fn from_index(index: usize) -> Self {
+        assert!((0..4_usize).contains(&index));
         match index {
-            0 => Some(Rot::N),
-            1 => Some(Rot::E),
-            2 => Some(Rot::S),
-            3 => Some(Rot::W),
-            _ => None,
+            0 => Rot::N,
+            1 => Rot::E,
+            2 => Rot::S,
+            3 => Rot::W,
+            _ => panic!("Failed to find rotation from_index"),
         }
     }
 }
@@ -43,6 +51,7 @@ pub struct Placement {
 
 impl Piece {
     // produce a (dx, dy) given the (x, y)
+    #[must_use]
     const fn cells(self, rot: Rot) -> [(i8, i8); 4] {
         const CELLS_TABLE: [[[(i8, i8); 4]; 4]; 7] = [
             // N, E, S, W order
@@ -102,6 +111,7 @@ impl Piece {
 }
 
 impl Placement {
+    #[must_use]
     pub fn cells(self) -> [(i8, i8); 4] {
         self.piece
             .cells(self.rot)

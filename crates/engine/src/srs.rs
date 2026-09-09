@@ -1,4 +1,7 @@
-use crate::{board::Board, piece::*};
+use crate::{
+    board::Board,
+    piece::{Piece, Placement, Rot},
+};
 
 // Base rotations
 #[repr(u8)]
@@ -8,109 +11,107 @@ pub enum Spin {
     Ccw,
 }
 
+#[must_use]
 pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)> {
     // TODO: Refactor to match the kicks table instead
+    // TODO: Calculate the rotation outside the loop
+
     // Match the kick
-    match p.piece {
-        Piece::I => {
-            // I
-            const KICKS_TABLE: [[[(i8, i8); 5]; 2]; 4] = [
-                [
-                    // N to E, N to W
-                    [(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)],
-                    [(0, 0), (-1, 0), (2, 0), (-1, 2), (2, -1)],
-                ],
-                [
-                    // E to S, E to N
-                    [(0, 0), (-1, 0), (2, 0), (-1, 2), (2, -1)],
-                    [(0, 0), (2, 0), (-1, 0), (2, 1), (-1, -2)],
-                ],
-                [
-                    // S to W, S to E
-                    [(0, 0), (2, 0), (-1, 0), (2, 1), (-1, -2)],
-                    [(0, 0), (1, 0), (-2, 0), (1, -2), (-2, 1)],
-                ],
-                [
-                    // W to N, W to S
-                    [(0, 0), (1, 0), (-2, 0), (1, -2), (-2, 1)],
-                    [(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)],
-                ],
-            ];
+    if p.piece == Piece::I {
+        // I
+        const KICKS_TABLE: [[[(i8, i8); 5]; 2]; 4] = [
+            [
+                // N to E, N to W
+                [(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)],
+                [(0, 0), (-1, 0), (2, 0), (-1, 2), (2, -1)],
+            ],
+            [
+                // E to S, E to N
+                [(0, 0), (-1, 0), (2, 0), (-1, 2), (2, -1)],
+                [(0, 0), (2, 0), (-1, 0), (2, 1), (-1, -2)],
+            ],
+            [
+                // S to W, S to E
+                [(0, 0), (2, 0), (-1, 0), (2, 1), (-1, -2)],
+                [(0, 0), (1, 0), (-2, 0), (1, -2), (-2, 1)],
+            ],
+            [
+                // W to N, W to S
+                [(0, 0), (1, 0), (-2, 0), (1, -2), (-2, 1)],
+                [(0, 0), (-2, 0), (1, 0), (-2, -1), (1, 2)],
+            ],
+        ];
 
-            // Seems inefficient right now, but it is possibly a low value fix
-            for test in 0..5_u8 {
-                let mut new_p = p.clone();
+        // Seems inefficient right now, but it is possibly a low value fix
+        for test in 0..5_u8 {
+            let mut new_p = p;
 
-                new_p.rot = match dir {
-                    Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
-                    Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
-                }
-                .expect("Rotation from index failed");
+            new_p.rot = match dir {
+                Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
+                Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
+            };
 
-                let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
+            let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
 
-                new_p.x += dx;
-                new_p.y += dy;
+            new_p.x += dx;
+            new_p.y += dy;
 
-                if board.collides(new_p) {
-                    continue;
-                }
-
-                return Some((new_p, test));
+            if board.collides(new_p) {
+                continue;
             }
 
-            None
+            return Some((new_p, test));
         }
-        _ => {
-            // O, T, S, Z, J, L
-            // Note: The O piece passes through here and passes test 1.
-            const KICKS_TABLE: [[[(i8, i8); 5]; 2]; 4] = [
-                [
-                    // N to E, N to W
-                    [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
-                    [(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)],
-                ],
-                [
-                    // E to S, E to N
-                    [(0, 0), (1, 0), (1, -1), (0, 2), (1, 2)],
-                    [(0, 0), (1, 0), (1, -1), (0, 2), (1, 2)],
-                ],
-                [
-                    // S to W, S to E
-                    [(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)],
-                    [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
-                ],
-                [
-                    // W to N, W to S
-                    [(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)],
-                    [(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)],
-                ],
-            ];
 
-            // Seems inefficient right now, but it is possibly a low value fix
-            for test in 0..5_u8 {
-                let mut new_p = p.clone();
+        None
+    } else {
+        // O, T, S, Z, J, L
+        // Note: The O piece passes through here and passes test 1.
+        const KICKS_TABLE: [[[(i8, i8); 5]; 2]; 4] = [
+            [
+                // N to E, N to W
+                [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
+                [(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)],
+            ],
+            [
+                // E to S, E to N
+                [(0, 0), (1, 0), (1, -1), (0, 2), (1, 2)],
+                [(0, 0), (1, 0), (1, -1), (0, 2), (1, 2)],
+            ],
+            [
+                // S to W, S to E
+                [(0, 0), (1, 0), (1, 1), (0, -2), (1, -2)],
+                [(0, 0), (-1, 0), (-1, 1), (0, -2), (-1, -2)],
+            ],
+            [
+                // W to N, W to S
+                [(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)],
+                [(0, 0), (-1, 0), (-1, -1), (0, 2), (-1, 2)],
+            ],
+        ];
 
-                new_p.rot = match dir {
-                    Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
-                    Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
-                }
-                .expect("Rotation from index failed");
+        // Seems inefficient right now, but it is possibly a low value fix
+        for test in 0..5_u8 {
+            let mut new_p = p;
 
-                let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
+            new_p.rot = match dir {
+                Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
+                Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
+            };
 
-                new_p.x += dx;
-                new_p.y += dy;
+            let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
 
-                if board.collides(new_p) {
-                    continue;
-                }
+            new_p.x += dx;
+            new_p.y += dy;
 
-                return Some((new_p, test));
+            if board.collides(new_p) {
+                continue;
             }
 
-            None
+            return Some((new_p, test));
         }
+
+        None
     }
 }
 
@@ -122,6 +123,7 @@ pub enum SpinKind {
     Full,
 }
 
+#[must_use]
 pub fn detect_spin(board: &Board, p: Placement, kick: u8) -> SpinKind {
     match p.piece {
         Piece::T => {

@@ -10,6 +10,7 @@ pub struct GarbageQueue {
 }
 
 impl GarbageQueue {
+    #[must_use]
     pub fn incoming(&self) -> u32 {
         todo!("Return number of incoming lines in the queue")
     }
