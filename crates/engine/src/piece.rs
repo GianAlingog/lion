@@ -1,4 +1,4 @@
-use core::panic;
+use {crate::board::Board, core::panic};
 
 #[repr(u8)]
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -107,6 +107,25 @@ impl Piece {
         ];
 
         CELLS_TABLE[self as usize][rot as usize]
+    }
+
+    // WARN: Offsets and piece widths are hardcoded!
+    // p.x = (remove piece) / 2
+    // p.y = (top - 1) - dist to bottom cell
+    #[must_use]
+    pub const fn spawn(&self) -> Placement {
+        let (x, y) = match *self {
+            Piece::I => ((Board::WIDTH_I8 - 4) / 2, Board::VIEW_HEIGHT_I8 - 3),
+            Piece::O => ((Board::WIDTH_I8 - 2) / 2, Board::VIEW_HEIGHT_I8 - 1),
+            _ => ((Board::WIDTH_I8 - 3) / 2, Board::VIEW_HEIGHT_I8 - 2),
+        };
+
+        Placement {
+            piece: *self,
+            rot: Rot::N,
+            x,
+            y,
+        }
     }
 }
 

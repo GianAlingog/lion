@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use crate::{
     bag::Bag,
     board::Board,
-    piece::{Piece, Placement, Rot},
+    piece::{Piece, Placement},
     srs::SpinKind,
 };
 
@@ -134,36 +134,12 @@ impl Game {
     /// This method should never be called in `advance()`, where the queue is mutated.
     #[must_use]
     pub fn topped_out(&self) -> bool {
-        let mut p = Placement {
-            piece: *self
-                .queue
-                .front()
-                .expect("Queue was empty on top out check"),
-            rot: Rot::N,
-            x: 0,
-            y: 0,
-        };
-
-        // WARN: Offsets and piece widths are hardcoded!
-        // p.x = (remove piece) / 2
-        // p.y = (top - 1) - dist to bottom cell
-        match p.piece {
-            Piece::I => {
-                p.x = (Board::WIDTH_I8 - 4) / 2;
-                p.y = Board::VIEW_HEIGHT_I8 - 3;
-                self.board.collides(p)
-            }
-            Piece::O => {
-                p.x = (Board::WIDTH_I8 - 2) / 2;
-                p.y = Board::VIEW_HEIGHT_I8 - 1;
-                self.board.collides(p)
-            }
-            _ => {
-                p.x = (Board::WIDTH_I8 - 3) / 2;
-                p.y = Board::VIEW_HEIGHT_I8 - 2;
-                self.board.collides(p)
-            }
-        }
+        let piece = *self
+            .queue
+            .front()
+            .expect("Queue was empty on top out check");
+        let p = piece.spawn();
+        self.board.collides(p)
     }
 }
 
