@@ -1,7 +1,7 @@
 use {crate::board::Board, core::panic};
 
 #[repr(u8)]
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Piece {
     I,
     O,
@@ -13,7 +13,7 @@ pub enum Piece {
 }
 
 #[repr(u8)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Rot {
     N,
     E,
@@ -39,7 +39,7 @@ impl Rot {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Placement {
     pub piece: Piece,
     pub rot: Rot,
