@@ -7,7 +7,7 @@ pub struct Move {
 }
 
 pub trait Bot {
-    fn pick(&mut self, _game: Game) -> Option<Move> {
+    fn pick(&mut self, _game: &Game) -> Option<Move> {
         todo!()
     }
 
