@@ -126,6 +126,22 @@ impl Board {
     }
 
     #[must_use]
+    pub fn aggregate_height(&self) -> u32 {
+        self.column_heights().iter().map(|&x| u32::from(x)).sum()
+    }
+
+    #[must_use]
+    pub fn bumpiness(&self) -> u32 {
+        let heights = self.column_heights();
+        let mut bumpiness = 0_u32;
+        for x in 1..Self::WIDTH {
+            bumpiness += u32::from(heights[x].abs_diff(heights[x - 1]));
+        }
+
+        bumpiness
+    }
+
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         *self == Self::empty()
     }
