@@ -1,5 +1,5 @@
 use bot::{Bot, Move};
-use engine::{game::Game};
+use engine::game::Game;
 
 pub enum RunMode {
     Endless,
