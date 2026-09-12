@@ -4,7 +4,7 @@ use crate::{
     srs::{Spin, rotate},
 };
 
-// Should be used with an empty `out` vector
+// No need to be empty, will append new entries and dedup
 pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
     if board.collides(piece.spawn()) {
         return;

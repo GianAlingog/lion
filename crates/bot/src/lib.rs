@@ -1,3 +1,5 @@
+pub mod greedy;
+
 use engine::{game::Game, piece::Placement, srs::SpinKind};
 
 pub struct Move {
@@ -7,11 +9,6 @@ pub struct Move {
 }
 
 pub trait Bot {
-    fn pick(&mut self, _game: &Game) -> Option<Move> {
-        todo!()
-    }
-
-    fn name(&self) -> &str {
-        todo!()
-    }
+    fn pick(&mut self, game: &Game) -> Option<Move>;
+    fn name(&self) -> &str;
 }
