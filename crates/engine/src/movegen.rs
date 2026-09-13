@@ -15,10 +15,31 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
     // Note: Must simulate the moves
     // Could filter on which rotations, then simulate from there
     // Go through all rotations
+    let mut base_placements = Vec::new();
     {
-        // Base
-        let mut p = piece.spawn();
+        let mut base = piece.spawn();
+        for _ in 0..4 {
+            base_placements.push(base);
+            if let Some((new_p, _)) = rotate(board, base, Spin::Cw) {
+                base = new_p;
+            }
+        }
+    }
 
+    {
+        let mut base = piece.spawn();
+        for _ in 0..4 {
+            base_placements.push(base);
+            if let Some((new_p, _)) = rotate(board, base, Spin::Ccw) {
+                base = new_p;
+            }
+        }
+    }
+
+    base_placements.sort_unstable();
+    base_placements.dedup();
+
+    for mut p in base_placements {
         // Go through all x-shifts
         {
             // Left
@@ -56,109 +77,7 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
         p.y = board.drop_y(p);
         out.push(p);
     }
-
-    {
-        // CW
-        let p = piece.spawn();
-        for _ in 0..4 {
-            if let Some((mut p, _)) = rotate(board, p, Spin::Cw) {
-                // Practically useless safety
-                // if-let guarantees we have a valid rotation
-                if board.collides(p) {
-                    continue;
-                }
-
-                // Go through all x-shifts
-                {
-                    // Left
-                    let mut last_x = p.x;
-                    loop {
-                        let mut new_p = p;
-                        new_p.x = last_x - 1;
-                        if board.collides(new_p) {
-                            break;
-                        }
-
-                        last_x -= 1;
-                        new_p.y = board.drop_y(new_p);
-                        out.push(new_p);
-                    }
-                }
-
-                {
-                    // Right
-                    let mut last_x = p.x;
-                    loop {
-                        let mut new_p = p;
-                        new_p.x = last_x + 1;
-                        if board.collides(new_p) {
-                            break;
-                        }
-
-                        last_x += 1;
-                        new_p.y = board.drop_y(new_p);
-                        out.push(new_p);
-                    }
-                }
-
-                // Spawn
-                p.y = board.drop_y(p);
-                out.push(p);
-            }
-        }
-    }
-
-    {
-        // CCW
-        let p = piece.spawn();
-        for _ in 0..4 {
-            if let Some((mut p, _)) = rotate(board, p, Spin::Ccw) {
-                // Practically useless safety
-                // if-let guarantees we have a valid rotation
-                if board.collides(p) {
-                    continue;
-                }
-
-                // Go through all x-shifts
-                {
-                    // Left
-                    let mut last_x = p.x;
-                    loop {
-                        let mut new_p = p;
-                        new_p.x = last_x - 1;
-                        if board.collides(new_p) {
-                            break;
-                        }
-
-                        last_x -= 1;
-                        new_p.y = board.drop_y(new_p);
-                        out.push(new_p);
-                    }
-                }
-
-                {
-                    // Right
-                    let mut last_x = p.x;
-                    loop {
-                        let mut new_p = p;
-                        new_p.x = last_x + 1;
-                        if board.collides(new_p) {
-                            break;
-                        }
-
-                        last_x += 1;
-                        new_p.y = board.drop_y(new_p);
-                        out.push(new_p);
-                    }
-                }
-
-                // Spawn
-                p.y = board.drop_y(p);
-                out.push(p);
-            }
-        }
-    }
-
+    
     // Dedup
     out.sort_unstable();
     out.dedup();
