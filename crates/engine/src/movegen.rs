@@ -10,11 +10,6 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
         return;
     }
 
-    // TODO: Refactor
-    // Doesn't seem like the cleanest way to do it
-    // Note: Must simulate the moves
-    // Could filter on which rotations, then simulate from there
-    // Go through all rotations
     let mut base_placements = Vec::new();
     {
         let mut base = piece.spawn();
@@ -77,7 +72,7 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
         p.y = board.drop_y(p);
         out.push(p);
     }
-    
+
     // Dedup
     out.sort_unstable();
     out.dedup();
