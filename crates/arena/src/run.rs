@@ -101,6 +101,7 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         game_stats.spins[outcome.spin as usize] += 1;
 
         // Need height information
+        game_stats.height_hist[*game.board.column_heights().iter().max().unwrap() as usize] += 1;
         // Collect timing data
 
         if game_stats.pieces >= cfg.max_pieces {

@@ -2,9 +2,11 @@ pub mod run;
 pub mod stats;
 
 use bot::{
-    Bot, greedy::{Greedy, N, Weights},
+    Bot,
+    greedy::{Greedy, N, Weights},
 };
 use clap::{Parser, ValueEnum};
+use engine::board::Board;
 use std::path::PathBuf;
 
 use crate::{
@@ -102,4 +104,12 @@ fn main() {
 
     let pieces = session_stats.summarize(|g| f64::from(g.pieces));
     println!("{pieces:?}");
+
+    let lines = session_stats.summarize(|g| f64::from(g.lines));
+    println!("{lines:?}");
+
+    for y in 0..Board::HEIGHT {
+        let heights = session_stats.summarize(|g| f64::from(g.height_hist[y]));
+        println!("{heights:?}");
+    }
 }
