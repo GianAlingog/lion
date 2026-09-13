@@ -16,6 +16,49 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
     // Could filter on which rotations, then simulate from there
     // Go through all rotations
     {
+        // Base
+        let mut p = piece.spawn();
+
+        // Go through all x-shifts
+        {
+            // Left
+            let mut last_x = p.x;
+            loop {
+                let mut new_p = p;
+                new_p.x = last_x - 1;
+                if board.collides(new_p) {
+                    break;
+                }
+
+                last_x -= 1;
+                new_p.y = board.drop_y(new_p);
+                out.push(new_p);
+            }
+        }
+
+        {
+            // Right
+            let mut last_x = p.x;
+            loop {
+                let mut new_p = p;
+                new_p.x = last_x + 1;
+                if board.collides(new_p) {
+                    break;
+                }
+
+                last_x += 1;
+                new_p.y = board.drop_y(new_p);
+                out.push(new_p);
+            }
+        }
+
+        // Spawn
+        p.y = board.drop_y(p);
+        out.push(p);
+    }
+
+    {
+        // CW
         let p = piece.spawn();
         for _ in 0..4 {
             if let Some((mut p, _)) = rotate(board, p, Spin::Cw) {
@@ -66,9 +109,10 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
     }
 
     {
+        // CCW
         let p = piece.spawn();
         for _ in 0..4 {
-            if let Some((mut p, _)) = rotate(board, p, Spin::Cw) {
+            if let Some((mut p, _)) = rotate(board, p, Spin::Ccw) {
                 // Practically useless safety
                 // if-let guarantees we have a valid rotation
                 if board.collides(p) {
