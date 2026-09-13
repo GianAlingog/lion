@@ -5,6 +5,8 @@ use {
     },
 };
 
+pub const N: usize = 4;
+
 #[derive(Clone, Copy)]
 pub struct Weights {
     pub holes: f64,
@@ -22,6 +24,21 @@ impl Weights {
             lines,
         } = self;
         [holes, bumpiness, aggregate_height, lines]
+    }
+}
+
+impl TryFrom<Vec<f64>> for Weights {
+    type Error = String;
+    fn try_from(value: Vec<f64>) -> Result<Self, Self::Error> {
+        let [holes, bumpiness, aggregate_height, lines]: [f64; N] = value
+            .try_into()
+            .map_err(|v: Vec<f64>| format!("need exactly {N} weights, got {}", v.len()))?;
+        Ok(Weights {
+            holes,
+            bumpiness,
+            aggregate_height,
+            lines,
+        })
     }
 }
 
