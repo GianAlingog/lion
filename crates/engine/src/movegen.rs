@@ -37,6 +37,7 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
                         }
 
                         last_x -= 1;
+                        new_p.y = board.drop_y(new_p);
                         out.push(new_p);
                     }
                 }
@@ -52,6 +53,7 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
                         }
 
                         last_x += 1;
+                        new_p.y = board.drop_y(new_p);
                         out.push(new_p);
                     }
                 }
@@ -85,6 +87,7 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
                         }
 
                         last_x -= 1;
+                        new_p.y = board.drop_y(new_p);
                         out.push(new_p);
                     }
                 }
@@ -100,6 +103,7 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
                         }
 
                         last_x += 1;
+                        new_p.y = board.drop_y(new_p);
                         out.push(new_p);
                     }
                 }
