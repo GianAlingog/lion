@@ -74,17 +74,22 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
             spin,
             use_hold,
         } = bot.pick(&game).unwrap();
+
+        // println!("{:?}", placement.cells());
+
         if use_hold {
             game.swap_hold();
         }
         let outcome = game.advance(placement, spin);
+
+        // println!("{:?}", game.board);
 
         // Record relevant statistics
         game_stats.pieces += 1;
         game_stats.lines += outcome.lines;
         game_stats.lines_by_type[outcome.lines as usize] += 1;
         let curr_holes = game.board.count_holes();
-        game_stats.net_hole_change += curr_holes - prev_holes;
+        game_stats.net_hole_change += curr_holes.abs_diff(prev_holes);
         prev_holes = curr_holes;
         // For non-line clears, write in heuristic
         if outcome.perfect_clear {

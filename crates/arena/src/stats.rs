@@ -1,5 +1,6 @@
 use crate::run::GameStats;
 
+#[derive(Debug)]
 pub struct Summary {
     pub n: usize,
     pub mean: f64,
