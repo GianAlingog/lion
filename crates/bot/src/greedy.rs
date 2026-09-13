@@ -51,6 +51,7 @@ pub struct Features {
 }
 
 impl Features {
+    #[must_use]
     fn to_array(self) -> [f64; 4] {
         let Features {
             holes,
@@ -61,15 +62,17 @@ impl Features {
         [holes, bumpiness, aggregate_height, lines]
     }
 
+    #[must_use]
     pub fn extract(board: &Board, lines: u32) -> Self {
         Features {
-            holes: board.count_holes() as f64,
-            bumpiness: board.bumpiness() as f64,
-            aggregate_height: board.aggregate_height() as f64,
-            lines: lines as f64,
+            holes: f64::from(board.count_holes()),
+            bumpiness: f64::from(board.bumpiness()),
+            aggregate_height: f64::from(board.aggregate_height()),
+            lines: f64::from(lines),
         }
     }
 
+    #[must_use]
     pub fn score(&self, w: &Weights) -> f64 {
         self.to_array()
             .iter()
@@ -91,6 +94,7 @@ pub struct Greedy {
 }
 
 impl Greedy {
+    #[must_use]
     pub fn new(weights: Weights) -> Self {
         Greedy {
             weights,
@@ -115,12 +119,7 @@ impl Greedy {
                 use_hold: false,
             };
 
-            let features = Features {
-                holes: board.count_holes() as f64,
-                bumpiness: board.bumpiness() as f64,
-                aggregate_height: board.aggregate_height() as f64,
-                lines: lines as f64,
-            };
+            let features = Features::extract(&board, lines);
 
             candidates.push(Candidate {
                 mv,
@@ -159,7 +158,7 @@ impl Greedy {
 }
 
 impl Bot for Greedy {
-    fn name(&self) -> &str {
+    fn name(&self) -> &'static str {
         "Greedy 1.0"
     }
 

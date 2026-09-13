@@ -2,8 +2,7 @@ pub mod run;
 pub mod stats;
 
 use bot::{
-    Bot,
-    greedy::{Greedy, Weights},
+    Bot, greedy::{Greedy, N, Weights},
 };
 use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
@@ -68,7 +67,7 @@ fn main() {
         Some(v) => v
             .clone()
             .try_into()
-            .map_err(|_| format!("--weights needs exactly 4 values"))
+            .map_err(|_| format!("--weights needs exactly {N} values"))
             .unwrap(),
         None => Weights {
             holes: -4.0,
@@ -101,6 +100,6 @@ fn main() {
             .push(run_game(args.seed + u64::from(i), &mut *bot, &cfg));
     }
 
-    let pieces = session_stats.summarize(|g| g.pieces as f64);
+    let pieces = session_stats.summarize(|g| f64::from(g.pieces));
     println!("{pieces:?}");
 }

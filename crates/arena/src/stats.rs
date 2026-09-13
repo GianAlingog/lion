@@ -16,12 +16,15 @@ pub struct SessionStats {
     pub games: Vec<GameStats>,
 }
 
+// We will accept some precision loss for the statistics
+// The sign loss is generally safe since we are calculating indices
+#[allow(clippy::cast_precision_loss, clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 impl SessionStats {
-    fn percentile(sorted: &Vec<f64>, p: f64) -> f64 {
+    fn percentile(sorted: &[f64], p: f64) -> f64 {
         let index = ((sorted.len() - 1) as f64 * p).ceil() as usize;
         sorted[index]
     }
-
+    
     pub fn summarize(&self, f: impl Fn(&GameStats) -> f64) -> Summary {
         let n = self.games.len();
         let mut summary = Summary {
