@@ -103,13 +103,13 @@ fn main() {
     }
 
     let pieces = session_stats.summarize(|g| f64::from(g.pieces));
-    println!("{pieces:?}");
+    println!("Pieces: {pieces:?}");
 
     let lines = session_stats.summarize(|g| f64::from(g.lines));
-    println!("{lines:?}");
+    println!("Lines cleared: {lines:?}");
 
     for y in 0..Board::HEIGHT {
         let heights = session_stats.summarize(|g| f64::from(g.height_hist[y]));
-        println!("{heights:?}");
+        println!("Board height {y}: {heights:?}");
     }
 }
