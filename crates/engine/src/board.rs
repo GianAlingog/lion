@@ -101,10 +101,10 @@ impl Board {
     pub fn column_heights(&self) -> [u8; Self::WIDTH] {
         let mut heights = [0_u8; Self::WIDTH];
         for (x, height) in heights.iter_mut().enumerate().take(Self::WIDTH) {
-            while *height < Self::HEIGHT_U8
-                && self.get(i8::try_from(x).unwrap(), i8::try_from(*height).unwrap())
-            {
-                *height += 1;
+            for y in 0..Self::HEIGHT_U8 {
+                if self.get(i8::try_from(x).unwrap(), i8::try_from(y).unwrap()) {
+                    (*height) = (*height).max(y);
+                }
             }
         }
 
@@ -184,7 +184,7 @@ impl Board {
 
     #[must_use]
     pub fn is_grounded(&self, p: Placement) -> bool {
-        self.drop_y(p) == 0
+        self.drop_y(p) == p.y
     }
 }
 
