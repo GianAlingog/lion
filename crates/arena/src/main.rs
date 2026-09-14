@@ -102,22 +102,24 @@ fn main() {
             .push(run_game(args.seed + u64::from(i), &mut *bot, &cfg));
     }
 
-    let pieces = session_stats.summarize(|g| f64::from(g.pieces));
-    println!("Pieces: {pieces:?}");
+    println!("{session_stats}");
 
-    let lines = session_stats.summarize(|g| f64::from(g.lines));
-    println!("Lines cleared: {lines:?}");
+    // let pieces = session_stats.summarize(|g| f64::from(g.pieces));
+    // println!("Pieces: {pieces:?}");
+
+    // let lines = session_stats.summarize(|g| f64::from(g.lines));
+    // println!("Lines cleared: {lines:?}");
 
     // for y in 0..Board::HEIGHT {
     //     let heights = session_stats.summarize(|g| f64::from(g.height_hist[y]));
     //     println!("Board height {y}: {heights:?}");
     // }
 
-    for bucket in 0..32 {
-        let durations = session_stats.summarize(|g| f64::from(g.decision_hist[bucket]));
-        println!("Decision bucket {bucket}: {durations:?}");
-    }
+    // for bucket in 0..32 {
+    //     let durations = session_stats.summarize(|g| f64::from(g.decision_hist[bucket]));
+    //     println!("Decision bucket {bucket}: {durations:?}");
+    // }
 
-    let elapsed = session_stats.summarize(|g| g.elapsed.as_secs_f64());
-    println!("Time elapsed: {elapsed:?}");
+    // let elapsed = session_stats.summarize(|g| g.elapsed.as_secs_f64());
+    // println!("Time elapsed: {elapsed:?}");
 }

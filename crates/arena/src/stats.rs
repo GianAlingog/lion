@@ -1,3 +1,5 @@
+use std::fmt::write;
+
 use crate::run::GameStats;
 
 #[derive(Debug)]
@@ -10,6 +12,17 @@ pub struct Summary {
     pub max: f64,
     pub p95: f64,
     pub p99: f64,
+}
+
+impl std::fmt::Display for Summary {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "| {:>10.2} | {:>10.2} | {:>10.2} | {:>10.2} | {:>10.2} | {:>10.2} | {:>10.2} |",
+            self.mean, self.median, self.stddev, self.min, self.max, self.p95, self.p99
+        )?;
+        Ok(())
+    }
 }
 
 pub struct SessionStats {
@@ -63,5 +76,23 @@ impl SessionStats {
         summary.p99 = Self::percentile(&values, 0.99);
 
         summary
+    }
+}
+
+impl std::fmt::Display for SessionStats {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(
+            f,
+            "| metric            | mean       | median     | stddev     | min        | max        | p95        | p99        |"
+        )?;
+        writeln!(
+            f,
+            "|-------------------|------------|------------|------------|------------|------------|------------|------------|"
+        )?;
+        writeln!(f, "| lines per piece   {}", self.summarize(|g| f64::from(g.lines) / f64::from(g.pieces)))?;
+        // writeln!(f, "| max height        {}",)?;
+        writeln!(f, "| pieces per second {}", self.summarize(|g| f64::from(g.pieces) / g.elapsed.as_secs_f64()))?;
+        // writeln!(f, "| decision time     {}",)?;
+        Ok(())
     }
 }
