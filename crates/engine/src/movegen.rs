@@ -74,6 +74,6 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
     }
 
     // Dedup
-    out.sort_unstable();
-    out.dedup();
+    out.sort_by_key(Placement::cells);
+    out.dedup_by_key(|p| p.cells());
 }

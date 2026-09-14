@@ -53,6 +53,7 @@ impl Piece {
     // produce a (dx, dy) given the (x, y)
     #[must_use]
     const fn cells(self, rot: Rot) -> [(i8, i8); 4] {
+        // TODO: sort the cells so that we skip that in the dedup process
         const CELLS_TABLE: [[[(i8, i8); 4]; 4]; 7] = [
             // N, E, S, W order
             [
@@ -130,10 +131,14 @@ impl Piece {
 }
 
 impl Placement {
+    // TODO: Sort the cells table and remove this costly sort
     #[must_use]
-    pub fn cells(self) -> [(i8, i8); 4] {
-        self.piece
+    pub fn cells(&self) -> [(i8, i8); 4] {
+        let mut c = self
+            .piece
             .cells(self.rot)
-            .map(|(dx, dy)| (self.x + dx, self.y + dy))
+            .map(|(dx, dy)| (self.x + dx, self.y + dy));
+        c.sort_unstable();
+        c
     }
 }
