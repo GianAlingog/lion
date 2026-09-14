@@ -1,5 +1,3 @@
-use std::fmt::write;
-
 use crate::run::GameStats;
 
 #[derive(Debug)]
@@ -89,9 +87,17 @@ impl std::fmt::Display for SessionStats {
             f,
             "|-------------------|------------|------------|------------|------------|------------|------------|------------|"
         )?;
-        writeln!(f, "| lines per piece   {}", self.summarize(|g| f64::from(g.lines) / f64::from(g.pieces)))?;
+        writeln!(
+            f,
+            "| lines per piece   {}",
+            self.summarize(|g| f64::from(g.lines) / f64::from(g.pieces))
+        )?;
         // writeln!(f, "| max height        {}",)?;
-        writeln!(f, "| pieces per second {}", self.summarize(|g| f64::from(g.pieces) / g.elapsed.as_secs_f64()))?;
+        writeln!(
+            f,
+            "| pieces per second {}",
+            self.summarize(|g| f64::from(g.pieces) / g.elapsed.as_secs_f64())
+        )?;
         // writeln!(f, "| decision time     {}",)?;
         Ok(())
     }

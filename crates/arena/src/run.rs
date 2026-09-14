@@ -85,7 +85,7 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         } = bot.pick(&game).unwrap();
 
         let pick_duration = pick_start.elapsed();
-        let decision_nanos = pick_duration.as_nanos() as u64;
+        let decision_nanos = u64::try_from(pick_duration.as_nanos()).unwrap();
         // Possibly dangerous if many overflow the last bucket
         let decision_bucket = (63 - decision_nanos.leading_zeros() as usize).min(31);
         game_stats.decision_hist[decision_bucket] += 1;
