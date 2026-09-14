@@ -61,10 +61,10 @@ impl SessionStats {
         values.sort_by(f64::total_cmp);
         let total: f64 = values.iter().sum();
         summary.mean = total / (n as f64);
-        summary.median = values[n / 2];
+        summary.median = values[n / 2]; // this is p50 instead of median...
         summary.stddev = (values
             .iter()
-            .map(|&x| (summary.mean - x).abs())
+            .map(|&x| (summary.mean - x).powi(2))
             .sum::<f64>()
             / ((n - 1) as f64))
             .sqrt();
