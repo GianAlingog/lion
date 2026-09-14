@@ -56,7 +56,7 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
     let mut game = Game::new(seed, cfg.preview);
     let mut game_stats = GameStats {
         seed,
-        end_reason: EndReason::GoalReached,
+        end_reason: EndReason::TopOut,
 
         pieces: 0,
         lines: 0,
@@ -118,16 +118,16 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
 
         // Need height information
         game_stats.height_hist[*game.board.column_heights().iter().max().unwrap() as usize] += 1;
-        // Collect timing data
-        // take log2 data in nanos or what
 
         if game_stats.pieces >= cfg.max_pieces {
+            game_stats.end_reason = EndReason::PieceCap;
             break;
         }
 
         if let RunMode::Sprint { lines } = cfg.mode
             && game_stats.lines >= lines
         {
+            game_stats.end_reason = EndReason::GoalReached;
             break;
         }
     }
