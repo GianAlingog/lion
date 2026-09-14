@@ -38,12 +38,13 @@ pub struct GameStats {
     pub max_b2b: u32,
     pub max_combo: u32,
     pub max_height: u32,
+    pub max_decision: Duration,
     pub attack: u32,
     pub spins: [u32; 3],
 
     // Don't hardcode height (?)
     pub height_hist: [u32; 41],
-    pub decision_hist: [u32; 32],
+    pub decision_hist: [u32; 257],
     pub decision_total: Duration,
     pub elapsed: Duration,
 }
@@ -67,11 +68,12 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         max_b2b: 0,
         max_combo: 0,
         max_height: 0,
+        max_decision: Duration::new(0, 0),
         attack: 0,
         spins: [0; 3],
 
         height_hist: [0; 41],
-        decision_hist: [0; 32],
+        decision_hist: [0; 257],
         decision_total: Duration::new(0, 0),
         elapsed: Duration::new(0, 0),
     };
@@ -85,21 +87,20 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
             spin,
             use_hold,
         } = bot.pick(&game).unwrap();
+        // println!("{:?}", placement.cells());
 
         let pick_duration = pick_start.elapsed();
         let decision_nanos = u64::try_from(pick_duration.as_nanos()).unwrap();
         // Possibly dangerous if many overflow the last bucket
-        let decision_bucket = (63 - decision_nanos.leading_zeros() as usize).min(31);
-        game_stats.decision_hist[decision_bucket] += 1;
-
+        let decision_bucket = (decision_nanos / 1000).min(256);
+        game_stats.max_decision = game_stats.max_decision.max(pick_duration);
+        game_stats.decision_hist[decision_bucket as usize] += 1;
         game_stats.decision_total = game_stats.decision_total.add(pick_duration);
-        // println!("{:?}", placement.cells());
 
         if use_hold {
             game.swap_hold();
         }
         let outcome = game.advance(placement, spin);
-
         // println!("{:?}", game.board);
 
         // Record relevant statistics

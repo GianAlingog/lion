@@ -77,6 +77,7 @@ impl SessionStats {
     }
 }
 
+#[allow(clippy::cast_precision_loss)]
 impl std::fmt::Display for SessionStats {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "per-game distributions")?;
@@ -133,6 +134,19 @@ impl std::fmt::Display for SessionStats {
             holes / pieces * 1000.0
         )?;
         writeln!(f, "| pieces per second | {:>10.2} |", pieces / decision)?;
+
+        writeln!(f)?;
+
+        writeln!(f, "decision latency (in microseconds)")?;
+        writeln!(
+            f,
+            "| mean       | median     | stddev     | min        | max        | p95        | p99        |"
+        )?;
+        writeln!(
+            f,
+            "{}",
+            self.summarize(|g| g.max_decision.as_micros() as f64)
+        )?;
 
         Ok(())
     }
