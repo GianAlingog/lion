@@ -105,7 +105,10 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         game_stats.lines += outcome.lines;
         game_stats.lines_by_type[outcome.lines as usize] += 1;
         let curr_holes = game.board.count_holes();
-        game_stats.net_hole_change += curr_holes.abs_diff(prev_holes);
+        if outcome.lines == 0 {
+            // Only record hole changes on non-clears (otherwise it will generally tend to 0)
+            game_stats.net_hole_change += curr_holes.abs_diff(prev_holes);
+        }
         prev_holes = curr_holes;
         // For non-line clears, write in heuristic
         if outcome.perfect_clear {
