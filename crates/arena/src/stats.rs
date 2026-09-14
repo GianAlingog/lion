@@ -130,14 +130,14 @@ impl std::fmt::Display for SessionStats {
         writeln!(f, "| lines per piece   | {:>10.2} |", lines / pieces)?;
         writeln!(
             f,
-            "| holes per 1000    | {:>10.2} |",
+            "| net holes / 1000  | {:>10.2} |",
             holes / pieces * 1000.0
         )?;
         writeln!(f, "| pieces per second | {:>10.2} |", pieces / decision)?;
 
         writeln!(f)?;
 
-        writeln!(f, "decision latency (in microseconds)")?;
+        writeln!(f, "max decision latency (in microseconds)")?;
         writeln!(
             f,
             "| mean       | median     | stddev     | min        | max        | p95        | p99        |"
