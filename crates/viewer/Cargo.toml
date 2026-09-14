@@ -1,0 +1,12 @@
+[package]
+name = "viewer"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+ratatui = "0.30.2"
+
+[lints]
+workspace = true
