@@ -12,6 +12,7 @@ mod tests {
     use crate::{
         bag::Bag,
         board::Board,
+        movegen::hard_drop_placements,
         piece::*,
         srs::{Spin, SpinKind, detect_spin, rotate},
     };
@@ -465,5 +466,17 @@ mod tests {
         }
 
         assert!(diff);
+    }
+
+    #[test]
+    fn all_pieces_movegen() {
+        let board = Board::empty();
+        let mut bag = Bag::new(0xDEAD_BEEF_u64);
+        for _ in 0..7 {
+            let piece = bag.next_piece();
+            let mut out = Vec::new();
+            hard_drop_placements(&board, piece, &mut out);
+            println!("{piece:?} {}", out.len());
+        }
     }
 }
