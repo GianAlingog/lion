@@ -37,6 +37,7 @@ pub struct GameStats {
     pub perfect_clears: u32,
     pub max_b2b: u32,
     pub max_combo: u32,
+    pub max_height: u32,
     pub attack: u32,
     pub spins: [u32; 3],
 
@@ -65,6 +66,7 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         perfect_clears: 0,
         max_b2b: 0,
         max_combo: 0,
+        max_height: 0,
         attack: 0,
         spins: [0; 3],
 
@@ -120,7 +122,9 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         game_stats.spins[outcome.spin as usize] += 1;
 
         // Need height information
-        game_stats.height_hist[*game.board.column_heights().iter().max().unwrap() as usize] += 1;
+        let height = *game.board.column_heights().iter().max().unwrap();
+        game_stats.max_height = game_stats.max_height.max(u32::from(height));
+        game_stats.height_hist[height as usize] += 1;
 
         if game_stats.pieces >= cfg.max_pieces {
             game_stats.end_reason = EndReason::PieceCap;

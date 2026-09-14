@@ -79,6 +79,7 @@ impl SessionStats {
 
 impl std::fmt::Display for SessionStats {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        writeln!(f, "per-game distributions")?;
         writeln!(
             f,
             "| metric            | mean       | median     | stddev     | min        | max        | p95        | p99        |"
@@ -89,16 +90,50 @@ impl std::fmt::Display for SessionStats {
         )?;
         writeln!(
             f,
-            "| lines per piece   {}",
-            self.summarize(|g| f64::from(g.lines) / f64::from(g.pieces))
+            "| pieces            {}",
+            self.summarize(|g| f64::from(g.pieces))
         )?;
-        // writeln!(f, "| max height        {}",)?;
         writeln!(
             f,
-            "| pieces per second {}",
-            self.summarize(|g| f64::from(g.pieces) / g.elapsed.as_secs_f64())
+            "| lines             {}",
+            self.summarize(|g| f64::from(g.lines))
         )?;
-        // writeln!(f, "| decision time     {}",)?;
+        writeln!(
+            f,
+            "| holes created     {}",
+            self.summarize(|g| f64::from(g.net_hole_change))
+        )?;
+        writeln!(
+            f,
+            "| max height        {}",
+            self.summarize(|g| f64::from(g.max_height))
+        )?;
+
+        writeln!(f)?;
+
+        let lines: f64 = self.games.iter().map(|g| f64::from(g.lines)).sum();
+        let pieces: f64 = self.games.iter().map(|g| f64::from(g.pieces)).sum();
+        let holes: f64 = self
+            .games
+            .iter()
+            .map(|g| f64::from(g.net_hole_change))
+            .sum();
+        let decision: f64 = self
+            .games
+            .iter()
+            .map(|g| g.decision_total.as_secs_f64())
+            .sum();
+        writeln!(f, "pooled statistics")?;
+        writeln!(f, "| metric            | value      |")?;
+        writeln!(f, "|-------------------|------------|")?;
+        writeln!(f, "| lines per piece   | {:>10.2} |", lines / pieces)?;
+        writeln!(
+            f,
+            "| holes per 1000    | {:>10.2} |",
+            holes / pieces * 1000.0
+        )?;
+        writeln!(f, "| pieces per second | {:>10.2} |", pieces / decision)?;
+
         Ok(())
     }
 }
