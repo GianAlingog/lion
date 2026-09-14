@@ -1,3 +1,8 @@
+use std::{
+    ops::Add,
+    time::{Duration, Instant},
+};
+
 use bot::{Bot, Move};
 use engine::game::Game;
 
@@ -37,15 +42,17 @@ pub struct GameStats {
 
     // Don't hardcode height (?)
     pub height_hist: [u32; 41],
-    pub decide_hist: [u32; 32],
-    // pub decision_nanos_total: u64,
-    // pub elapsed_nanos: u64,
+    pub decision_hist: [u32; 32],
+    pub decision_total: Duration,
+    pub elapsed: Duration,
 }
 
 /// # Panics
 ///
 /// Will panic should the bot fail to produce a move.
 pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
+    let game_start = Instant::now();
+
     let mut game = Game::new(seed, cfg.preview);
     let mut game_stats = GameStats {
         seed,
@@ -62,19 +69,28 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         spins: [0; 3],
 
         height_hist: [0; 41],
-        decide_hist: [0; 32],
-        // decision_nanos_total: 0,
-        // elapsed_nanos: 0,
+        decision_hist: [0; 32],
+        decision_total: Duration::new(0, 0),
+        elapsed: Duration::new(0, 0),
     };
 
     let mut prev_holes = 0_u32;
     while !game.topped_out() {
+        let pick_start = Instant::now();
+
         let Move {
             placement,
             spin,
             use_hold,
         } = bot.pick(&game).unwrap();
 
+        let pick_duration = pick_start.elapsed();
+        let decision_nanos = pick_duration.as_nanos() as u64;
+        // Possibly dangerous if many overflow the last bucket
+        let decision_bucket = (63 - decision_nanos.leading_zeros() as usize).min(31);
+        game_stats.decision_hist[decision_bucket] += 1;
+
+        game_stats.decision_total = game_stats.decision_total.add(pick_duration);
         // println!("{:?}", placement.cells());
 
         if use_hold {
@@ -103,6 +119,7 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
         // Need height information
         game_stats.height_hist[*game.board.column_heights().iter().max().unwrap() as usize] += 1;
         // Collect timing data
+        // take log2 data in nanos or what
 
         if game_stats.pieces >= cfg.max_pieces {
             break;
@@ -114,6 +131,8 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
             break;
         }
     }
+
+    game_stats.elapsed = game_start.elapsed();
 
     game_stats
 }
