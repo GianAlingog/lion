@@ -142,3 +142,33 @@ impl Placement {
         c
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn all_pieces_and_rotations() {
+        let mut placement = Placement {
+            piece: Piece::L,
+            rot: Rot::N,
+            x: 2,
+            y: 2,
+        };
+
+        println!("{placement:?}");
+        println!("{:?}", placement.cells());
+        placement.rot = Rot::E;
+        println!("{placement:?}");
+        println!("{:?}", placement.cells());
+        placement.rot = Rot::S;
+        println!("{placement:?}");
+        println!("{:?}", placement.cells());
+        placement.rot = Rot::W;
+        println!("{placement:?}");
+        println!("{:?}", placement.cells());
+        placement.rot = Rot::N;
+        println!("{placement:?}");
+        println!("{:?}", placement.cells());
+    }
+}

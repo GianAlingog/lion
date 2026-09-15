@@ -175,3 +175,257 @@ pub fn detect_spin(board: &Board, p: Placement, kick: u8) -> SpinKind {
         _ => SpinKind::None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn wall_kick() {
+        let mut board = Board::empty();
+        let p = Placement {
+            piece: Piece::I,
+            rot: Rot::W,
+            x: -1,
+            y: 0,
+        };
+
+        let (mut p, _) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
+
+        p.y = board.drop_y(p);
+        assert_eq!(board.lock(p), 0);
+        println!("{board:?}");
+    }
+
+    #[test]
+    fn sz_kick_triple() {
+        let mut board = Board::empty();
+        board.set(7, 2);
+        for i in 0..7 {
+            for j in 0..3 {
+                board.set(i, j);
+            }
+        }
+
+        board.set(8, 0);
+        board.set(8, 4);
+
+        for j in 0..5 {
+            board.set(9, j);
+        }
+
+        let p = Placement {
+            piece: Piece::Z,
+            rot: Rot::N,
+            x: 6,
+            y: 2,
+        };
+
+        let (p, kick) = rotate(&board, p, Spin::Ccw).expect("Rotation failed");
+        let spin_kind = detect_spin(&board, p, kick);
+
+        println!("{board:?}");
+
+        assert_eq!(spin_kind, SpinKind::None);
+        assert_eq!(board.lock(p), 3);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
+    }
+
+    #[test]
+    fn surrounded_piece_kick_fail() {
+        let mut board = Board::empty();
+        for i in 0..9 {
+            board.set(i, 0);
+            board.set(i, 2);
+        }
+
+        for i in 0..8 {
+            board.set(i, 1);
+        }
+
+        let p = Placement {
+            piece: Piece::T,
+            rot: Rot::W,
+            x: 8,
+            y: 0,
+        };
+
+        let response = rotate(&board, p, Spin::Ccw);
+        assert!(response.is_none());
+    }
+
+    #[test]
+    fn t_spin_triple() {
+        let mut board = Board::empty();
+        for i in 1..10 {
+            board.set(i, 0);
+            board.set(i, 2);
+        }
+
+        for i in 2..10 {
+            board.set(i, 1);
+        }
+
+        board.set(0, 4);
+
+        let p = Placement {
+            piece: Piece::T,
+            rot: Rot::N,
+            x: 0,
+            y: 2,
+        };
+
+        let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
+        let spin_kind = detect_spin(&board, p, kick);
+
+        println!("{board:?}");
+
+        assert_eq!(spin_kind, SpinKind::Full);
+        assert_eq!(board.lock(p), 3);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
+    }
+
+    #[test]
+    fn t_spin_double() {
+        let mut board = Board::empty();
+        board.set(1, 0);
+        board.set(0, 0);
+        board.set(0, 1);
+        board.set(0, 2);
+        for i in 3..10 {
+            board.set(i, 0);
+            board.set(i, 2);
+        }
+
+        for i in 4..10 {
+            board.set(i, 1);
+        }
+
+        let p = Placement {
+            piece: Piece::T,
+            rot: Rot::W,
+            x: 1,
+            y: 0,
+        };
+
+        let (p, kick) = rotate(&board, p, Spin::Ccw).expect("Rotation failed");
+        let spin_kind = detect_spin(&board, p, kick);
+
+        println!("{board:?}");
+
+        assert_eq!(spin_kind, SpinKind::Full);
+        assert_eq!(board.lock(p), 2);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
+    }
+
+    #[test]
+    fn t_spin_single() {
+        let mut board = Board::empty();
+        board.set(1, 0);
+        board.set(0, 0);
+        board.set(0, 1);
+        board.set(0, 2);
+        for i in 3..10 {
+            board.set(i, 0);
+            board.set(i, 2);
+        }
+
+        for i in 4..10 {
+            board.set(i, 1);
+        }
+
+        let p = Placement {
+            piece: Piece::T,
+            rot: Rot::N,
+            x: 1,
+            y: 0,
+        };
+
+        let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
+        let spin_kind = detect_spin(&board, p, kick);
+
+        println!("{board:?}");
+
+        assert_eq!(spin_kind, SpinKind::Full);
+        assert_eq!(board.lock(p), 1);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
+    }
+
+    #[test]
+    fn t_spin_mini() {
+        let mut board = Board::empty();
+        board.set(1, 0);
+        board.set(0, 0);
+        board.set(0, 1);
+        board.set(0, 2);
+        for i in 3..10 {
+            board.set(i, 0);
+            board.set(i, 2);
+        }
+
+        for i in 4..10 {
+            board.set(i, 1);
+        }
+
+        let p = Placement {
+            piece: Piece::T,
+            rot: Rot::W,
+            x: 1,
+            y: 0,
+        };
+
+        let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
+        let spin_kind = detect_spin(&board, p, kick);
+
+        println!("{board:?}");
+
+        assert_eq!(spin_kind, SpinKind::Mini);
+        assert_eq!(board.lock(p), 1);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
+    }
+
+    #[test]
+    fn t_spin_none() {
+        let mut board = Board::empty();
+        board.set(1, 0);
+        board.set(0, 0);
+        board.set(0, 1);
+        board.set(0, 2);
+        for i in 3..10 {
+            board.set(i, 0);
+            board.set(i, 2);
+        }
+
+        for i in 4..10 {
+            board.set(i, 1);
+        }
+
+        let p = Placement {
+            piece: Piece::T,
+            rot: Rot::N,
+            x: 4,
+            y: 2,
+        };
+
+        let (p, kick) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
+        let spin_kind = detect_spin(&board, p, kick);
+
+        println!("{board:?}");
+
+        assert_eq!(spin_kind, SpinKind::None);
+        assert_eq!(board.lock(p), 0);
+
+        println!("{board:?}");
+        println!("{spin_kind:?} {kick}");
+    }
+}

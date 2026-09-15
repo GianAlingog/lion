@@ -77,3 +77,69 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
     out.sort_by_key(Placement::cells);
     out.dedup_by_key(|p| p.cells());
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::bag::Bag;
+
+    #[test]
+    fn all_pieces_movegen() {
+        let board = Board::empty();
+        let mut bag = Bag::new(0xDEAD_BEEF_u64);
+        for _ in 0..7 {
+            let piece = bag.next_piece();
+            let mut out = Vec::new();
+            hard_drop_placements(&board, piece, &mut out);
+            println!("{piece:?} {}", out.len());
+
+            for placement in out {
+                assert!(board.is_grounded(placement));
+                assert!(!board.collides(placement));
+            }
+        }
+    }
+
+    #[test]
+    fn all_pieces_less_movegen() {
+        let mut board = Board::empty();
+        for i in 0..3 {
+            board.set(i, 19);
+        }
+
+        let mut bag = Bag::new(0xDEAD_BEEF_u64);
+        for _ in 0..7 {
+            let piece = bag.next_piece();
+            let mut out = Vec::new();
+            hard_drop_placements(&board, piece, &mut out);
+            println!("{piece:?} {}", out.len());
+
+            for placement in out {
+                let mut board = board;
+                assert!(board.is_grounded(placement));
+                assert!(!board.collides(placement));
+                let lines = board.lock(placement);
+                assert_eq!(lines, 0);
+                // println!("{board:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn all_pieces_none_movegen() {
+        let mut board = Board::empty();
+        for i in 0..10 {
+            board.set(i, 19);
+        }
+
+        let mut bag = Bag::new(0xDEAD_BEEF_u64);
+        for _ in 0..7 {
+            let piece = bag.next_piece();
+            let mut out = Vec::new();
+            hard_drop_placements(&board, piece, &mut out);
+            println!("{piece:?} {}", out.len());
+
+            assert!(out.is_empty());
+        }
+    }
+}

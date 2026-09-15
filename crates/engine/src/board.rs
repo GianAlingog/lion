@@ -205,3 +205,154 @@ impl std::fmt::Debug for Board {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::piece::{Piece, Rot};
+
+    #[test]
+    fn print_empty_board() {
+        let board: Board = Board::empty();
+        println!("{board:?}");
+    }
+
+    #[test]
+    fn build_from_ascii() {
+        let mut board1 = Board::empty();
+        for i in 0..10 {
+            board1.set(i, i);
+        }
+
+        let board1_output = format!("{board1:?}");
+
+        let board2 = Board::from_ascii(&board1_output);
+        let board2_output = format!("{board2:?}");
+
+        assert_eq!(board1_output, board2_output);
+
+        println!("{board1:?}\n{board2:?}");
+    }
+
+    #[test]
+    fn clear_two_lines() {
+        let mut board = Board::empty();
+        for i in 0..10 {
+            board.set(i, i);
+        }
+
+        for y in [2, 4] {
+            for x in 0..Board::WIDTH_I8 {
+                board.set(x, y);
+            }
+        }
+
+        println!("{board:?}");
+        assert_eq!(board.clear_lines(), 2_u32);
+        println!("{board:?}");
+    }
+
+    #[test]
+    fn get_bounds() {
+        let mut board = Board::empty();
+        assert!(board.get(-1, 0));
+        assert!(board.get(10, 0));
+        assert!(board.get(0, -1));
+        assert!(!board.get(0, 39));
+        assert!(!board.get(1, 1));
+        board.set(1, 1);
+        assert!(board.get(1, 1));
+    }
+
+    #[test]
+    fn count_two_holes() {
+        let mut board = Board::empty();
+        for i in 0..10 {
+            if i != 2 {
+                board.set(i, 0);
+            }
+
+            if i != 4 {
+                board.set(i, 1);
+            }
+
+            board.set(i, 2);
+        }
+
+        println!("{board:?}");
+        assert_eq!(board.count_holes(), 2);
+    }
+
+    #[test]
+    fn wall_collision() {
+        let board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::I,
+            rot: Rot::N,
+            x: -1,
+            y: 0,
+        };
+
+        assert!(board.collides(p));
+
+        p.x = 0;
+
+        assert!(!board.collides(p));
+    }
+
+    #[test]
+    fn hard_drop_empty() {
+        let mut board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::I,
+            rot: Rot::N,
+            x: 3,
+            y: 19,
+        };
+
+        p.y = board.drop_y(p);
+        assert_eq!(board.lock(p), 0);
+        println!("{board:?}");
+    }
+
+    #[test]
+    fn hard_drop_onto_stack() {
+        let mut board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::I,
+            rot: Rot::N,
+            x: 3,
+            y: 19,
+        };
+
+        board.set(4, 0);
+        board.set(4, 1);
+
+        p.y = board.drop_y(p);
+        assert_eq!(board.lock(p), 0);
+        println!("{board:?}");
+    }
+
+    #[test]
+    fn hard_drop_into_line_clear() {
+        let mut board = Board::empty();
+        let mut p = Placement {
+            piece: Piece::T,
+            rot: Rot::N,
+            x: 3,
+            y: 19,
+        };
+
+        for i in 0..10 {
+            if (3..=5).contains(&i) {
+                continue;
+            }
+
+            board.set(i, 0);
+        }
+
+        p.y = board.drop_y(p);
+        assert_eq!(board.lock(p), 1);
+        println!("{board:?}");
+    }
+}
