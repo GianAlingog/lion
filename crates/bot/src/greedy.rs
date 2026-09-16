@@ -141,7 +141,7 @@ impl Greedy {
             let mv = Move {
                 placement,
                 spin: SpinKind::None,
-                use_hold: false,
+                use_hold: true,
             };
 
             let features = Features::extract(&board, lines);

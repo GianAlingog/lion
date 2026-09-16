@@ -71,8 +71,8 @@ impl Game {
         // We need to send the displayed piece as well
         // TODO: Decide if we pop off the displayed piece from the queue
         // or take it from the first element. Former may be preferred
-        let _current_piece = self.queue.pop_front().expect("Queue was empty on advance");
-
+        let current_piece = self.queue.pop_front().expect("Queue was empty on advance");
+        assert_eq!(p.piece, current_piece);
         let cleared_lines = self.board.lock(p);
 
         // WARN: Hardcoded b2b on quads only
@@ -124,6 +124,8 @@ impl Game {
         let outgoing_piece = self.hold.replace(incoming_piece);
         if let Some(piece) = outgoing_piece {
             self.queue.push_front(piece);
+        } else {
+            self.queue.push_back(self.bag.next_piece());
         }
         self.can_hold = false;
     }
