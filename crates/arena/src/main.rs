@@ -2,8 +2,7 @@ pub mod run;
 pub mod stats;
 
 use bot::{
-    Bot,
-    greedy::{Greedy, N, Weights},
+    Bot, greedy::{Greedy, N, Weights}, nothing::Nothing,
 };
 use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
@@ -22,6 +21,7 @@ enum Mode {
 #[derive(Clone, Copy, Debug, ValueEnum)]
 enum BotKind {
     Greedy,
+    Nothing
 }
 
 #[derive(Debug, Parser)]
@@ -29,7 +29,7 @@ struct Args {
     #[arg(long, default_value_t = 1)]
     games: u32,
 
-    #[arg(long, default_value_t = 0xDEADBEEF_u64)]
+    #[arg(long, default_value_t = 0xDEAD_BEEF_u64)]
     seed: u64,
 
     #[arg(long, value_enum, default_value_t = Mode::Endless)]
@@ -57,6 +57,7 @@ struct Args {
 fn make_bot(kind: BotKind, w: Weights) -> Box<dyn Bot> {
     match kind {
         BotKind::Greedy => Box::new(Greedy::new(w)),
+        BotKind::Nothing => Box::new(Nothing::new()),
     }
 }
 
