@@ -36,12 +36,15 @@ pub struct SessionStats {
 )]
 impl SessionStats {
     fn percentile(sorted: &[f64], p: f64) -> f64 {
-        let index = ((sorted.len() - 1) as f64 * p).ceil() as usize;
+        let index = (sorted.len() as f64 * p).ceil() as usize - 1;
         sorted[index]
     }
 
-    pub fn summarize(&self, f: impl Fn(&GameStats) -> f64) -> Summary {
-        let n = self.games.len();
+    /// # Warning
+    ///
+    /// Will consume the `values` parameter
+    pub fn create_summary(values: &mut [f64]) -> Summary {
+        let n = values.len();
         let mut summary = Summary {
             n,
             mean: 0.0,
@@ -57,7 +60,6 @@ impl SessionStats {
             return summary;
         }
 
-        let mut values: Vec<f64> = self.games.iter().map(f).collect();
         values.sort_by(f64::total_cmp);
         let total: f64 = values.iter().sum();
         summary.mean = total / (n as f64);
@@ -78,6 +80,11 @@ impl SessionStats {
         summary.p99 = Self::percentile(&values, 0.99);
 
         summary
+    }
+
+    pub fn summarize(&self, f: impl Fn(&GameStats) -> f64) -> Summary {
+        let mut values: Vec<f64> = self.games.iter().map(f).collect();
+        SessionStats::create_summary(&mut values)
     }
 }
 
@@ -153,5 +160,118 @@ impl std::fmt::Display for SessionStats {
         )?;
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::Duration;
+
+    use crate::{
+        run::{EndReason, GameStats},
+        stats::SessionStats,
+    };
+
+    #[test]
+    fn empty_values() {
+        let mut pieces = Vec::new();
+        let summary = SessionStats::create_summary(&mut pieces);
+        assert_eq!(summary.n, 0);
+        println!("{summary:?}");
+    }
+
+    #[test]
+    fn odd_median() {
+        let mut pieces = vec![1.0, 2.0, 3.0, 4.0, 5.0];
+        let summary = SessionStats::create_summary(&mut pieces);
+        assert_eq!(summary.median, 3.0);
+        println!("{summary:?}");
+    }
+
+    #[test]
+    fn even_median() {
+        let mut pieces = vec![2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0];
+        let summary = SessionStats::create_summary(&mut pieces);
+        assert_eq!(summary.median, 4.5);
+        println!("{summary:?}");
+    }
+
+    #[test]
+    fn stddev_scaling() {
+        let mut pieces = vec![2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0];
+        let summary = SessionStats::create_summary(&mut pieces);
+        assert!((summary.stddev - 2.138090).abs() < 1e-6);
+        println!("{summary:?}");
+
+        for x in pieces.iter_mut() {
+            *x *= 2.0;
+        }
+
+        let summary = SessionStats::create_summary(&mut pieces);
+        assert!((summary.stddev - 4.276180).abs() < 1e-6);
+        println!("{summary:?}");
+    }
+
+    #[test]
+    fn pooled_stats() {
+        let game1 = GameStats {
+            seed: 0xDEFE_C8ED_u64,
+            end_reason: EndReason::TopOut,
+
+            pieces: 10,
+            lines: 1,
+            lines_by_type: [0; 5],
+            net_hole_change: 0,
+            perfect_clears: 0,
+            max_b2b: 0,
+            max_combo: 0,
+            max_height: 0,
+            max_decision: Duration::new(0, 0),
+            attack: 0,
+            spins: [0; 3],
+
+            height_hist: [0; 41],
+            decision_hist: [0; 257],
+            decision_total: Duration::new(0, 2_000_000),
+            elapsed: Duration::new(0, 0),
+        };
+
+        let game2 = GameStats {
+            seed: 0xDEFE_C8ED_u64,
+            end_reason: EndReason::TopOut,
+
+            pieces: 40,
+            lines: 12,
+            lines_by_type: [0; 5],
+            net_hole_change: 0,
+            perfect_clears: 0,
+            max_b2b: 0,
+            max_combo: 0,
+            max_height: 0,
+            max_decision: Duration::new(0, 0),
+            attack: 0,
+            spins: [0; 3],
+
+            height_hist: [0; 41],
+            decision_hist: [0; 257],
+            decision_total: Duration::new(0, 3_000_000),
+            elapsed: Duration::new(0, 0),
+        };
+
+        let session = SessionStats {
+            games: vec![game1, game2],
+        };
+
+        println!("{session}");
+        // Should be 0.26 lines piece, not 0.20
+        // Should be 10000.0 pps
+    }
+
+    #[test]
+    fn percentile_95_99() {
+        let mut pieces: Vec<f64> = (1..=20).map(|x| x as f64).collect();
+        let summary = SessionStats::create_summary(&mut pieces);
+        assert_eq!(summary.p95, 19.0);
+        assert_eq!(summary.p99, 20.0);
     }
 }
