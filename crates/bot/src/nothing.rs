@@ -1,14 +1,12 @@
 use crate::{Bot, Move};
 use engine::game::Game;
 
-pub struct Nothing {
-    
-}
+pub struct Nothing {}
 
 impl Nothing {
     #[must_use]
     pub fn new() -> Self {
-        Nothing {  }
+        Nothing {}
     }
 }
 

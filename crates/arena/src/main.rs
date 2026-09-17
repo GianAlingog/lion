@@ -2,7 +2,9 @@ pub mod run;
 pub mod stats;
 
 use bot::{
-    Bot, greedy::{Greedy, N, Weights}, nothing::Nothing,
+    Bot,
+    greedy::{Greedy, N, Weights},
+    nothing::Nothing,
 };
 use clap::{Parser, ValueEnum};
 use std::path::PathBuf;
@@ -21,7 +23,7 @@ enum Mode {
 #[derive(Clone, Copy, Debug, ValueEnum)]
 enum BotKind {
     Greedy,
-    Nothing
+    Nothing,
 }
 
 #[derive(Debug, Parser)]

@@ -90,7 +90,8 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
             placement,
             spin,
             use_hold,
-        }) = bot.pick(&game) else {
+        }) = bot.pick(&game)
+        else {
             game_stats.end_reason = EndReason::BotFailed;
             break;
         };
@@ -155,16 +156,50 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{BotKind::{Greedy, Nothing}, make_bot};
+    use crate::{
+        BotKind::{Greedy, Nothing}, make_bot, run::EndReason::{GoalReached, PieceCap},
+    };
     use bot::greedy::Weights;
 
     #[test]
     fn same_seed_game() {
-        let mut bot1 = make_bot(Greedy, Weights { holes: -10.0, bumpiness: -10.0, aggregate_height: -1.0, lines: 0.0});
-        let game1 = run_game(0xDEFE_C8ED_u64, &mut *bot1, &RunConfig { mode: RunMode::Sprint { lines: 1000 }, max_pieces: 1, preview: 5 });
+        let mut bot1 = make_bot(
+            Greedy,
+            Weights {
+                holes: -10.0,
+                bumpiness: -10.0,
+                aggregate_height: -1.0,
+                lines: 0.0,
+            },
+        );
+        let game1 = run_game(
+            0xDEFE_C8ED_u64,
+            &mut *bot1,
+            &RunConfig {
+                mode: RunMode::Sprint { lines: 1000 },
+                max_pieces: 1,
+                preview: 5,
+            },
+        );
 
-        let mut bot2 = make_bot(Greedy, Weights { holes: -10.0, bumpiness: -10.0, aggregate_height: -1.0, lines: 0.0});
-        let game2 = run_game(0xDEFE_C8ED_u64, &mut *bot2, &RunConfig { mode: RunMode::Sprint { lines: 1000 }, max_pieces: 1, preview: 5 });
+        let mut bot2 = make_bot(
+            Greedy,
+            Weights {
+                holes: -10.0,
+                bumpiness: -10.0,
+                aggregate_height: -1.0,
+                lines: 0.0,
+            },
+        );
+        let game2 = run_game(
+            0xDEFE_C8ED_u64,
+            &mut *bot2,
+            &RunConfig {
+                mode: RunMode::Sprint { lines: 1000 },
+                max_pieces: 1,
+                preview: 5,
+            },
+        );
 
         // TODO: Implement equality not to use the decision times
         assert_eq!(game1, game2);
@@ -172,9 +207,75 @@ mod tests {
 
     #[test]
     fn bot_fail() {
-        let mut bot = make_bot(Nothing, Weights { holes: 0.0, bumpiness: 0.0, aggregate_height: 0.0, lines: 0.0 });
-        let game = run_game(0xDEFE_C8ED_u64, &mut *bot, &RunConfig { mode: RunMode::Endless, max_pieces: 100_000, preview: 5 });
+        let mut bot = make_bot(
+            Nothing,
+            Weights {
+                holes: 0.0,
+                bumpiness: 0.0,
+                aggregate_height: 0.0,
+                lines: 0.0,
+            },
+        );
+        let game = run_game(
+            0xDEFE_C8ED_u64,
+            &mut *bot,
+            &RunConfig {
+                mode: RunMode::Endless,
+                max_pieces: 100_000,
+                preview: 5,
+            },
+        );
 
         assert_eq!(game.end_reason, EndReason::BotFailed);
+    }
+
+    #[test]
+    fn piece_cap() {
+        let mut bot = make_bot(
+            Greedy,
+            Weights {
+                holes: -4.0,
+                bumpiness: -1.0,
+                aggregate_height: -0.5,
+                lines: 0.0,
+            },
+        );
+        let game = run_game(
+            0xDEFE_C8ED_u64,
+            &mut *bot,
+            &RunConfig {
+                mode: RunMode::Endless,
+                max_pieces: 10,
+                preview: 5,
+            },
+        );
+
+        assert_eq!(game.pieces, 10);
+        assert_eq!(game.end_reason, PieceCap);
+    }
+
+    #[test]
+    fn sprint_cap() {
+        let mut bot = make_bot(
+            Greedy,
+            Weights {
+                holes: -4.0,
+                bumpiness: -1.0,
+                aggregate_height: -0.5,
+                lines: 0.0,
+            },
+        );
+        let game = run_game(
+            0xDEFE_C8ED_u64,
+            &mut *bot,
+            &RunConfig {
+                mode: RunMode::Sprint { lines: 50 },
+                max_pieces: 10,
+                preview: 5,
+            },
+        );
+
+        assert_eq!(game.lines, 50);
+        assert_eq!(game.end_reason, GoalReached);
     }
 }
