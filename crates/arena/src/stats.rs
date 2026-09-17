@@ -63,8 +63,8 @@ impl SessionStats {
         values.sort_by(f64::total_cmp);
         let total: f64 = values.iter().sum();
         summary.mean = total / (n as f64);
-        summary.median = if n % 2 == 0 {
-            (values[n / 2 - 1] + values[n / 2]) / 2.0
+        summary.median = if n.is_multiple_of(2) {
+            f64::midpoint(values[n / 2 - 1], values[n / 2])
         } else {
             values[n / 2]
         };
@@ -76,8 +76,8 @@ impl SessionStats {
             .sqrt();
         summary.min = values[0];
         summary.max = values[n - 1];
-        summary.p95 = Self::percentile(&values, 0.95);
-        summary.p99 = Self::percentile(&values, 0.99);
+        summary.p95 = Self::percentile(values, 0.95);
+        summary.p99 = Self::percentile(values, 0.99);
 
         summary
     }
@@ -184,7 +184,7 @@ mod tests {
     fn odd_median() {
         let mut pieces = vec![1.0, 2.0, 3.0, 4.0, 5.0];
         let summary = SessionStats::create_summary(&mut pieces);
-        assert_eq!(summary.median, 3.0);
+        assert!((summary.median - 3.0).abs() < 1e-6);
         println!("{summary:?}");
     }
 
@@ -192,7 +192,7 @@ mod tests {
     fn even_median() {
         let mut pieces = vec![2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0];
         let summary = SessionStats::create_summary(&mut pieces);
-        assert_eq!(summary.median, 4.5);
+        assert!((summary.median - 4.5).abs() < 1e-6);
         println!("{summary:?}");
     }
 
@@ -200,15 +200,15 @@ mod tests {
     fn stddev_scaling() {
         let mut pieces = vec![2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0];
         let summary = SessionStats::create_summary(&mut pieces);
-        assert!((summary.stddev - 2.138090).abs() < 1e-6);
+        assert!((summary.stddev - 2.138_090).abs() < 1e-6);
         println!("{summary:?}");
 
-        for x in pieces.iter_mut() {
+        for x in &mut pieces.iter_mut() {
             *x *= 2.0;
         }
 
         let summary = SessionStats::create_summary(&mut pieces);
-        assert!((summary.stddev - 4.276180).abs() < 1e-6);
+        assert!((summary.stddev - 4.276_180).abs() < 1e-6);
         println!("{summary:?}");
     }
 
@@ -269,9 +269,9 @@ mod tests {
 
     #[test]
     fn percentile_95_99() {
-        let mut pieces: Vec<f64> = (1..=20).map(|x| x as f64).collect();
+        let mut pieces: Vec<f64> = (1..=20).map(f64::from).collect();
         let summary = SessionStats::create_summary(&mut pieces);
-        assert_eq!(summary.p95, 19.0);
-        assert_eq!(summary.p99, 20.0);
+        assert!((summary.p95 - 19.0).abs() < 1e-6);
+        assert!((summary.p99 - 20.0).abs() < 1e-6);
     }
 }
