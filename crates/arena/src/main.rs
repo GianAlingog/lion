@@ -1,67 +1,10 @@
-pub mod run;
-pub mod stats;
-
-use bot::{
-    Bot,
-    greedy::{Greedy, N, Weights},
-    nothing::Nothing,
-};
-use clap::{Parser, ValueEnum};
-use std::path::PathBuf;
-
-use crate::{
-    run::{RunConfig, run_game},
+use arena::{
+    Args, Mode, make_bot,
+    run::{self, RunConfig, run_game},
     stats::SessionStats,
 };
-
-#[derive(Clone, Copy, Debug, ValueEnum)]
-enum Mode {
-    Endless,
-    Sprint,
-}
-
-#[derive(Clone, Copy, Debug, ValueEnum)]
-enum BotKind {
-    Greedy,
-    Nothing,
-}
-
-#[derive(Debug, Parser)]
-struct Args {
-    #[arg(long, default_value_t = 1)]
-    games: u32,
-
-    #[arg(long, default_value_t = 0xDEAD_BEEF_u64)]
-    seed: u64,
-
-    #[arg(long, value_enum, default_value_t = Mode::Endless)]
-    mode: Mode,
-
-    #[arg(long, default_value_t = 40)]
-    sprint_lines: u32,
-
-    #[arg(long, default_value_t = 10_000)]
-    max_pieces: u32,
-
-    #[arg(long, default_value_t = 5)]
-    preview: usize,
-
-    #[arg(long, value_enum, default_value_t = BotKind::Greedy)]
-    bot: BotKind,
-
-    #[arg(long, value_delimiter = ',')]
-    weights: Option<Vec<f64>>,
-
-    #[arg(long)]
-    csv: Option<PathBuf>,
-}
-
-fn make_bot(kind: BotKind, w: Weights) -> Box<dyn Bot> {
-    match kind {
-        BotKind::Greedy => Box::new(Greedy::new(w)),
-        BotKind::Nothing => Box::new(Nothing::new()),
-    }
-}
+use bot::greedy::{N, Weights};
+use clap::Parser;
 
 fn main() {
     let args = Args::parse();
