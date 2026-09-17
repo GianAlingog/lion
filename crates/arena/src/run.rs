@@ -157,7 +157,9 @@ pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
 mod tests {
     use super::*;
     use crate::{
-        BotKind::{Greedy, Nothing}, make_bot, run::EndReason::{GoalReached, PieceCap},
+        BotKind::{Greedy, Nothing},
+        make_bot,
+        run::EndReason::{GoalReached, PieceCap},
     };
     use bot::greedy::Weights;
 
