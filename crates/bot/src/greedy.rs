@@ -169,3 +169,47 @@ impl Bot for Greedy {
             .map(|c| c.mv)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use engine::piece::Piece;
+
+    #[test]
+    fn greedy_well_placement() {
+        // This seed has I piece as the first piece.
+        let mut game = Game::new(0xDEAD_BEEF_u64, 5);
+        for x in 1..10_i8 {
+            for y in 0..6_i8 {
+                if x == 9 && y == 2 {
+                    break;
+                }
+                game.board.set(x, y);
+            }
+        }
+
+        assert_eq!(game.queue[0], Piece::I);
+
+        println!("{:?}", game.board);
+
+        let mut bot = Greedy::new(Weights {
+            holes: -10.0,
+            bumpiness: -10.0,
+            aggregate_height: -1.0,
+            lines: 0.0,
+        });
+
+        let Move {
+            placement,
+            spin,
+            use_hold,
+        } = bot.pick(&game).unwrap();
+
+        if use_hold {
+            game.swap_hold();
+        }
+        game.advance(placement, spin);
+
+        println!("{:?}", game.board);
+    }
+}
