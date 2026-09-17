@@ -1,4 +1,5 @@
 pub mod greedy;
+pub mod nothing;
 
 use engine::{game::Game, piece::Placement, srs::SpinKind};
 
