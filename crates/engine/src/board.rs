@@ -117,7 +117,7 @@ impl Board {
     #[must_use]
     pub fn count_holes(&self) -> u32 {
         let mut holes = 0_u32;
-        for y in 0..Self::HEIGHT_I8 {
+        for y in 0..Self::HEIGHT_I8 - 1 {
             for x in 0..Self::WIDTH_I8 {
                 if !self.get(x, y) && self.get(x, y + 1) {
                     holes += 1;
