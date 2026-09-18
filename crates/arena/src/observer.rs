@@ -13,9 +13,7 @@ pub trait Observer {
         chosen: &Move,
         candidates: &[Candidate],
         outcome: &Outcome,
-    ) -> Flow {
-        todo!()
-    }
+    ) -> Flow;
 }
 
 pub struct Silent;
