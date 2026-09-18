@@ -1,14 +1,13 @@
 use arena::{
     Args, Mode, make_bot,
     observer::Silent,
-    run::{self, RunConfig, run_game},
+    run::{RunConfig, RunMode, run_game},
     stats::SessionStats,
 };
 use bot::greedy::{N, Weights};
-use clap::Parser;
 
 fn main() {
-    let args = Args::parse();
+    let args = Args::parse_args();
     println!("{args:?}");
 
     let weights: Weights = match &args.weights {
@@ -27,8 +26,8 @@ fn main() {
 
     let cfg = RunConfig {
         mode: match args.mode {
-            Mode::Endless => run::RunMode::Endless,
-            Mode::Sprint => run::RunMode::Sprint {
+            Mode::Endless => RunMode::Endless,
+            Mode::Sprint => RunMode::Sprint {
                 lines: args.sprint_lines,
             },
         },

@@ -45,11 +45,20 @@ pub struct Args {
     #[arg(long, value_enum, default_value_t = BotKind::Greedy)]
     pub bot: BotKind,
 
+    #[arg(long, default_value_t = true)]
+    pub step_mode: bool,
+
     #[arg(long, value_delimiter = ',')]
     pub weights: Option<Vec<f64>>,
 
     #[arg(long)]
     pub csv: Option<PathBuf>,
+}
+
+impl Args {
+    pub fn parse_args() -> Self {
+        Args::parse()
+    }
 }
 
 #[must_use]
