@@ -83,8 +83,18 @@ mod tests {
     #[test]
     fn generate_random_bags() {
         let mut bag = Bag::new(0xDEAD_BEEF_u64);
-        for _ in 0..49 {
-            print!("{:?} ", bag.next_piece());
+        let mut pieces = Vec::new();
+        for i in 1..10000_u32 {
+            pieces.push(bag.next_piece());
+
+            if i.is_multiple_of(7) {
+                pieces.sort_unstable();
+                pieces.dedup();
+
+                assert_eq!(pieces.len(), 7);
+                pieces.clear();
+            }
+            // print!("{:?} ", bag.next_piece());
         }
         println!();
     }
@@ -93,7 +103,7 @@ mod tests {
     fn equal_seed_bags() {
         let mut bag1 = Bag::new(0xDEAD_BEEF_u64);
         let mut bag2 = Bag::new(0xDEAD_BEEF_u64);
-        for _ in 0..49 {
+        for _ in 1..10000 {
             assert_eq!(bag1.next_piece(), bag2.next_piece());
         }
     }
@@ -103,7 +113,7 @@ mod tests {
         let mut bag1 = Bag::new(0xDEAD_BEEF_u64);
         let mut bag2 = Bag::new(0xDEFE_C8ED_u64);
         let mut diff = false;
-        for _ in 0..49 {
+        for _ in 1..10000 {
             if bag1.next_piece() != bag2.next_piece() {
                 diff = true;
             }
