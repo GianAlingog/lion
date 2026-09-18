@@ -317,6 +317,8 @@ mod tests {
 
         p.y = board.drop_y(p);
         assert_eq!(board.lock(p), 0);
+        assert_eq!(board.aggregate_height(), 4);
+        assert_eq!(board.bumpiness(), 2);
         println!("{board:?}");
     }
 
