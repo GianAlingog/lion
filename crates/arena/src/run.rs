@@ -6,6 +6,8 @@ use std::{
 use bot::{Bot, Move};
 use engine::game::Game;
 
+use crate::observer::Observer;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RunMode {
     Endless,
@@ -56,7 +58,12 @@ pub struct GameStats {
 /// # Panics
 ///
 /// Will panic should the bot fail to produce a move.
-pub fn run_game(seed: u64, bot: &mut dyn Bot, cfg: &RunConfig) -> GameStats {
+pub fn run_game(
+    seed: u64,
+    bot: &mut dyn Bot,
+    observer: &mut dyn Observer,
+    cfg: &RunConfig,
+) -> GameStats {
     let game_start = Instant::now();
 
     let mut game = Game::new(seed, cfg.preview);
@@ -159,6 +166,7 @@ mod tests {
     use crate::{
         BotKind::{Greedy, Nothing},
         make_bot,
+        observer::Silent,
         run::EndReason::{GoalReached, PieceCap},
     };
     use bot::greedy::Weights;
@@ -177,6 +185,7 @@ mod tests {
         let game1 = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot1,
+            &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 1000 },
                 max_pieces: 1,
@@ -196,6 +205,7 @@ mod tests {
         let game2 = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot2,
+            &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 1000 },
                 max_pieces: 1,
@@ -222,6 +232,7 @@ mod tests {
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
+            &mut Silent,
             &RunConfig {
                 mode: RunMode::Endless,
                 max_pieces: 100_000,
@@ -246,6 +257,7 @@ mod tests {
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
+            &mut Silent,
             &RunConfig {
                 mode: RunMode::Endless,
                 max_pieces: 10,
@@ -271,6 +283,7 @@ mod tests {
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
+            &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 50 },
                 max_pieces: 10,

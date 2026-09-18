@@ -1,5 +1,6 @@
 use arena::{
     Args, Mode, make_bot,
+    observer::Silent,
     run::{self, RunConfig, run_game},
     stats::SessionStats,
 };
@@ -41,10 +42,15 @@ fn main() {
         games: Vec::with_capacity(args.games as usize),
     };
 
+    let mut observer = Silent;
+
     for i in 0..args.games {
-        session_stats
-            .games
-            .push(run_game(args.seed + u64::from(i), &mut *bot, &cfg));
+        session_stats.games.push(run_game(
+            args.seed + u64::from(i),
+            &mut *bot,
+            &mut observer,
+            &cfg,
+        ));
     }
 
     println!("{session_stats}");

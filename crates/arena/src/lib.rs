@@ -1,3 +1,4 @@
+pub mod observer;
 pub mod run;
 pub mod stats;
 
