@@ -170,9 +170,11 @@ impl Bot for Greedy {
             .map(|c| c.mv)
     }
 
+    // TODO: Change to unstable sort, check all occurrences of sorts
+    // TODO: Write a test to verify pick is first element
     fn moves(&mut self, game: &Game) -> Vec<Candidate> {
         let mut candidates = self.candidates(game);
-        candidates.sort_by(|a, b| a.score.total_cmp(&b.score));
+        candidates.sort_by(|a, b| b.score.total_cmp(&a.score));
         candidates
     }
 }
