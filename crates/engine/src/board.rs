@@ -51,6 +51,7 @@ impl Board {
     /// Rows and columns are scoped properly.
     #[must_use]
     pub fn get(&self, x: i8, y: i8) -> bool {
+        // TODO: branching is heavy, extract cell check for sure calls
         if !(0..Self::WIDTH_I8).contains(&x) || y < 0 {
             return true;
         }
@@ -67,6 +68,7 @@ impl Board {
     /// Provably should not panic.
     /// Rows and columns are scoped properly.
     pub fn set(&mut self, x: i8, y: i8) {
+        // TODO: branching is heavy, extract cell check for sure calls
         assert!(
             (0..Self::WIDTH_I8).contains(&x) && (0..Self::HEIGHT_I8).contains(&y),
             "Out of bounds in set {x} {y}"
@@ -99,11 +101,12 @@ impl Board {
     /// Rows and columns are scoped properly.
     #[must_use]
     pub fn column_heights(&self) -> [u8; Self::WIDTH] {
+        // TODO: early breaking? maybe over-optimization, we can use a ctz/clz eventually
         let mut heights = [0_u8; Self::WIDTH];
         for (x, height) in heights.iter_mut().enumerate().take(Self::WIDTH) {
             for y in 0..Self::HEIGHT_U8 {
                 if self.get(i8::try_from(x).unwrap(), i8::try_from(y).unwrap()) {
-                    (*height) = (*height).max(y);
+                    (*height) = (*height).max(y + 1);
                 }
             }
         }
@@ -134,9 +137,11 @@ impl Board {
     pub fn bumpiness(&self) -> u32 {
         let heights = self.column_heights();
         let mut bumpiness = 0_u32;
+        bumpiness += u32::from(heights[0]);
         for x in 1..Self::WIDTH {
             bumpiness += u32::from(heights[x].abs_diff(heights[x - 1]));
         }
+        bumpiness += u32::from(heights[Board::WIDTH - 1]);
 
         bumpiness
     }
