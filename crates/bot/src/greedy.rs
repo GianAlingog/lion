@@ -82,6 +82,7 @@ impl Features {
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct Candidate {
     pub mv: Move,
     pub score: f64,
@@ -170,7 +171,9 @@ impl Bot for Greedy {
     }
 
     fn moves(&mut self, game: &Game) -> Vec<Candidate> {
-        self.candidates(game)
+        let mut candidates = self.candidates(game);
+        candidates.sort_by(|a, b| a.score.total_cmp(&b.score));
+        candidates
     }
 }
 
