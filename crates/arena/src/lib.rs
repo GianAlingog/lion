@@ -56,6 +56,7 @@ pub struct Args {
 }
 
 impl Args {
+    #[must_use]
     pub fn parse_args() -> Self {
         Args::parse()
     }

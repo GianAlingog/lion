@@ -2,7 +2,7 @@ use bot::{Move, greedy::Candidate};
 use engine::{board::Board, game::Game};
 use ratatui::{
     Frame,
-    layout::{Constraint, Layout, Margin},
+    layout::{Constraint, Layout},
     style::{Color, Style},
     text::{Line, Span},
     widgets::{Block, Paragraph},
