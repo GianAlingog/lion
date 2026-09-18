@@ -93,6 +93,12 @@ pub fn run_game(
 
     let mut prev_holes = 0_u32;
     while !game.topped_out() {
+        let candidates = if cfg.step_mode {
+            bot.moves(&game)
+        } else {
+            Vec::new()
+        };
+
         let pick_start = Instant::now();
 
         let Some(chosen) = bot.pick(&game) else {
@@ -119,17 +125,6 @@ pub fn run_game(
         }
         let outcome = game.advance(placement, spin);
 
-        let candidates = if cfg.step_mode {
-            bot.moves(&game)
-        } else {
-            Vec::new()
-        };
-        let flow = observer.on_step(&game, &chosen, &candidates, &outcome);
-        if flow == Flow::Stop {
-            game_stats.end_reason = EndReason::ViewerClosed;
-            break;
-        }
-
         // Record relevant statistics
         game_stats.pieces += 1;
         game_stats.lines += outcome.lines;
@@ -153,6 +148,12 @@ pub fn run_game(
         let height = *game.board.column_heights().iter().max().unwrap();
         game_stats.max_height = game_stats.max_height.max(u32::from(height));
         game_stats.height_hist[height as usize] += 1;
+
+        let flow = observer.on_step(&game, &chosen, &candidates, &outcome);
+        if flow == Flow::Stop {
+            game_stats.end_reason = EndReason::ViewerClosed;
+            break;
+        }
 
         if cfg.mode == RunMode::Endless && game_stats.pieces >= cfg.max_pieces {
             game_stats.end_reason = EndReason::PieceCap;
