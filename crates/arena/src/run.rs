@@ -6,7 +6,7 @@ use std::{
 use bot::{Bot, Move};
 use engine::game::Game;
 
-use crate::observer::Observer;
+use crate::observer::{Flow, Observer};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RunMode {
@@ -17,6 +17,7 @@ pub enum RunMode {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EndReason {
     BotFailed,
+    ViewerClosed,
     TopOut,
     PieceCap,
     GoalReached,
@@ -26,7 +27,7 @@ pub struct RunConfig {
     pub mode: RunMode,
     pub max_pieces: u32,
     pub preview: usize,
-    // pub show_moves: bool,
+    pub step_mode: bool,
     // pub ruleset: Ruleset,
     // pub check_invariants: bool,
     // pub record_history: bool,
@@ -94,16 +95,16 @@ pub fn run_game(
     while !game.topped_out() {
         let pick_start = Instant::now();
 
-        let Some(Move {
-            placement,
-            spin,
-            use_hold,
-        }) = bot.pick(&game)
-        else {
+        let Some(chosen) = bot.pick(&game) else {
             game_stats.end_reason = EndReason::BotFailed;
             break;
         };
-        // println!("{:?}", placement.cells());
+
+        let Move {
+            placement,
+            spin,
+            use_hold,
+        } = chosen;
 
         let pick_duration = pick_start.elapsed();
         let decision_nanos = u64::try_from(pick_duration.as_nanos()).unwrap();
@@ -117,7 +118,17 @@ pub fn run_game(
             game.swap_hold();
         }
         let outcome = game.advance(placement, spin);
-        // println!("{:?}", game.board);
+
+        let candidates = if cfg.step_mode {
+            bot.moves(&game)
+        } else {
+            Vec::new()
+        };
+        let flow = observer.on_step(&game, &chosen, &candidates, &outcome);
+        if flow == Flow::Stop {
+            game_stats.end_reason = EndReason::ViewerClosed;
+            break;
+        }
 
         // Record relevant statistics
         game_stats.pieces += 1;
@@ -191,6 +202,7 @@ mod tests {
                 mode: RunMode::Sprint { lines: 1000 },
                 max_pieces: 1,
                 preview: 5,
+                step_mode: false,
             },
         );
 
@@ -211,6 +223,7 @@ mod tests {
                 mode: RunMode::Sprint { lines: 1000 },
                 max_pieces: 1,
                 preview: 5,
+                step_mode: false,
             },
         );
 
@@ -238,6 +251,7 @@ mod tests {
                 mode: RunMode::Endless,
                 max_pieces: 100_000,
                 preview: 5,
+                step_mode: false,
             },
         );
 
@@ -263,6 +277,7 @@ mod tests {
                 mode: RunMode::Endless,
                 max_pieces: 10,
                 preview: 5,
+                step_mode: false,
             },
         );
 
@@ -289,6 +304,7 @@ mod tests {
                 mode: RunMode::Sprint { lines: 50 },
                 max_pieces: 10,
                 preview: 5,
+                step_mode: false,
             },
         );
 

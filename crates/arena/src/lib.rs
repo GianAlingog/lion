@@ -45,7 +45,7 @@ pub struct Args {
     #[arg(long, value_enum, default_value_t = BotKind::Greedy)]
     pub bot: BotKind,
 
-    #[arg(long, default_value_t = true)]
+    #[arg(long)]
     pub step_mode: bool,
 
     #[arg(long, value_delimiter = ',')]

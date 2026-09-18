@@ -33,6 +33,7 @@ fn main() {
         },
         max_pieces: args.max_pieces,
         preview: args.preview,
+        step_mode: args.step_mode,
     };
 
     let mut bot = make_bot(args.bot, weights);
