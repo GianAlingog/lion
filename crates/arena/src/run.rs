@@ -149,7 +149,7 @@ pub fn run_game(
         game_stats.max_height = game_stats.max_height.max(u32::from(height));
         game_stats.height_hist[height as usize] += 1;
 
-        let flow = observer.on_step(&game, &chosen, &candidates, &outcome);
+        let flow = observer.on_step(&game, &chosen, &candidates, &outcome, &game_stats);
         if flow == Flow::Stop {
             game_stats.end_reason = EndReason::ViewerClosed;
             break;

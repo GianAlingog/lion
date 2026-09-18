@@ -1,6 +1,9 @@
 use std::time::Duration;
 
-use arena::observer::{Flow, Observer};
+use arena::{
+    observer::{Flow, Observer},
+    run::GameStats,
+};
 use bot::{Move, greedy::Candidate};
 use engine::{
     board::Board,
@@ -41,12 +44,14 @@ impl Observer for Tui {
         chosen: &Move,
         candidates: &[Candidate],
         _outcome: &Outcome,
+        stats: &GameStats,
     ) -> Flow {
         loop {
             let view = ViewState {
                 game,
                 chosen,
                 candidates,
+                stats,
                 select: self.select,
                 step_mode: self.step_mode,
                 prev_board: self.prev_board,
@@ -87,7 +92,7 @@ impl Observer for Tui {
                 KeyCode::Char('k') => self.select = self.select.saturating_sub(1),
                 KeyCode::Char('+') => self.delay_ms = self.delay_ms.saturating_sub(20).max(10),
                 KeyCode::Char('-') => self.delay_ms += 20,
-                _ => {},
+                _ => {}
             }
         }
 

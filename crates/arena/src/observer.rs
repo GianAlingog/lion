@@ -1,6 +1,8 @@
 use bot::{Move, greedy::Candidate};
 use engine::game::{Game, Outcome};
 
+use crate::run::GameStats;
+
 #[derive(PartialEq, Eq)]
 pub enum Flow {
     Continue,
@@ -14,6 +16,7 @@ pub trait Observer {
         chosen: &Move,
         candidates: &[Candidate],
         outcome: &Outcome,
+        stats: &GameStats,
     ) -> Flow;
 }
 
@@ -26,6 +29,7 @@ impl Observer for Silent {
         _chosen: &Move,
         _candidates: &[Candidate],
         _outcome: &Outcome,
+        _stats: &GameStats,
     ) -> Flow {
         Flow::Continue
     }
