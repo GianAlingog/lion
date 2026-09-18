@@ -6,6 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
+arena = { path = "../arena" }
+bot = { path = "../bot" }
+engine = { path = "../engine" }
 ratatui = "0.30.2"
 
 [lints]
