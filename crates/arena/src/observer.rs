@@ -1,6 +1,7 @@
 use bot::{Move, greedy::Candidate};
 use engine::game::{Game, Outcome};
 
+#[derive(PartialEq, Eq)]
 pub enum Flow {
     Continue,
     Stop,
