@@ -26,6 +26,7 @@ pub struct RunConfig {
     pub mode: RunMode,
     pub max_pieces: u32,
     pub preview: usize,
+    // pub show_moves: bool,
     // pub ruleset: Ruleset,
     // pub check_invariants: bool,
     // pub record_history: bool,

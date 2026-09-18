@@ -168,6 +168,10 @@ impl Bot for Greedy {
             .max_by(|a, b| a.score.total_cmp(&b.score))
             .map(|c| c.mv)
     }
+
+    fn moves(&mut self, game: &Game) -> Vec<Candidate> {
+        self.candidates(game)
+    }
 }
 
 #[cfg(test)]

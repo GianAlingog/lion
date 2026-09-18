@@ -3,6 +3,8 @@ pub mod nothing;
 
 use engine::{game::Game, piece::Placement, srs::SpinKind};
 
+use crate::greedy::Candidate;
+
 pub struct Move {
     pub placement: Placement,
     pub spin: SpinKind,
@@ -12,4 +14,7 @@ pub struct Move {
 pub trait Bot {
     fn pick(&mut self, game: &Game) -> Option<Move>;
     fn name(&self) -> &str;
+    fn moves(&mut self, _game: &Game) -> Vec<Candidate> {
+        Vec::new()
+    }
 }
