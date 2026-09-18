@@ -137,11 +137,9 @@ impl Board {
     pub fn bumpiness(&self) -> u32 {
         let heights = self.column_heights();
         let mut bumpiness = 0_u32;
-        bumpiness += u32::from(heights[0]);
         for x in 1..Self::WIDTH {
             bumpiness += u32::from(heights[x].abs_diff(heights[x - 1]));
         }
-        bumpiness += u32::from(heights[Board::WIDTH - 1]);
 
         bumpiness
     }
