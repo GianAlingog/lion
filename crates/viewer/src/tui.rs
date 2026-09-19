@@ -12,14 +12,15 @@ use engine::{
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
+    widgets::TableState,
 };
 
 use crate::render::{ViewState, render};
 
 pub struct Tui {
     terminal: DefaultTerminal,
+    table: TableState,
     delay_ms: u64,
-    select: usize,
     step_mode: bool,
     prev_board: Board,
 }
@@ -29,8 +30,8 @@ impl Tui {
     pub fn new(terminal: DefaultTerminal, step_mode: bool) -> Self {
         Self {
             terminal,
+            table: TableState::new(),
             delay_ms: 100,
-            select: 0,
             step_mode,
             prev_board: Board::empty(),
         }
@@ -46,25 +47,34 @@ impl Observer for Tui {
         _outcome: &Outcome,
         stats: &GameStats,
     ) -> Flow {
+        self.table.select(Some(0));
+
         loop {
+            let Self {
+                terminal,
+                table,
+                delay_ms,
+                step_mode,
+                prev_board,
+            } = self;
+
             let view = ViewState {
                 game,
                 chosen,
                 candidates,
                 stats,
-                select: self.select,
-                step_mode: self.step_mode,
-                prev_board: self.prev_board,
+                step_mode: *step_mode,
+                prev_board: *prev_board,
             };
 
-            if self.terminal.draw(|f| render(f, &view)).is_err() {
+            if terminal.draw(|f| render(f, &view, table)).is_err() {
                 return Flow::Stop;
             }
 
-            let ready = if self.step_mode {
+            let ready = if *step_mode {
                 true
             } else {
-                event::poll(Duration::from_millis(self.delay_ms)).unwrap_or(false)
+                event::poll(Duration::from_millis(*delay_ms)).unwrap_or(false)
             };
 
             if !ready {
@@ -82,16 +92,17 @@ impl Observer for Tui {
                 KeyCode::Char('q') => return Flow::Stop,
                 KeyCode::Char(' ' | 'n') => break,
                 KeyCode::Char('c') => {
-                    self.step_mode = false;
+                    *step_mode = false;
                     break;
                 }
-                KeyCode::Char('s') => self.step_mode = true,
+                KeyCode::Char('s') => *step_mode = true,
                 KeyCode::Char('j') => {
-                    self.select = (self.select + 1).min(candidates.len().saturating_sub(1));
+                    let i = table.selected().unwrap_or(0);
+                    table.select(Some((i + 1).min(candidates.len().saturating_sub(1))));
                 }
-                KeyCode::Char('k') => self.select = self.select.saturating_sub(1),
-                KeyCode::Char('+') => self.delay_ms = self.delay_ms.saturating_sub(20).max(10),
-                KeyCode::Char('-') => self.delay_ms += 20,
+                KeyCode::Char('k') => table.select_previous(),
+                KeyCode::Char('+') => *delay_ms = delay_ms.saturating_sub(20).max(10),
+                KeyCode::Char('-') => *delay_ms += 20,
                 _ => {}
             }
         }

@@ -10,9 +10,9 @@ use engine::{
 use ratatui::{
     Frame,
     layout::{Constraint, Layout},
-    style::{Color, Style},
+    style::{Color, Modifier, Style},
     text::{Line, Span},
-    widgets::{Block, Cell, Paragraph, Row, Table},
+    widgets::{Block, Cell, Paragraph, Row, Table, TableState},
 };
 
 pub const PIECE_COLORS: [Color; 7] = [
@@ -118,13 +118,12 @@ pub struct ViewState<'a> {
     pub chosen: &'a Move,
     pub candidates: &'a [Candidate],
     pub stats: &'a GameStats,
-    pub select: usize,
     pub step_mode: bool,
     pub prev_board: Board,
 }
 
 // TODO: Move each widget to its own helper function
-pub fn render(f: &mut Frame, v: &ViewState) {
+pub fn render(f: &mut Frame, v: &ViewState, t: &mut TableState) {
     // [board, sidebar]
     let [board_area, sidebar_area] =
         Layout::horizontal([Constraint::Length(24), Constraint::Min(30)]).areas(f.area());
@@ -186,14 +185,13 @@ pub fn render(f: &mut Frame, v: &ViewState) {
                 "mode     {}",
                 if v.step_mode { "step" } else { "auto" }
             )),
-            Line::from(format!("select   {}", v.select)),
         ])
         .block(Block::bordered().title(" state ")),
         state_area,
     );
 
     // Candidates
-    let candidates_rows = v.candidates.iter().take(5).map(|x| {
+    let candidates_rows = v.candidates.iter().map(|x| {
         Row::new(vec![
             Cell::from(format!(
                 "{} {}",
@@ -215,10 +213,13 @@ pub fn render(f: &mut Frame, v: &ViewState) {
             Constraint::Length(6),
         ],
     )
-    .header(Row::new(vec!["move", "score", "lines", "holes", "bump"]));
-    f.render_widget(
+    .header(Row::new(vec!["move", "score", "lines", "holes", "bump"]))
+    .row_highlight_style(Style::new().add_modifier(Modifier::REVERSED))
+    .highlight_symbol("> ");
+    f.render_stateful_widget(
         candidates_table.block(Block::bordered().title(" candidates ")),
         candidates_area,
+        t,
     );
 
     // Help
