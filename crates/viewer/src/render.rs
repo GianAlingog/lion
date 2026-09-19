@@ -1,6 +1,12 @@
+use std::{collections::VecDeque, iter::once};
+
 use arena::run::GameStats;
 use bot::{Move, greedy::Candidate};
-use engine::{board::Board, game::Game};
+use engine::{
+    board::Board,
+    game::Game,
+    piece::{Piece, Rot},
+};
 use ratatui::{
     Frame,
     layout::{Constraint, Layout},
@@ -21,6 +27,68 @@ pub const PIECE_COLORS: [Color; 7] = [
 
 pub const PIECE_LABEL: [&str; 7] = ["I", "O", "T", "S", "Z", "J", "L"];
 pub const ROT_LABEL: [&str; 4] = ["N", "E", "S", "W"];
+
+// Provably should not underflow
+#[allow(clippy::cast_sign_loss)]
+fn piece_mask(p: Piece) -> [[bool; 4]; 2] {
+    let cells = p.cells(Rot::N);
+    let min_x = cells.iter().map(|c| c.0).min().unwrap();
+    let max_x = cells.iter().map(|c| c.0).max().unwrap();
+    let min_y = cells.iter().map(|c| c.1).min().unwrap();
+    let pad = (4 - (max_x - min_x + 1)) / 2;
+
+    let mut mask = [[false; 4]; 2];
+    for &(x, y) in &cells {
+        mask[(y - min_y) as usize][(x - min_x + pad) as usize] = true;
+    }
+    mask
+}
+
+fn piece_lines(p: Option<Piece>) -> Vec<Line<'static>> {
+    // TODO: Offset by half-cell for 3-length pieces instead
+    let Some(p) = p else {
+        return vec![Line::from("        "), Line::from("        ")];
+    };
+    let mask = piece_mask(p);
+    let piece_color = PIECE_COLORS[p as usize];
+
+    (0..2)
+        .rev()
+        .map(|r| {
+            Line::from(
+                (0..4)
+                    .map(|c| {
+                        if mask[r][c] {
+                            Span::styled("██", Style::default().fg(piece_color))
+                        } else {
+                            Span::raw("  ")
+                        }
+                    })
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .collect()
+}
+
+fn queue_lines(pieces: &VecDeque<Piece>) -> Vec<Line<'static>> {
+    let lines: Vec<_> = pieces.iter().map(|&p| piece_lines(Some(p))).collect();
+    (0..2)
+        .map(|r| {
+            lines
+                .iter()
+                .enumerate()
+                .flat_map(|(i, p)| {
+                    let spacing = if i > 0 {
+                        Span::raw("  ")
+                    } else {
+                        Span::default()
+                    };
+                    once(spacing).chain(p[r].spans.clone())
+                })
+                .collect()
+        })
+        .collect()
+}
 
 fn board_lines(v: &ViewState) -> Vec<Line<'static>> {
     let piece_cells = v.chosen.placement.cells();
@@ -81,20 +149,30 @@ pub fn render(f: &mut Frame, v: &ViewState) {
     );
 
     // Hold
-    let hold_label = if let Some(piece) = v.game.hold {
-        PIECE_LABEL[piece as usize]
-    } else {
-        " "
-    };
+    let hold_lines = piece_lines(v.game.hold);
     f.render_widget(
-        Paragraph::new(Span::styled(hold_label, Color::White))
-            .centered()
-            .block(Block::bordered().title(" hold ")),
+        Paragraph::new(vec![
+            Line::default(),
+            hold_lines[0].clone(),
+            hold_lines[1].clone(),
+            Line::default(),
+        ])
+        .block(Block::bordered().title(" hold ")),
         hold_area,
     );
 
     // Queue
-    f.render_widget(Block::bordered().title(" queue "), queue_area);
+    let queue_lines = queue_lines(&v.game.queue);
+    f.render_widget(
+        Paragraph::new(vec![
+            Line::default(),
+            queue_lines[0].clone(),
+            queue_lines[1].clone(),
+            Line::default(),
+        ])
+        .block(Block::bordered().title(" queue ")),
+        queue_area,
+    );
 
     // State
     // TODO: fix desync (1 move ahead)
@@ -119,7 +197,7 @@ pub fn render(f: &mut Frame, v: &ViewState) {
                 "{} {}",
                 PIECE_LABEL[x.mv.placement.piece as usize], ROT_LABEL[x.mv.placement.rot as usize]
             )),
-            Cell::from(format!("{}", x.score)),
+            Cell::from(format!("{:.1}", x.score)),
             Cell::from(format!("{}", x.features.lines)),
             Cell::from(format!("{}", x.features.holes)),
             Cell::from(format!("{}", x.features.bumpiness)),
