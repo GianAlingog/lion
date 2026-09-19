@@ -89,6 +89,13 @@ pub struct Candidate {
     pub features: Features,
 }
 
+pub fn rank(a: &Candidate, b: &Candidate) -> std::cmp::Ordering {
+    b.score
+        .total_cmp(&a.score)
+        .then_with(|| a.mv.placement.cmp(&b.mv.placement))
+        .then_with(|| a.mv.use_hold.cmp(&b.mv.use_hold))
+}
+
 pub struct Greedy {
     pub weights: Weights,
     buf: Vec<Placement>,
@@ -166,15 +173,14 @@ impl Bot for Greedy {
     fn pick(&mut self, game: &Game) -> Option<Move> {
         self.candidates(game)
             .into_iter()
-            .max_by(|a, b| a.score.total_cmp(&b.score))
+            .min_by(rank)
             .map(|c| c.mv)
     }
 
-    // TODO: Change to unstable sort, check all occurrences of sorts
     // TODO: Write a test to verify pick is first element
     fn moves(&mut self, game: &Game) -> Vec<Candidate> {
         let mut candidates = self.candidates(game);
-        candidates.sort_by(|a, b| b.score.total_cmp(&a.score));
+        candidates.sort_unstable_by(rank);
         candidates
     }
 }
