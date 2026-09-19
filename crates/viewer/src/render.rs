@@ -5,7 +5,7 @@ use bot::{Move, greedy::Candidate};
 use engine::{
     board::Board,
     game::Game,
-    piece::{Piece, Rot},
+    piece::{Piece, Placement, Rot},
 };
 use ratatui::{
     Frame,
@@ -91,8 +91,13 @@ fn queue_lines(pieces: &VecDeque<Piece>) -> Vec<Line<'static>> {
 }
 
 fn board_lines(v: &ViewState) -> Vec<Line<'static>> {
-    let piece_cells = v.chosen.placement.cells();
-    let piece_color = PIECE_COLORS[v.chosen.placement.piece as usize];
+    let chosen_cells = v.chosen.placement.cells();
+    let chosen_color = PIECE_COLORS[v.chosen.placement.piece as usize];
+
+    let ghost_cells = v.ghost.map_or([(-1, -1); 4], |p| p.cells());
+    let ghost_color = v
+        .ghost
+        .map_or(Color::Gray, |p| PIECE_COLORS[p.piece as usize]);
 
     (0..Board::VIEW_HEIGHT_I8)
         .rev()
@@ -101,8 +106,10 @@ fn board_lines(v: &ViewState) -> Vec<Line<'static>> {
                 .map(|x| {
                     if v.prev_board.get(x, y) {
                         Span::styled("██", Style::default().fg(Color::DarkGray))
-                    } else if piece_cells.contains(&(x, y)) {
-                        Span::styled("██", Style::default().fg(piece_color))
+                    } else if chosen_cells.contains(&(x, y)) {
+                        Span::styled("██", Style::default().fg(chosen_color))
+                    } else if ghost_cells.contains(&(x, y)) {
+                        Span::styled("░░", Style::default().fg(ghost_color))
                     } else {
                         Span::styled(" .", Style::default().fg(Color::Rgb(60, 60, 70)))
                     }
@@ -116,6 +123,7 @@ fn board_lines(v: &ViewState) -> Vec<Line<'static>> {
 pub struct ViewState<'a> {
     pub game: &'a Game,
     pub chosen: &'a Move,
+    pub ghost: Option<Placement>,
     pub candidates: &'a [Candidate],
     pub stats: &'a GameStats,
     pub step_mode: bool,

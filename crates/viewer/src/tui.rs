@@ -58,9 +58,15 @@ impl Observer for Tui {
                 prev_board,
             } = self;
 
+            let ghost = table
+                .selected()
+                .and_then(|i| candidates.get(i))
+                .map(|c| c.mv.placement);
+
             let view = ViewState {
                 game,
                 chosen,
+                ghost,
                 candidates,
                 stats,
                 step_mode: *step_mode,
