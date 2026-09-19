@@ -123,6 +123,7 @@ pub struct ViewState<'a> {
     pub prev_board: Board,
 }
 
+// TODO: Move each widget to its own helper function
 pub fn render(f: &mut Frame, v: &ViewState) {
     // [board, sidebar]
     let [board_area, sidebar_area] =
@@ -148,13 +149,14 @@ pub fn render(f: &mut Frame, v: &ViewState) {
         board_area,
     );
 
+    // TODO: Avoid the .clone() via array instead of Vec
     // Hold
-    let hold_lines = piece_lines(v.game.hold);
+    let hold_rows = piece_lines(v.game.hold);
     f.render_widget(
         Paragraph::new(vec![
             Line::default(),
-            hold_lines[0].clone(),
-            hold_lines[1].clone(),
+            hold_rows[0].clone(),
+            hold_rows[1].clone(),
             Line::default(),
         ])
         .block(Block::bordered().title(" hold ")),
@@ -162,12 +164,12 @@ pub fn render(f: &mut Frame, v: &ViewState) {
     );
 
     // Queue
-    let queue_lines = queue_lines(&v.game.queue);
+    let queue_rows = queue_lines(&v.game.queue);
     f.render_widget(
         Paragraph::new(vec![
             Line::default(),
-            queue_lines[0].clone(),
-            queue_lines[1].clone(),
+            queue_rows[0].clone(),
+            queue_rows[1].clone(),
             Line::default(),
         ])
         .block(Block::bordered().title(" queue ")),
@@ -191,7 +193,7 @@ pub fn render(f: &mut Frame, v: &ViewState) {
     );
 
     // Candidates
-    let candidates_rows = v.candidates.iter().take(5).map(|&x| {
+    let candidates_rows = v.candidates.iter().take(5).map(|x| {
         Row::new(vec![
             Cell::from(format!(
                 "{} {}",
