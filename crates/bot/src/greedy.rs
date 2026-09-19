@@ -171,10 +171,7 @@ impl Bot for Greedy {
     }
 
     fn pick(&mut self, game: &Game) -> Option<Move> {
-        self.candidates(game)
-            .into_iter()
-            .min_by(rank)
-            .map(|c| c.mv)
+        self.candidates(game).into_iter().min_by(rank).map(|c| c.mv)
     }
 
     // TODO: Write a test to verify pick is first element
