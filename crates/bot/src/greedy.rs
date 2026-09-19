@@ -89,6 +89,7 @@ pub struct Candidate {
     pub features: Features,
 }
 
+#[must_use]
 pub fn rank(a: &Candidate, b: &Candidate) -> std::cmp::Ordering {
     b.score
         .total_cmp(&a.score)
