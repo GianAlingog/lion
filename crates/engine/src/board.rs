@@ -114,12 +114,19 @@ impl Board {
         heights
     }
 
+    /// # Panics
+    ///
+    /// Provably should not panic.
+    /// Rows and columns are scoped properly.
     #[must_use]
     pub fn count_holes(&self) -> u32 {
+        let heights = self.column_heights();
         let mut holes = 0_u32;
-        for y in 0..Self::HEIGHT_I8 - 1 {
-            for x in 0..Self::WIDTH_I8 {
-                if !self.get(x, y) && self.get(x, y + 1) {
+        for (x, height) in heights.iter().enumerate().take(Self::WIDTH) {
+            for y in 0..height.saturating_sub(1) {
+                if !self.get(i8::try_from(x).unwrap(), i8::try_from(y).unwrap())
+                    && self.get(i8::try_from(x).unwrap(), i8::try_from(y).unwrap() + 1)
+                {
                     holes += 1;
                 }
             }
