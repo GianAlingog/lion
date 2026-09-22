@@ -33,6 +33,23 @@ To simulate games headlessly:
 cargo run -p arena --release
 ```
 
+## Status
+
+**Completed**
+- Bitboard board representation
+- Deterministic 7-bag generation
+- SRS engine (kicks, spin detection)
+- Greedy heuristic bot with one-piece + hold depth
+- Headless arena and TUI viewer
+- Statistics library
+
+**In progress**
+- CSV session export
+- Benchmarks of baseline
+- Complete move generation
+- Bot lookahead
+- Versus mode
+
 ## Contributing
 
 Pull requests and suggestions are welcome! Please open an issue to discuss your ideas or report bugs.
