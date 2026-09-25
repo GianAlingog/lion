@@ -4,17 +4,18 @@ use crate::piece::Piece;
 pub struct Rng(u64);
 
 impl Rng {
-    // Never seed with 0
     #[must_use]
     pub fn new(seed: u64) -> Self {
         Rng(seed)
     }
 
+    // https://rosettacode.org/wiki/Pseudo-random_numbers/Splitmix64
     pub fn next_u64(&mut self) -> u64 {
-        self.0 ^= self.0 << 15;
-        self.0 ^= self.0 >> 13;
-        self.0 ^= self.0 << 7;
-        self.0
+        self.0 = self.0.wrapping_add(0x9E37_79B9_7F4A_7C15);
+        let mut z = self.0;
+        z = (z ^ (z >> 30)).wrapping_mul(0xBF58_476D_1CE4_E5B9);
+        z = (z ^ (z >> 27)).wrapping_mul(0x94D0_49BB_1331_11EB);
+        z ^ (z >> 31)
     }
 
     // For randomization, it is fine to truncate the bits
