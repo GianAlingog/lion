@@ -6,14 +6,10 @@
 
 <sub>Greedy bot playing Tetris via the TUI, debounced at 100ms</sub>
 
-## Benchmarks
+## Results
 
-Under construction!
-<!-- Insert key findings here -->
-
-<!-- You can find a more detailed report [here](BENCHMARKS.md). -->
-
-<!-- Benchmark Entry template -->
+- Greedy bot survives 100k pieces in zen mode (hard-drop, one piece preview + hold piece, hand-picked weights)
+- Greedy bot with zero bumpiness weight completes only 6 of 100 games in 40L (same setup as above)
 
 ## Recording
 
