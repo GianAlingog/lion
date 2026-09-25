@@ -33,6 +33,11 @@ To simulate games headlessly:
 cargo run -p arena --release
 ```
 
+To export a session:
+```
+cargo run -p arena --release -- --label "$(git describe --always --dirty)" --csv path/to/output.csv
+```
+
 ## Status
 
 **Completed**
@@ -42,9 +47,9 @@ cargo run -p arena --release
 - Greedy heuristic bot with one-piece + hold depth
 - Headless arena and TUI viewer
 - Statistics library
+- CSV session export
 
 **In progress**
-- CSV session export
 - Benchmarks of baseline
 - Complete move generation
 - Bot lookahead
