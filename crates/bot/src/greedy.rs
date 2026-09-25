@@ -191,8 +191,14 @@ mod tests {
 
     #[test]
     fn greedy_well_placement() {
-        // This seed has I piece as the first piece.
-        let mut game = Game::new(0xDEAD_BEEF_u64, 5);
+        // Shuffle until it's the right piece
+        let mut seed = 0xDEAD_BEEF_u64;
+        let mut game = Game::new(seed, 5);
+        while game.queue[0] != Piece::I {
+            seed = seed.wrapping_add(1);
+            game = Game::new(seed, 5);
+        }
+
         for x in 1..10_i8 {
             for y in 0..6_i8 {
                 if x == 9 && y == 2 {
