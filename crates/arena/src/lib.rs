@@ -8,12 +8,21 @@ use bot::{
     nothing::Nothing,
 };
 use clap::{Parser, ValueEnum};
-use std::path::PathBuf;
+use std::{fmt, path::PathBuf};
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
 pub enum Mode {
     Endless,
     Sprint,
+}
+
+impl fmt::Display for Mode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Mode::Endless => write!(f, "Endless"),
+            Mode::Sprint => write!(f, "Sprint"),
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -24,6 +33,9 @@ pub enum BotKind {
 
 #[derive(Debug, Parser)]
 pub struct Args {
+    #[arg(long, default_value = "no_label")]
+    pub label: String,
+
     #[arg(long, default_value_t = 1)]
     pub games: u32,
 
@@ -68,4 +80,11 @@ pub fn make_bot(kind: BotKind, w: Weights) -> Box<dyn Bot> {
         BotKind::Greedy => Box::new(Greedy::new(w)),
         BotKind::Nothing => Box::new(Nothing::new()),
     }
+}
+
+pub struct SessionMetadata<'a> {
+    pub label: &'a str,
+    pub bot: &'a str,
+    pub weights: [f64; 4],
+    pub mode: &'a str,
 }

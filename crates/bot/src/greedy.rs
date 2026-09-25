@@ -16,7 +16,8 @@ pub struct Weights {
 }
 
 impl Weights {
-    fn to_array(self) -> [f64; 4] {
+    #[must_use]
+    pub fn to_array(self) -> [f64; 4] {
         let Weights {
             holes,
             bumpiness,

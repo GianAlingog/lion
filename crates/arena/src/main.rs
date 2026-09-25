@@ -1,5 +1,5 @@
 use arena::{
-    Args, Mode, make_bot,
+    Args, Mode, SessionMetadata, make_bot,
     observer::Silent,
     run::{RunConfig, RunMode, run_game},
     stats::SessionStats,
@@ -54,4 +54,17 @@ fn main() {
     }
 
     println!("{session_stats}");
+
+    let session_metadata = SessionMetadata {
+        label: &args.label,
+        bot: bot.name(),
+        weights: weights.to_array(),
+        mode: &args.mode.to_string(),
+    };
+
+    if let Some(path) = args.csv {
+        session_stats
+            .export(&path, &session_metadata)
+            .expect("CSV Export failed");
+    }
 }

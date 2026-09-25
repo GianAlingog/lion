@@ -1,4 +1,10 @@
-use crate::run::GameStats;
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+    path::PathBuf,
+};
+
+use crate::{SessionMetadata, run::GameStats};
 
 #[derive(Debug)]
 pub struct Summary {
@@ -21,6 +27,15 @@ impl std::fmt::Display for Summary {
         )?;
         Ok(())
     }
+}
+
+// This is very slow!
+#[allow(clippy::cast_precision_loss)]
+fn extract_hist(d: &[u32]) -> Vec<f64> {
+    d.iter()
+        .enumerate()
+        .flat_map(|(x, c)| std::iter::repeat_n(x as f64, *c as usize))
+        .collect()
 }
 
 pub struct SessionStats {
@@ -86,6 +101,49 @@ impl SessionStats {
         let mut values: Vec<f64> = self.games.iter().map(f).collect();
         SessionStats::create_summary(&mut values)
     }
+
+    /// # Errors
+    ///
+    /// Will return `Err` on a failure to create file or write the results to file
+    pub fn export(&self, path: &PathBuf, m: &SessionMetadata) -> std::io::Result<()> {
+        let mut w = BufWriter::new(File::create(path)?);
+        writeln!(
+            w,
+            "label,bot,w_holes,w_bump,w_agg,w_lines,seed,mode,end_reason,pieces,lines,no_clear,lines_1,lines_2,lines_3,lines_4,net_holes,max_height,decision_p95,decision_p99"
+        )?;
+
+        for g in &self.games {
+            let mut decision_occurrences: Vec<f64> = extract_hist(&g.decision_hist);
+            let decision_summary = SessionStats::create_summary(&mut decision_occurrences);
+
+            writeln!(
+                w,
+                "{},{},{},{},{},{},{},{},{:?},{},{},{},{},{},{},{},{},{},{},{}",
+                m.label,
+                m.bot,
+                m.weights[0],
+                m.weights[1],
+                m.weights[2],
+                m.weights[3],
+                g.seed,
+                m.mode,
+                g.end_reason,
+                g.pieces,
+                g.lines,
+                g.lines_by_type[0],
+                g.lines_by_type[1],
+                g.lines_by_type[2],
+                g.lines_by_type[3],
+                g.lines_by_type[4],
+                g.net_hole_change,
+                g.max_height,
+                decision_summary.p95,
+                decision_summary.p99,
+            )?;
+        }
+
+        Ok(())
+    }
 }
 
 #[allow(clippy::cast_precision_loss)]
@@ -148,6 +206,11 @@ impl std::fmt::Display for SessionStats {
 
         writeln!(f)?;
 
+        let mut decision_occurrences: Vec<f64> = self
+            .games
+            .iter()
+            .flat_map(|g| extract_hist(&g.decision_hist))
+            .collect();
         writeln!(f, "max decision latency (in microseconds)")?;
         writeln!(
             f,
@@ -156,7 +219,7 @@ impl std::fmt::Display for SessionStats {
         writeln!(
             f,
             "{}",
-            self.summarize(|g| g.max_decision.as_micros() as f64)
+            SessionStats::create_summary(&mut decision_occurrences)
         )?;
 
         Ok(())
