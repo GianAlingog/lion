@@ -44,9 +44,9 @@ cargo run -p arena --release -- --label "$(git describe --always --dirty)" --csv
 - Headless arena and TUI viewer
 - Statistics library
 - CSV session export
+- Benchmarks of baseline
 
 **In progress**
-- Benchmarks of baseline
 - Complete move generation
 - Bot lookahead
 - Versus mode
