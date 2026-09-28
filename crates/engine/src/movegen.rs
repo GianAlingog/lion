@@ -182,7 +182,7 @@ mod tests {
     use crate::bag::Bag;
 
     #[test]
-    fn all_pieces_movegen() {
+    fn all_pieces_harddrop() {
         let board = Board::empty();
         let mut bag = Bag::new(0xDEAD_BEEF_u64);
         for _ in 0..7 {
@@ -199,7 +199,7 @@ mod tests {
     }
 
     #[test]
-    fn all_pieces_less_movegen() {
+    fn all_pieces_less_harddrop() {
         let mut board = Board::empty();
         for i in 0..3 {
             board.set(i, 19);
@@ -224,7 +224,7 @@ mod tests {
     }
 
     #[test]
-    fn all_pieces_none_movegen() {
+    fn all_pieces_none_harddrop() {
         let mut board = Board::empty();
         for i in 0..10 {
             board.set(i, 19);
@@ -238,6 +238,40 @@ mod tests {
             println!("{piece:?} {}", out.len());
 
             assert!(out.is_empty());
+        }
+    }
+
+    #[test]
+    fn all_pieces() {
+        let board = Board::empty();
+        let mut bag = Bag::new(0xDEAD_BEEF_u64);
+        for _ in 0..7 {
+            let piece = bag.next_piece();
+            let mut out = Vec::new();
+            placements(&board, piece, &mut out);
+            println!("{piece:?} {}", out.len());
+
+            for placement in out {
+                // assert!(board.is_grounded(placement));
+                assert!(!board.collides(placement));
+            }
+        }
+    }
+
+    #[test]
+    fn bfs_superset() {
+        let board = Board::empty();
+        let mut bag = Bag::new(0xDEAD_BEEF_u64);
+        for _ in 0..7 {
+            let piece = bag.next_piece();
+            let mut hard = Vec::new();
+            hard_drop_placements(&board, piece, &mut hard);
+            let mut bfs = Vec::new();
+            placements(&board, piece, &mut bfs);
+
+            for p in hard {
+                assert!(bfs.iter().any(|q| p.cells() == q.cells()));
+            }
         }
     }
 }
