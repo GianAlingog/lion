@@ -49,7 +49,7 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
                 (!board.collides(q)).then_some(q)
             }
             Input::SoftDrop => {
-                let q = Placement { y: p.x - 1, ..p };
+                let q = Placement { y: p.y - 1, ..p };
                 (!board.collides(q)).then_some(q)
             }
             Input::Cw => rotate(board, p, Spin::Cw).map(|(q, _)| q),
