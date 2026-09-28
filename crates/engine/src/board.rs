@@ -123,10 +123,8 @@ impl Board {
         let heights = self.column_heights();
         let mut holes = 0_u32;
         for (x, height) in heights.iter().enumerate().take(Self::WIDTH) {
-            for y in 0..height.saturating_sub(1) {
-                if !self.get(i8::try_from(x).unwrap(), i8::try_from(y).unwrap())
-                    && self.get(i8::try_from(x).unwrap(), i8::try_from(y).unwrap() + 1)
-                {
+            for y in 0..*height {
+                if !self.get(i8::try_from(x).unwrap(), i8::try_from(y).unwrap()) {
                     holes += 1;
                 }
             }
