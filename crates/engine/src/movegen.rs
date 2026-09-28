@@ -1,8 +1,106 @@
+use std::collections::VecDeque;
+
 use crate::{
     board::Board,
     piece::{Piece, Placement},
     srs::{Spin, rotate},
 };
+
+pub enum Input {
+    Left,
+    Right,
+    SoftDrop,
+    Cw,
+    Ccw,
+}
+
+pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
+    // I-pieces can have their x and y be outside the left and bottom side of the board by 2
+    const X_OFFSET: usize = 2;
+    const X_WIDTH: usize = Board::WIDTH + X_OFFSET;
+    const Y_OFFSET: usize = 2;
+    const Y_WIDTH: usize = Board::HEIGHT + X_OFFSET;
+    const STATES: usize = 4 * X_WIDTH * Y_WIDTH;
+
+    fn index(p: Placement) -> usize {
+        (p.rot as usize * X_WIDTH + (p.x as isize + X_OFFSET as isize) as usize) * Y_WIDTH
+            + (p.y as isize + Y_OFFSET as isize) as usize
+    }
+
+    struct Visited([u64; STATES.div_ceil(64)]);
+
+    impl Visited {
+        fn new() -> Self {
+            Visited([0_u64; STATES.div_ceil(64)])
+        }
+
+        fn clear(&mut self) {
+            *self = Self::new();
+        }
+
+        fn get(&self, i: usize) -> bool {
+            let block = i / 64;
+            let bit = i % 64;
+            (self.0[block] >> bit & 1) == 1
+        }
+
+        fn set(&mut self, i: usize) {
+            let block = i / 64;
+            let bit = i % 64;
+            self.0[block] |= 1 << bit;
+        }
+    }
+
+    let mut visited: Visited = Visited::new();
+    let mut queue = VecDeque::new();
+    out.push(piece.spawn());
+    queue.push_back(piece.spawn());
+    visited.clear();
+    visited.set(index(piece.spawn()));
+
+    const EDGES: [Input; 5] = [
+        Input::Left,
+        Input::Right,
+        Input::SoftDrop,
+        Input::Cw,
+        Input::Ccw,
+    ];
+
+    fn step(board: &Board, p: Placement, i: Input) -> Option<Placement> {
+        match i {
+            Input::Left => {
+                let q = Placement { x: p.x - 1, ..p };
+                (!board.collides(q)).then_some(q)
+            }
+            Input::Right => {
+                let q = Placement { x: p.x + 1, ..p };
+                (!board.collides(q)).then_some(q)
+            }
+            Input::SoftDrop => {
+                let q = Placement { y: p.x - 1, ..p };
+                (!board.collides(q)).then_some(q)
+            }
+            Input::Cw => rotate(board, p, Spin::Cw).map(|(q, _)| q),
+            Input::Ccw => rotate(board, p, Spin::Ccw).map(|(q, _)| q),
+        }
+    }
+
+    while !queue.is_empty() {
+        let p = queue.pop_front().unwrap();
+        for i in EDGES {
+            if let Some(q) = step(board, p, i) {
+                if visited.get(index(q)) { continue }
+                visited.set(index(q));
+                out.push(q);
+                queue.push_back(q);
+            }
+        }
+    }
+
+    // Dedup
+    out.sort_by_key(Placement::cells);
+    out.dedup_by_key(|p| p.cells());
+}
 
 // No need to be empty, will append new entries and dedup
 pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
