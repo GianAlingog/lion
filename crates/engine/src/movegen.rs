@@ -14,6 +14,9 @@ pub enum Input {
     Ccw,
 }
 
+/// # Panics
+///
+/// Provably should not panic as queue size is asserted before unwrap
 pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
     // I-pieces can have their x and y be outside the left and bottom side of the board by 2
     const X_OFFSET: usize = 2;
@@ -21,10 +24,36 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
     const Y_OFFSET: usize = 2;
     const Y_WIDTH: usize = Board::HEIGHT + X_OFFSET;
     const STATES: usize = 4 * X_WIDTH * Y_WIDTH;
+    const EDGES: [Input; 5] = [
+        Input::Left,
+        Input::Right,
+        Input::SoftDrop,
+        Input::Cw,
+        Input::Ccw,
+    ];
 
     fn index(p: Placement) -> usize {
-        (p.rot as usize * X_WIDTH + (p.x as isize + X_OFFSET as isize) as usize) * Y_WIDTH
-            + (p.y as isize + Y_OFFSET as isize) as usize
+        (p.rot as usize * X_WIDTH + (p.x as isize + X_OFFSET.cast_signed()).cast_unsigned()) * Y_WIDTH
+            + (p.y as isize + Y_OFFSET.cast_signed()).cast_unsigned()
+    }
+
+    fn step(board: &Board, p: Placement, i: &Input) -> Option<Placement> {
+        match i {
+            Input::Left => {
+                let q = Placement { x: p.x - 1, ..p };
+                (!board.collides(q)).then_some(q)
+            }
+            Input::Right => {
+                let q = Placement { x: p.x + 1, ..p };
+                (!board.collides(q)).then_some(q)
+            }
+            Input::SoftDrop => {
+                let q = Placement { y: p.x - 1, ..p };
+                (!board.collides(q)).then_some(q)
+            }
+            Input::Cw => rotate(board, p, Spin::Cw).map(|(q, _)| q),
+            Input::Ccw => rotate(board, p, Spin::Ccw).map(|(q, _)| q),
+        }
     }
 
     struct Visited([u64; STATES.div_ceil(64)]);
@@ -58,38 +87,13 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
     visited.clear();
     visited.set(index(piece.spawn()));
 
-    const EDGES: [Input; 5] = [
-        Input::Left,
-        Input::Right,
-        Input::SoftDrop,
-        Input::Cw,
-        Input::Ccw,
-    ];
-
-    fn step(board: &Board, p: Placement, i: Input) -> Option<Placement> {
-        match i {
-            Input::Left => {
-                let q = Placement { x: p.x - 1, ..p };
-                (!board.collides(q)).then_some(q)
-            }
-            Input::Right => {
-                let q = Placement { x: p.x + 1, ..p };
-                (!board.collides(q)).then_some(q)
-            }
-            Input::SoftDrop => {
-                let q = Placement { y: p.x - 1, ..p };
-                (!board.collides(q)).then_some(q)
-            }
-            Input::Cw => rotate(board, p, Spin::Cw).map(|(q, _)| q),
-            Input::Ccw => rotate(board, p, Spin::Ccw).map(|(q, _)| q),
-        }
-    }
-
     while !queue.is_empty() {
         let p = queue.pop_front().unwrap();
         for i in EDGES {
-            if let Some(q) = step(board, p, i) {
-                if visited.get(index(q)) { continue }
+            if let Some(q) = step(board, p, &i) {
+                if visited.get(index(q)) {
+                    continue;
+                }
                 visited.set(index(q));
                 out.push(q);
                 queue.push_back(q);
