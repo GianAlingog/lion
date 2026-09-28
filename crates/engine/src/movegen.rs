@@ -33,7 +33,8 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
     ];
 
     fn index(p: Placement) -> usize {
-        (p.rot as usize * X_WIDTH + (p.x as isize + X_OFFSET.cast_signed()).cast_unsigned()) * Y_WIDTH
+        (p.rot as usize * X_WIDTH + (p.x as isize + X_OFFSET.cast_signed()).cast_unsigned())
+            * Y_WIDTH
             + (p.y as isize + Y_OFFSET.cast_signed()).cast_unsigned()
     }
 
