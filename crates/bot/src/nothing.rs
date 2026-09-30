@@ -24,4 +24,27 @@ impl Bot for Nothing {
     fn pick(&mut self, _game: &Game) -> Option<Move> {
         None
     }
+
+    fn moves(&mut self, _game: &Game) -> Vec<crate::greedy::Candidate> {
+        Vec::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn do_nothing() {
+        let seed = 0xDEAD_BEEF_u64;
+        let game = Game::new(seed, 5);
+
+        let mut bot = Nothing::new();
+
+        let moves = bot.moves(&game);
+        assert!(moves.is_empty());
+
+        let mv = bot.pick(&game);
+        assert_eq!(mv, None);
+    }
 }
