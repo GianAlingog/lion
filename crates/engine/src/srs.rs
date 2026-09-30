@@ -116,7 +116,7 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
 }
 
 // Spin detections
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum SpinKind {
     None,
     Mini,

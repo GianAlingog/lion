@@ -111,9 +111,15 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<(Placement, SpinKin
     }
 
     // Dedup
-    // TODO: Dedup by keeping the better SpinKind
     out.sort_by_key(|(p, _)| p.cells());
-    out.dedup();
+    out.dedup_by(|a, b| {
+        if a.0.cells() == b.0.cells() {
+            b.1 = b.1.max(a.1);
+            true
+        } else {
+            false
+        }
+    });
 }
 
 // No need to be empty, will append new entries and dedup
