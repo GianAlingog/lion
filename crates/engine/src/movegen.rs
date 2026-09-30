@@ -83,7 +83,7 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<(Placement, SpinKin
 
     let mut visited: Visited = Visited::new();
     let mut queue = VecDeque::new();
-    out.push((piece.spawn(), SpinKind::None));
+    // out.push((piece.spawn(), SpinKind::None));
     queue.push_back(piece.spawn());
     visited.clear();
     visited.set(index(piece.spawn()));
@@ -272,7 +272,7 @@ mod tests {
             println!("{piece:?} {}", out.len());
 
             for (placement, _) in out {
-                // assert!(board.is_grounded(placement));
+                assert!(board.is_grounded(placement));
                 assert!(!board.collides(placement));
             }
         }
