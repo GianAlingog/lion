@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use crate::{
     board::Board,
     piece::{Piece, Placement},
-    srs::{Spin, rotate},
+    srs::{Spin, SpinKind, detect_spin, rotate},
 };
 
 pub enum Input {
@@ -17,7 +17,7 @@ pub enum Input {
 /// # Panics
 ///
 /// Provably should not panic as queue size is asserted before unwrap
-pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
+pub fn placements(board: &Board, piece: Piece, out: &mut Vec<(Placement, SpinKind)>) {
     // I-pieces can have their x and y be outside the left and bottom side of the board by 2
     const X_OFFSET: usize = 2;
     const X_WIDTH: usize = Board::WIDTH + X_OFFSET;
@@ -38,22 +38,22 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
             + (p.y as isize + Y_OFFSET.cast_signed()).cast_unsigned()
     }
 
-    fn step(board: &Board, p: Placement, i: &Input) -> Option<Placement> {
+    fn step(board: &Board, p: Placement, i: &Input) -> Option<(Placement, u8)> {
         match i {
             Input::Left => {
                 let q = Placement { x: p.x - 1, ..p };
-                (!board.collides(q)).then_some(q)
+                (!board.collides(q)).then_some((q, 0))
             }
             Input::Right => {
                 let q = Placement { x: p.x + 1, ..p };
-                (!board.collides(q)).then_some(q)
+                (!board.collides(q)).then_some((q, 0))
             }
             Input::SoftDrop => {
                 let q = Placement { y: p.y - 1, ..p };
-                (!board.collides(q)).then_some(q)
+                (!board.collides(q)).then_some((q, 0))
             }
-            Input::Cw => rotate(board, p, Spin::Cw).map(|(q, _)| q),
-            Input::Ccw => rotate(board, p, Spin::Ccw).map(|(q, _)| q),
+            Input::Cw => rotate(board, p, Spin::Cw),
+            Input::Ccw => rotate(board, p, Spin::Ccw),
         }
     }
 
@@ -83,7 +83,7 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
 
     let mut visited: Visited = Visited::new();
     let mut queue = VecDeque::new();
-    out.push(piece.spawn());
+    out.push((piece.spawn(), SpinKind::None));
     queue.push_back(piece.spawn());
     visited.clear();
     visited.set(index(piece.spawn()));
@@ -91,20 +91,29 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<Placement>) {
     while !queue.is_empty() {
         let p = queue.pop_front().unwrap();
         for i in EDGES {
-            if let Some(q) = step(board, p, &i) {
+            if let Some((q, kick)) = step(board, p, &i) {
+                if board.is_grounded(q) {
+                    let spin = match i {
+                        Input::Cw | Input::Ccw => detect_spin(board, q, kick),
+                        _ => SpinKind::None,
+                    };
+                    out.push((q, spin));
+                }
+
                 if visited.get(index(q)) {
                     continue;
                 }
                 visited.set(index(q));
-                out.push(q);
+                // out.push(q);
                 queue.push_back(q);
             }
         }
     }
 
     // Dedup
-    out.sort_by_key(Placement::cells);
-    out.dedup_by_key(|p| p.cells());
+    // TODO: Dedup by keeping the better SpinKind
+    out.sort_by_key(|(p, _)| p.cells());
+    out.dedup();
 }
 
 // No need to be empty, will append new entries and dedup
@@ -256,7 +265,7 @@ mod tests {
             placements(&board, piece, &mut out);
             println!("{piece:?} {}", out.len());
 
-            for placement in out {
+            for (placement, _) in out {
                 // assert!(board.is_grounded(placement));
                 assert!(!board.collides(placement));
             }
@@ -275,7 +284,7 @@ mod tests {
             placements(&board, piece, &mut bfs);
 
             for p in hard {
-                assert!(bfs.iter().any(|q| p.cells() == q.cells()));
+                assert!(bfs.iter().any(|(q, _)| p.cells() == q.cells()));
             }
         }
     }
