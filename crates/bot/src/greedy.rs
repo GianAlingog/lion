@@ -43,7 +43,7 @@ impl TryFrom<Vec<f64>> for Weights {
     }
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Features {
     pub holes: f64,
     pub bumpiness: f64,
@@ -83,7 +83,8 @@ impl Features {
     }
 }
 
-#[derive(Clone, Copy)]
+// TODO: Move out of greedy
+#[derive(Clone, Copy, Debug)]
 pub struct Candidate {
     pub mv: Move,
     pub score: f64,
@@ -213,9 +214,9 @@ mod tests {
         println!("{:?}", game.board);
 
         let mut bot = Greedy::new(Weights {
-            holes: -10.0,
-            bumpiness: -10.0,
-            aggregate_height: -1.0,
+            holes: -4.0,
+            bumpiness: -1.0,
+            aggregate_height: -0.5,
             lines: 0.0,
         });
 
@@ -231,5 +232,34 @@ mod tests {
         game.advance(placement, spin);
 
         println!("{:?}", game.board);
+    }
+
+    #[test]
+    fn top_candidate_is_chosen() {
+        let seed = 0xDEAD_BEEF_u64;
+        let mut game = Game::new(seed, 5);
+
+        let mut bot = Greedy::new(Weights {
+            holes: -4.0,
+            bumpiness: -1.0,
+            aggregate_height: -0.5,
+            lines: 0.0,
+        });
+
+        for _ in 0..1000 {
+            let moves = bot.moves(&game);
+            let mv = bot.pick(&game).unwrap();
+            let Move {
+                placement,
+                spin,
+                use_hold,
+            } = mv;
+            assert_eq!(moves[0].mv, mv);
+            if use_hold {
+                game.swap_hold();
+            }
+
+            game.advance(placement, spin);
+        }
     }
 }

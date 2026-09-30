@@ -5,7 +5,7 @@ use engine::{game::Game, piece::Placement, srs::SpinKind};
 
 use crate::greedy::Candidate;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Move {
     pub placement: Placement,
     pub spin: SpinKind,
