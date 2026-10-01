@@ -4,7 +4,7 @@ use arena::{
     observer::{Flow, Observer},
     run::GameStats,
 };
-use bot::{Move, greedy::Candidate};
+use bot::{Candidate, Move};
 use engine::{
     board::Board,
     game::{Game, Outcome},
@@ -46,6 +46,7 @@ impl Observer for Tui {
         candidates: &[Candidate],
         _outcome: &Outcome,
         stats: &GameStats,
+        feature_names: &'static [&'static str],
     ) -> Flow {
         self.table.select(Some(0));
 
@@ -71,6 +72,7 @@ impl Observer for Tui {
                 stats,
                 step_mode: *step_mode,
                 prev_board: *prev_board,
+                feature_names,
             };
 
             if terminal.draw(|f| render(f, &view, table)).is_err() {

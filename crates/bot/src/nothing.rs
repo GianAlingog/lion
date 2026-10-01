@@ -1,4 +1,4 @@
-use crate::{Bot, Move};
+use crate::{Bot, Candidate, Move};
 use engine::game::Game;
 
 pub struct Nothing {}
@@ -25,7 +25,7 @@ impl Bot for Nothing {
         None
     }
 
-    fn moves(&mut self, _game: &Game) -> Vec<crate::greedy::Candidate> {
+    fn moves(&mut self, _game: &Game) -> Vec<Candidate> {
         Vec::new()
     }
 }

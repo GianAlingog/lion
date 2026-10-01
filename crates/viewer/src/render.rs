@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, iter::once};
 
 use arena::run::GameStats;
-use bot::{Move, greedy::Candidate};
+use bot::{Candidate, Move};
 use engine::{
     board::Board,
     game::Game,
@@ -128,6 +128,7 @@ pub struct ViewState<'a> {
     pub stats: &'a GameStats,
     pub step_mode: bool,
     pub prev_board: Board,
+    pub feature_names: &'static [&'static str],
 }
 
 // TODO: Move each widget to its own helper function
@@ -200,30 +201,31 @@ pub fn render(f: &mut Frame, v: &ViewState, t: &mut TableState) {
 
     // Candidates
     let candidates_rows = v.candidates.iter().map(|x| {
-        Row::new(vec![
+        let mut cells = vec![
             Cell::from(format!(
                 "{} {}",
                 PIECE_LABEL[x.mv.placement.piece as usize], ROT_LABEL[x.mv.placement.rot as usize]
             )),
             Cell::from(format!("{:.1}", x.score)),
-            Cell::from(format!("{}", x.features.lines)),
-            Cell::from(format!("{}", x.features.holes)),
-            Cell::from(format!("{}", x.features.bumpiness)),
-        ])
+        ];
+        cells.extend(x.features.iter().map(|y| Cell::from(format!("{y}"))));
+        Row::new(cells)
     });
-    let candidates_table = Table::new(
-        candidates_rows,
-        [
-            Constraint::Length(6),
-            Constraint::Length(8),
-            Constraint::Length(6),
-            Constraint::Length(6),
-            Constraint::Length(6),
-        ],
-    )
-    .header(Row::new(vec!["move", "score", "lines", "holes", "bump"]))
-    .row_highlight_style(Style::new().add_modifier(Modifier::REVERSED))
-    .highlight_symbol("> ");
+    let mut candidates_widths = Vec::new();
+    candidates_widths.extend(std::iter::repeat_n(
+        Constraint::Length(6),
+        v.feature_names.len() + 2,
+    ));
+    let candidates_table = Table::new(candidates_rows, candidates_widths)
+        .header(Row::new(
+            ["mv ", "scr"]
+                .into_iter()
+                .chain(v.feature_names.iter().copied())
+                .map(Cell::from)
+                .collect::<Vec<_>>(),
+        ))
+        .row_highlight_style(Style::new().add_modifier(Modifier::REVERSED))
+        .highlight_symbol("> ");
     f.render_stateful_widget(
         candidates_table.block(Block::bordered().title(" candidates ")),
         candidates_area,

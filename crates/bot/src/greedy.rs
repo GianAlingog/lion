@@ -1,5 +1,5 @@
 use {
-    crate::{Bot, Move},
+    crate::{Bot, Candidate, Move},
     engine::{
         board::Board, game::Game, movegen::hard_drop_placements, piece::Placement, srs::SpinKind,
     },
@@ -83,14 +83,6 @@ impl Features {
     }
 }
 
-// TODO: Move out of greedy
-#[derive(Clone, Copy, Debug)]
-pub struct Candidate {
-    pub mv: Move,
-    pub score: f64,
-    pub features: Features,
-}
-
 #[must_use]
 pub fn rank(a: &Candidate, b: &Candidate) -> std::cmp::Ordering {
     b.score
@@ -105,6 +97,8 @@ pub struct Greedy {
 }
 
 impl Greedy {
+    const NAMES: [&'static str; N] = ["hol", "bmp", "agh", "lin"];
+
     #[must_use]
     pub fn new(weights: Weights) -> Self {
         Greedy {
@@ -135,7 +129,7 @@ impl Greedy {
             candidates.push(Candidate {
                 mv,
                 score: features.score(&self.weights),
-                features,
+                features: features.to_array().to_vec(),
             });
         }
 
@@ -160,7 +154,7 @@ impl Greedy {
             candidates.push(Candidate {
                 mv,
                 score: features.score(&self.weights),
-                features,
+                features: features.to_array().to_vec(),
             });
         }
 
@@ -182,6 +176,10 @@ impl Bot for Greedy {
         let mut candidates = self.candidates(game);
         candidates.sort_unstable_by(rank);
         candidates
+    }
+
+    fn feature_names(&self) -> &'static [&'static str] {
+        &Greedy::NAMES
     }
 }
 

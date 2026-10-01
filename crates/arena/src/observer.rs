@@ -1,4 +1,4 @@
-use bot::{Move, greedy::Candidate};
+use bot::{Candidate, Move};
 use engine::game::{Game, Outcome};
 
 use crate::run::GameStats;
@@ -17,6 +17,7 @@ pub trait Observer {
         candidates: &[Candidate],
         outcome: &Outcome,
         stats: &GameStats,
+        feature_names: &'static [&'static str],
     ) -> Flow;
 }
 
@@ -30,6 +31,7 @@ impl Observer for Silent {
         _candidates: &[Candidate],
         _outcome: &Outcome,
         _stats: &GameStats,
+        _feature_names: &'static [&'static str],
     ) -> Flow {
         Flow::Continue
     }
