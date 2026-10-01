@@ -157,11 +157,15 @@ impl Board {
         bumpiness
     }
 
+    /// # Panics
+    ///
+    /// Provably should not panic as max is easily within i8
     #[must_use]
     pub fn row_transitions(&self) -> u32 {
+        let top = i8::try_from(*self.column_heights().iter().max().unwrap()).unwrap();
         let mut transitions = 0_u32;
-        for x in 0..=Self::WIDTH_I8 {
-            for y in 0..Self::HEIGHT_I8 {
+        for y in 0..top {
+            for x in 0..=Self::WIDTH_I8 {
                 if self.get(x, y) != self.get(x - 1, y) {
                     transitions += 1;
                 }
@@ -196,12 +200,12 @@ impl Board {
                     break;
                 }
 
-                if !(self.get(x - 1, y) && self.get(x + 1, y)) {
-                    continue;
+                if self.get(x - 1, y) && self.get(x + 1, y) {
+                    depth += 1;
+                    cumulative += depth;
+                } else {
+                    depth = 0;
                 }
-
-                depth += 1;
-                cumulative += depth;
             }
         }
 
