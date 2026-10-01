@@ -5,6 +5,14 @@ pub struct Board {
     rows: [u16; Self::HEIGHT],
 }
 
+pub struct LockData {
+    pub lines: u32,
+    pub eroded_cells: u32,
+}
+
+// Dellacherie feature set
+// https://arxiv.org/pdf/1905.01652
+// TODO: Optimize the locks to pull all the data at once
 impl Board {
     // This is getting quite bad.
     // TODO: Figure out if there's a better way to maintain these types
@@ -78,7 +86,7 @@ impl Board {
     }
 
     pub fn clear_lines(&mut self) -> u32 {
-        let mut full_rows: u32 = 0;
+        let mut full_rows = 0_u32;
         let mut new_state = Self::empty();
         let mut current_y: usize = 0;
         for y in 0..Self::HEIGHT {
@@ -233,12 +241,24 @@ impl Board {
     }
 
     #[must_use]
-    pub fn lock(&mut self, p: Placement) -> u32 {
+    pub fn lock(&mut self, p: Placement) -> LockData {
         for (x, y) in p.cells() {
             self.set(x, y);
         }
 
-        self.clear_lines()
+        let eroded = p
+            .cells()
+            .iter()
+            .filter(|(_, y)| self.rows[usize::try_from(*y).unwrap()] == Self::FULL_ROW)
+            .count();
+
+        let lines = self.clear_lines();
+
+        // TODO: Compute all of these in one sweep!
+        LockData {
+            lines,
+            eroded_cells: lines * eroded as u32,
+        }
     }
 
     #[must_use]
@@ -370,7 +390,7 @@ mod tests {
         };
 
         p.y = board.drop_y(p);
-        assert_eq!(board.lock(p), 0);
+        assert_eq!(board.lock(p).lines, 0);
         assert_eq!(board.aggregate_height(), 4);
         assert_eq!(board.bumpiness(), 2);
         println!("{board:?}");
@@ -390,7 +410,7 @@ mod tests {
         board.set(4, 1);
 
         p.y = board.drop_y(p);
-        assert_eq!(board.lock(p), 0);
+        assert_eq!(board.lock(p).lines, 0);
         println!("{board:?}");
     }
 
@@ -413,7 +433,7 @@ mod tests {
         }
 
         p.y = board.drop_y(p);
-        assert_eq!(board.lock(p), 1);
+        assert_eq!(board.lock(p).lines, 1);
         println!("{board:?}");
     }
 }
