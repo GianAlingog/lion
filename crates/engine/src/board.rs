@@ -194,14 +194,14 @@ impl Board {
             for y in (0..Self::HEIGHT_I8).rev() {
                 if self.get(x, y) {
                     break;
-                } else {
-                    if !(self.get(x - 1, y) && self.get(x + 1, y)) {
-                        continue;
-                    }
-
-                    depth += 1;
-                    cumulative += depth;
                 }
+
+                if !(self.get(x - 1, y) && self.get(x + 1, y)) {
+                    continue;
+                }
+
+                depth += 1;
+                cumulative += depth;
             }
         }
 
@@ -240,6 +240,9 @@ impl Board {
         last_y
     }
 
+    /// # Panics
+    ///
+    /// May panic if piece cells are above the board
     #[must_use]
     pub fn lock(&mut self, p: Placement) -> LockData {
         for (x, y) in p.cells() {
@@ -257,7 +260,7 @@ impl Board {
         // TODO: Compute all of these in one sweep!
         LockData {
             lines,
-            eroded_cells: lines * eroded as u32,
+            eroded_cells: lines * u32::try_from(eroded).unwrap(),
         }
     }
 
