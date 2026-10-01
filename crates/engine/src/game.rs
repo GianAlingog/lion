@@ -73,7 +73,7 @@ impl Game {
         // or take it from the first element. Former may be preferred
         let current_piece = self.queue.pop_front().expect("Queue was empty on advance");
         assert_eq!(p.piece, current_piece);
-        let cleared_lines = self.board.lock(p);
+        let cleared_lines = self.board.lock(p).lines;
 
         // WARN: Hardcoded b2b on quads only
         let mut b2b_broken = false;

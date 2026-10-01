@@ -122,7 +122,7 @@ impl Greedy {
         hard_drop_placements(&game.board, game.queue[0], &mut self.buf);
         for &placement in &self.buf {
             let mut board = game.board;
-            let lines = board.lock(placement);
+            let lines = board.lock(placement).lines;
 
             let mv = Move {
                 placement,
@@ -147,7 +147,7 @@ impl Greedy {
         );
         for &placement in &self.buf {
             let mut board = game.board;
-            let lines = board.lock(placement);
+            let lines = board.lock(placement).lines;
 
             let mv = Move {
                 placement,

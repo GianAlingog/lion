@@ -236,7 +236,7 @@ mod tests {
                 let mut board = board;
                 assert!(board.is_grounded(placement));
                 assert!(!board.collides(placement));
-                let lines = board.lock(placement);
+                let lines = board.lock(placement).lines;
                 assert_eq!(lines, 0);
                 // println!("{board:?}");
             }

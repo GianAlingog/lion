@@ -193,7 +193,7 @@ mod tests {
         let (mut p, _) = rotate(&board, p, Spin::Cw).expect("Rotation failed");
 
         p.y = board.drop_y(p);
-        assert_eq!(board.lock(p), 0);
+        assert_eq!(board.lock(p).lines, 0);
         println!("{board:?}");
     }
 
@@ -227,7 +227,7 @@ mod tests {
         println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::None);
-        assert_eq!(board.lock(p), 3);
+        assert_eq!(board.lock(p).lines, 3);
 
         println!("{board:?}");
         println!("{spin_kind:?} {kick}");
@@ -283,7 +283,7 @@ mod tests {
         println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Full);
-        assert_eq!(board.lock(p), 3);
+        assert_eq!(board.lock(p).lines, 3);
 
         println!("{board:?}");
         println!("{spin_kind:?} {kick}");
@@ -318,7 +318,7 @@ mod tests {
         println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Full);
-        assert_eq!(board.lock(p), 2);
+        assert_eq!(board.lock(p).lines, 2);
 
         println!("{board:?}");
         println!("{spin_kind:?} {kick}");
@@ -353,7 +353,7 @@ mod tests {
         println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Full);
-        assert_eq!(board.lock(p), 1);
+        assert_eq!(board.lock(p).lines, 1);
 
         println!("{board:?}");
         println!("{spin_kind:?} {kick}");
@@ -388,7 +388,7 @@ mod tests {
         println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::Mini);
-        assert_eq!(board.lock(p), 1);
+        assert_eq!(board.lock(p).lines, 1);
 
         println!("{board:?}");
         println!("{spin_kind:?} {kick}");
@@ -423,7 +423,7 @@ mod tests {
         println!("{board:?}");
 
         assert_eq!(spin_kind, SpinKind::None);
-        assert_eq!(board.lock(p), 0);
+        assert_eq!(board.lock(p).lines, 0);
 
         println!("{board:?}");
         println!("{spin_kind:?} {kick}");
