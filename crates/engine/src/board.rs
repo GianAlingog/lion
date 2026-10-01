@@ -150,6 +150,57 @@ impl Board {
     }
 
     #[must_use]
+    pub fn row_transitions(&self) -> u32 {
+        let mut transitions = 0_u32;
+        for x in 0..=Self::WIDTH_I8 {
+            for y in 0..Self::HEIGHT_I8 {
+                if self.get(x, y) != self.get(x - 1, y) {
+                    transitions += 1;
+                }
+            }
+        }
+
+        transitions
+    }
+
+    #[must_use]
+    pub fn column_transitions(&self) -> u32 {
+        let mut transitions = 0_u32;
+        for y in 0..=Self::HEIGHT_I8 {
+            for x in 0..Self::WIDTH_I8 {
+                if self.get(x, y) != self.get(x, y - 1) {
+                    transitions += 1;
+                }
+            }
+        }
+
+        transitions
+    }
+
+    // Top wells only
+    #[must_use]
+    pub fn cumulative_wells(&self) -> u32 {
+        let mut cumulative = 0_u32;
+        for x in 0..Self::WIDTH_I8 {
+            let mut depth = 0;
+            for y in (0..Self::HEIGHT_I8).rev() {
+                if self.get(x, y) {
+                    break;
+                } else {
+                    if !(self.get(x - 1, y) && self.get(x + 1, y)) {
+                        continue;
+                    }
+
+                    depth += 1;
+                    cumulative += depth;
+                }
+            }
+        }
+
+        cumulative
+    }
+
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         *self == Self::empty()
     }
