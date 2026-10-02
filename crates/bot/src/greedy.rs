@@ -1,5 +1,5 @@
 use {
-    crate::{Bot, Candidate, Move},
+    crate::{Bot, Candidate, Move, rank},
     engine::{
         board::Board, game::Game, movegen::hard_drop_placements, piece::Placement, srs::SpinKind,
     },
@@ -17,7 +17,7 @@ pub struct Weights {
 
 impl Weights {
     #[must_use]
-    pub fn to_array(self) -> [f64; 4] {
+    pub fn to_array(self) -> [f64; N] {
         let Weights {
             holes,
             bumpiness,
@@ -53,7 +53,7 @@ pub struct Features {
 
 impl Features {
     #[must_use]
-    fn to_array(self) -> [f64; 4] {
+    fn to_array(self) -> [f64; N] {
         let Features {
             holes,
             bumpiness,
@@ -81,14 +81,6 @@ impl Features {
             .map(|(f, w)| f * w)
             .sum()
     }
-}
-
-#[must_use]
-pub fn rank(a: &Candidate, b: &Candidate) -> std::cmp::Ordering {
-    b.score
-        .total_cmp(&a.score)
-        .then_with(|| a.mv.placement.cmp(&b.mv.placement))
-        .then_with(|| a.mv.use_hold.cmp(&b.mv.use_hold))
 }
 
 pub struct Greedy {
@@ -171,7 +163,6 @@ impl Bot for Greedy {
         self.candidates(game).into_iter().min_by(rank).map(|c| c.mv)
     }
 
-    // TODO: Write a test to verify pick is first element
     fn moves(&mut self, game: &Game) -> Vec<Candidate> {
         let mut candidates = self.candidates(game);
         candidates.sort_unstable_by(rank);
