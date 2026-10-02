@@ -2,9 +2,7 @@ pub mod observer;
 pub mod run;
 pub mod stats;
 
-use bot::{
-    Bot, dellacherie::Dellacherie, greedy::Greedy, nothing::Nothing,
-};
+use bot::{Bot, dellacherie::Dellacherie, greedy::Greedy, nothing::Nothing};
 use clap::{Parser, ValueEnum};
 use std::{fmt, path::PathBuf};
 
@@ -73,10 +71,15 @@ impl Args {
     }
 }
 
+/// # Panics
+///
+/// Will panic on incorrect argument for bot weights
 #[must_use]
 pub fn make_bot(kind: BotKind, w: Vec<f64>) -> Box<dyn Bot> {
     match kind {
-        BotKind::Dellacherie => Box::new(Dellacherie::new(bot::dellacherie::Weights::try_from(w).unwrap())),
+        BotKind::Dellacherie => Box::new(Dellacherie::new(
+            bot::dellacherie::Weights::try_from(w).unwrap(),
+        )),
         BotKind::Greedy => Box::new(Greedy::new(bot::greedy::Weights::try_from(w).unwrap())),
         BotKind::Nothing => Box::new(Nothing::new()),
     }

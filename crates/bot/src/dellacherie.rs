@@ -135,6 +135,10 @@ impl Dellacherie {
         }
     }
 
+    /// # Panics
+    ///
+    /// May panic on taking cell min/max
+    /// May panic on taking preview indices 0 or 1
     pub fn candidates(&mut self, game: &Game) -> Vec<Candidate> {
         let mut candidates = Vec::new();
 
@@ -167,7 +171,11 @@ impl Dellacherie {
         }
 
         self.buf.clear();
-        placements(&game.board, game.hold.unwrap_or(game.queue[1]), &mut self.buf);
+        placements(
+            &game.board,
+            game.hold.unwrap_or(game.queue[1]),
+            &mut self.buf,
+        );
         for &(placement, spin) in &self.buf {
             let mut board = game.board;
             let LockData {

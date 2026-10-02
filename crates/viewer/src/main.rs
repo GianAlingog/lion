@@ -3,7 +3,6 @@ use arena::{
     run::{RunConfig, RunMode, run_game},
     stats::SessionStats,
 };
-use bot::greedy::{N, Weights};
 
 use crate::tui::Tui;
 
