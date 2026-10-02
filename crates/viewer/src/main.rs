@@ -15,19 +15,7 @@ fn main() {
     assert_eq!(args.games, 1);
     println!("{args:?}");
 
-    let weights: Weights = match &args.weights {
-        Some(v) => v
-            .clone()
-            .try_into()
-            .map_err(|_| format!("--weights needs exactly {N} values"))
-            .unwrap(),
-        None => Weights {
-            holes: -4.0,
-            bumpiness: -1.0,
-            aggregate_height: -0.5,
-            lines: 0.0,
-        },
-    };
+    let weights = args.weights.unwrap();
 
     let cfg = RunConfig {
         mode: match args.mode {
@@ -41,7 +29,7 @@ fn main() {
         step_mode: args.step_mode,
     };
 
-    let mut bot = make_bot(args.bot, weights);
+    let mut bot = make_bot(args.bot, weights.clone());
 
     let mut session_stats = SessionStats {
         games: Vec::with_capacity(args.games as usize),

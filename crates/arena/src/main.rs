@@ -4,25 +4,12 @@ use arena::{
     run::{RunConfig, RunMode, run_game},
     stats::SessionStats,
 };
-use bot::greedy::{N, Weights};
 
 fn main() {
     let args = Args::parse_args();
     println!("{args:?}");
 
-    let weights: Weights = match &args.weights {
-        Some(v) => v
-            .clone()
-            .try_into()
-            .map_err(|_| format!("--weights needs exactly {N} values"))
-            .unwrap(),
-        None => Weights {
-            holes: -4.0,
-            bumpiness: -1.0,
-            aggregate_height: -0.5,
-            lines: 0.0,
-        },
-    };
+    let weights = args.weights.unwrap();
 
     let cfg = RunConfig {
         mode: match args.mode {
@@ -36,7 +23,7 @@ fn main() {
         step_mode: args.step_mode,
     };
 
-    let mut bot = make_bot(args.bot, weights);
+    let mut bot = make_bot(args.bot, weights.clone());
 
     let mut session_stats = SessionStats {
         games: Vec::with_capacity(args.games as usize),
@@ -58,7 +45,7 @@ fn main() {
     let session_metadata = SessionMetadata {
         label: &args.label,
         bot: bot.name(),
-        weights: weights.to_array(),
+        weights: weights.clone(),
         mode: &args.mode.to_string(),
     };
 

@@ -102,6 +102,7 @@ impl SessionStats {
         SessionStats::create_summary(&mut values)
     }
 
+    // TODO: dynamically build the csv based on the weights
     /// # Errors
     ///
     /// Will return `Err` on a failure to create file or write the results to file

@@ -189,18 +189,12 @@ mod tests {
         observer::Silent,
         run::EndReason::{GoalReached, PieceCap},
     };
-    use bot::greedy::Weights;
 
     #[test]
     fn same_seed_game() {
         let mut bot1 = make_bot(
             Greedy,
-            Weights {
-                holes: -10.0,
-                bumpiness: -10.0,
-                aggregate_height: -1.0,
-                lines: 0.0,
-            },
+            vec![-10.0, -10.0, -1.0, 0.0],
         );
         let game1 = run_game(
             0xDEFE_C8ED_u64,
@@ -216,12 +210,7 @@ mod tests {
 
         let mut bot2 = make_bot(
             Greedy,
-            Weights {
-                holes: -10.0,
-                bumpiness: -10.0,
-                aggregate_height: -1.0,
-                lines: 0.0,
-            },
+            vec![-10.0, -10.0, -1.0, 0.0],
         );
         let game2 = run_game(
             0xDEFE_C8ED_u64,
@@ -244,12 +233,7 @@ mod tests {
     fn bot_fail() {
         let mut bot = make_bot(
             Nothing,
-            Weights {
-                holes: 0.0,
-                bumpiness: 0.0,
-                aggregate_height: 0.0,
-                lines: 0.0,
-            },
+            vec![],
         );
         let game = run_game(
             0xDEFE_C8ED_u64,
@@ -270,12 +254,7 @@ mod tests {
     fn piece_cap() {
         let mut bot = make_bot(
             Greedy,
-            Weights {
-                holes: -4.0,
-                bumpiness: -1.0,
-                aggregate_height: -0.5,
-                lines: 0.0,
-            },
+            vec![-4.0, -1.0, -0.5, 0.0],
         );
         let game = run_game(
             0xDEFE_C8ED_u64,
@@ -297,12 +276,7 @@ mod tests {
     fn sprint_cap() {
         let mut bot = make_bot(
             Greedy,
-            Weights {
-                holes: -4.0,
-                bumpiness: -1.0,
-                aggregate_height: -0.5,
-                lines: 0.0,
-            },
+            vec![-4.0, -1.0, -0.5, 0.0],
         );
         let game = run_game(
             0xDEFE_C8ED_u64,

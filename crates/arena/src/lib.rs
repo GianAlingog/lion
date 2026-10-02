@@ -3,9 +3,7 @@ pub mod run;
 pub mod stats;
 
 use bot::{
-    Bot,
-    greedy::{Greedy, Weights},
-    nothing::Nothing,
+    Bot, dellacherie::Dellacherie, greedy::Greedy, nothing::Nothing,
 };
 use clap::{Parser, ValueEnum};
 use std::{fmt, path::PathBuf};
@@ -27,6 +25,7 @@ impl fmt::Display for Mode {
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
 pub enum BotKind {
+    Dellacherie,
     Greedy,
     Nothing,
 }
@@ -75,9 +74,10 @@ impl Args {
 }
 
 #[must_use]
-pub fn make_bot(kind: BotKind, w: Weights) -> Box<dyn Bot> {
+pub fn make_bot(kind: BotKind, w: Vec<f64>) -> Box<dyn Bot> {
     match kind {
-        BotKind::Greedy => Box::new(Greedy::new(w)),
+        BotKind::Dellacherie => Box::new(Dellacherie::new(bot::dellacherie::Weights::try_from(w).unwrap())),
+        BotKind::Greedy => Box::new(Greedy::new(bot::greedy::Weights::try_from(w).unwrap())),
         BotKind::Nothing => Box::new(Nothing::new()),
     }
 }
@@ -85,6 +85,6 @@ pub fn make_bot(kind: BotKind, w: Weights) -> Box<dyn Bot> {
 pub struct SessionMetadata<'a> {
     pub label: &'a str,
     pub bot: &'a str,
-    pub weights: [f64; 4],
+    pub weights: Vec<f64>,
     pub mode: &'a str,
 }
