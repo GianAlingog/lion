@@ -17,6 +17,8 @@ impl Board {
     // This is getting quite bad.
     // TODO: Figure out if there's a better way to maintain these types
     // while avoiding type conversion at runtime
+    // EDIT: These are constant values so typecasts should be done
+    // under compile time. Refactor some day, resolve the clippy warning
     pub const WIDTH: usize = 10;
     pub const WIDTH_U8: u8 = 10;
     pub const WIDTH_I8: i8 = 10;
