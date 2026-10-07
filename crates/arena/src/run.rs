@@ -192,7 +192,7 @@ mod tests {
 
     #[test]
     fn same_seed_game() {
-        let mut bot1 = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0]);
+        let mut bot1 = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
         let game1 = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot1,
@@ -205,7 +205,7 @@ mod tests {
             },
         );
 
-        let mut bot2 = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0]);
+        let mut bot2 = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
         let game2 = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot2,
@@ -225,7 +225,7 @@ mod tests {
 
     #[test]
     fn bot_fail() {
-        let mut bot = make_bot(Nothing, vec![]);
+        let mut bot = make_bot(Nothing, vec![], 0, 0);
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
@@ -243,7 +243,7 @@ mod tests {
 
     #[test]
     fn piece_cap() {
-        let mut bot = make_bot(Greedy, vec![-4.0, -1.0, -0.5, 0.0]);
+        let mut bot = make_bot(Greedy, vec![-4.0, -1.0, -0.5, 0.0], 0, 0);
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
@@ -262,7 +262,7 @@ mod tests {
 
     #[test]
     fn sprint_cap() {
-        let mut bot = make_bot(Greedy, vec![-4.0, -1.0, -0.5, 0.0]);
+        let mut bot = make_bot(Greedy, vec![-4.0, -1.0, -0.5, 0.0], 0, 0);
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,

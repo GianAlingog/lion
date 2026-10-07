@@ -1,6 +1,6 @@
 use crate::piece::Placement;
 
-#[derive(Clone, Copy, PartialEq, Eq)]
+#[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Board {
     rows: [u16; Self::HEIGHT],
 }

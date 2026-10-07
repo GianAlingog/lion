@@ -28,7 +28,7 @@ fn main() {
         step_mode: args.step_mode,
     };
 
-    let mut bot = make_bot(args.bot, weights.clone());
+    let mut bot = make_bot(args.bot, weights.clone(), args.depth, args.width);
 
     let mut session_stats = SessionStats {
         games: Vec::with_capacity(args.games as usize),

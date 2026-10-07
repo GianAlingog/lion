@@ -1,3 +1,4 @@
+pub mod beam;
 pub mod dellacherie;
 pub mod greedy;
 pub mod nothing;

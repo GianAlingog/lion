@@ -2,7 +2,7 @@ pub mod observer;
 pub mod run;
 pub mod stats;
 
-use bot::{Bot, dellacherie::Dellacherie, greedy::Greedy, nothing::Nothing};
+use bot::{Bot, beam::Beam, dellacherie::Dellacherie, greedy::Greedy, nothing::Nothing};
 use clap::{Parser, ValueEnum};
 use std::{fmt, path::PathBuf};
 
@@ -23,6 +23,7 @@ impl fmt::Display for Mode {
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
 pub enum BotKind {
+    Beam,
     Dellacherie,
     Greedy,
     Nothing,
@@ -51,6 +52,12 @@ pub struct Args {
     #[arg(long, default_value_t = 5)]
     pub preview: usize,
 
+    #[arg(long, default_value_t = 3)]
+    pub depth: usize,
+
+    #[arg(long, default_value_t = 16)]
+    pub width: usize,
+
     #[arg(long, value_enum, default_value_t = BotKind::Greedy)]
     pub bot: BotKind,
 
@@ -75,8 +82,14 @@ impl Args {
 ///
 /// Will panic on incorrect argument for bot weights
 #[must_use]
-pub fn make_bot(kind: BotKind, w: Vec<f64>) -> Box<dyn Bot> {
+pub fn make_bot(kind: BotKind, w: Vec<f64>, depth: usize, width: usize) -> Box<dyn Bot> {
+    // TODO: Refactor to take in &Args instead, will require refactoring tests
     match kind {
+        BotKind::Beam => Box::new(Beam::new(
+            bot::beam::Weights::try_from(w).unwrap(),
+            depth,
+            width,
+        )),
         BotKind::Dellacherie => Box::new(Dellacherie::new(
             bot::dellacherie::Weights::try_from(w).unwrap(),
         )),
