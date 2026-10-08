@@ -325,4 +325,34 @@ mod tests {
 
         assert_eq!(found, 4);
     }
+
+    #[test]
+    fn zspin_possible() {
+        let mut board = Board::empty();
+        board.set(0, 0);
+        for x in 3..Board::WIDTH_I8 {
+            board.set(x, 0);
+        }
+
+        for x in 2..Board::WIDTH_I8 {
+            board.set(x, 1);
+        }
+
+        println!("{board:?}");
+
+        let mut out = Vec::new();
+        placements(&board, Piece::Z, &mut out);
+
+        let mut found = false;
+        for (placement, spin) in out {
+            let mut next_board = board;
+            let LockData { lines, eroded_cells: _ } = next_board.lock(placement);
+
+            if lines == 2 {
+                found = true;
+            }
+        }
+
+        assert!(found);
+    }
 }
