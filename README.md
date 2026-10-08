@@ -48,10 +48,12 @@ cargo run -p arena --release -- --label "$(git describe --always --dirty)" --csv
 - CSV session export
 - Benchmarks of baseline
 - Complete move generation
+- Bot lookahead
 
 **In progress**
-- Bot lookahead
 - Versus mode
+- Arena 1v1
+- Better benchmarking
 
 ## Contributing
 
