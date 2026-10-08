@@ -138,9 +138,7 @@ impl Node {
             out.push((p, self.next + 1, false, self.hold));
 
             if let Some(q) = self.hold {
-                if p != q {
-                    out.push((q, self.next + 1, true, Some(p)));
-                }
+                out.push((q, self.next + 1, true, Some(p)));
             } else if let Some(&q) = queue.get(self.next + 1) {
                 out.push((q, self.next + 2, true, Some(p)));
             }
