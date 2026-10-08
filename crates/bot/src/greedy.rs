@@ -103,7 +103,6 @@ impl Greedy {
     pub fn candidates(&mut self, game: &Game) -> Vec<Candidate> {
         let mut candidates = Vec::new();
 
-        // TODO: Refactor to decrease code repetition
         self.buf.clear();
         hard_drop_placements(&game.board, game.queue[0], &mut self.buf);
         for &placement in &self.buf {
