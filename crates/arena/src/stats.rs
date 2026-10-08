@@ -110,7 +110,12 @@ impl SessionStats {
         let mut w = BufWriter::new(File::create(path)?);
 
         let weight_header = m.weight_names.join(",");
-        let weight_values = m.weights.iter().map(ToString::to_string).collect::<Vec<_>>().join(",");
+        let weight_values = m
+            .weights
+            .iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join(",");
 
         writeln!(
             w,
