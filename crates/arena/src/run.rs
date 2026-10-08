@@ -33,7 +33,7 @@ pub struct RunConfig {
     // pub record_history: bool,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Eq)]
 pub struct GameStats {
     pub seed: u64,
     pub end_reason: EndReason,
@@ -55,6 +55,25 @@ pub struct GameStats {
     pub decision_hist: [u32; 257],
     pub decision_total: Duration,
     pub elapsed: Duration,
+}
+
+impl PartialEq for GameStats {
+    // Does not depend on decision time
+    fn eq(&self, other: &Self) -> bool {
+        self.seed == other.seed
+            && self.end_reason == other.end_reason
+            && self.pieces == other.pieces
+            && self.lines == other.lines
+            && self.lines_by_type == other.lines_by_type
+            && self.net_hole_change == other.net_hole_change
+            && self.perfect_clears == other.perfect_clears
+            && self.max_b2b == other.max_b2b
+            && self.max_combo == other.max_combo
+            && self.max_height == other.max_height
+            && self.attack == other.attack
+            && self.spins == other.spins
+            && self.height_hist == other.height_hist
+    }
 }
 
 /// # Panics
@@ -218,9 +237,7 @@ mod tests {
             },
         );
 
-        // TODO: Implement equality not to use the decision times
-        // assert_eq!(game1, game2);
-        assert_eq!(game1.height_hist[3], game2.height_hist[3]);
+        assert_eq!(game1, game2);
     }
 
     #[test]
