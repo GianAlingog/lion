@@ -344,7 +344,7 @@ mod tests {
         placements(&board, Piece::Z, &mut out);
 
         let mut found = false;
-        for (placement, spin) in out {
+        for (placement, _spin) in out {
             let mut next_board = board;
             let LockData { lines, eroded_cells: _ } = next_board.lock(placement);
 
