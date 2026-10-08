@@ -263,7 +263,6 @@ impl Board {
 
         let lines = self.clear_lines();
 
-        // TODO: Compute all of these in one sweep!
         LockData {
             lines,
             eroded_cells: lines * u32::try_from(eroded).unwrap(),
