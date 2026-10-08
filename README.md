@@ -10,7 +10,8 @@
 
 - Greedy bot survives 100k pieces in zen mode (hard-drop, one piece preview + hold piece, hand-picked weights)
 - Greedy bot with zero bumpiness weight completes only 6 of 100 games in 40L (same setup as above)
-- [Dellacherie bot](https://arxiv.org/pdf/1905.01652) with BFS move generation averages max height of 4.64 and max at 7.00 across 100 games
+- [Dellacherie bot](https://arxiv.org/pdf/1905.01652) with BFS move generation averages a max height of 4.64 and max at 7.00 across 100 games, median of 102 pieces
+- Dellacherie bot with beam search averages a max height of 4.29 and max at 5.00 across 100 games, median of 102 pieces
 
 ## Recording
 
