@@ -22,7 +22,6 @@ pub enum Rot {
 } // spawn, cw, 180, ccw
 
 impl Rot {
-    // TODO: This should never fail. Do not return Option. Panic here instead.
     /// # Panics
     ///
     /// This call should always be within bounds [0, 4).
