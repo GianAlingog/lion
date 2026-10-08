@@ -318,7 +318,10 @@ mod tests {
         for (placement, spin) in out {
             if spin != SpinKind::None {
                 let mut next_board = board;
-                let LockData { lines: _, eroded_cells: _ } = next_board.lock(placement);
+                let LockData {
+                    lines: _,
+                    eroded_cells: _,
+                } = next_board.lock(placement);
                 found += 1;
             }
         }
@@ -346,7 +349,10 @@ mod tests {
         let mut found = false;
         for (placement, _spin) in out {
             let mut next_board = board;
-            let LockData { lines, eroded_cells: _ } = next_board.lock(placement);
+            let LockData {
+                lines,
+                eroded_cells: _,
+            } = next_board.lock(placement);
 
             if lines == 2 {
                 found = true;
