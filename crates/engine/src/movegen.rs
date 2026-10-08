@@ -199,7 +199,7 @@ pub fn hard_drop_placements(board: &Board, piece: Piece, out: &mut Vec<Placement
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::bag::Bag;
+    use crate::{bag::Bag, board::LockData};
 
     #[test]
     fn all_pieces_harddrop() {
@@ -293,5 +293,36 @@ mod tests {
                 assert!(bfs.iter().any(|(q, _)| p.cells() == q.cells()));
             }
         }
+    }
+
+    #[test]
+    fn tspin_with_spinkind() {
+        let mut board = Board::empty();
+        board.set(0, 0);
+        for x in 2..Board::WIDTH_I8 {
+            board.set(x, 0);
+        }
+
+        for x in 3..Board::WIDTH_I8 {
+            board.set(x, 1);
+        }
+
+        board.set(2, 2);
+
+        println!("{board:?}");
+
+        let mut out = Vec::new();
+        placements(&board, Piece::T, &mut out);
+
+        let mut found = 0_u8;
+        for (placement, spin) in out {
+            if spin != SpinKind::None {
+                let mut next_board = board;
+                let LockData { lines: _, eroded_cells: _ } = next_board.lock(placement);
+                found += 1;
+            }
+        }
+
+        assert_eq!(found, 4);
     }
 }
