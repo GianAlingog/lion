@@ -48,17 +48,24 @@ impl Game {
         queue: VecDeque<Piece>,
         b2b: u32,
         combo: u32,
+        seed: u64,
+        steps: u32,
     ) -> Self {
-        // TODO: Decide what to do about the bag
-        Game {
+        let mut game = Game {
             board,
             hold,
             can_hold: true,
             queue,
             b2b,
             combo,
-            bag: Bag::new(0xDEAD_BEEF_u64),
+            bag: Bag::new(seed),
+        };
+
+        for _ in 0..steps {
+            game.bag.next_piece();
         }
+
+        game
     }
 
     // Drives action, calls all internal logic
