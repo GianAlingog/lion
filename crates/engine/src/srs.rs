@@ -14,7 +14,6 @@ pub enum Spin {
 #[must_use]
 pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)> {
     // TODO: Refactor to match the kicks table instead
-    // TODO: Calculate the rotation outside the loop
 
     // Match the kick
     if p.piece == Piece::I {
@@ -42,25 +41,25 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
             ],
         ];
 
-        // Seems inefficient right now, but it is possibly a low value fix
+        let mut new_p = p;
+
+        new_p.rot = match dir {
+            Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
+            Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
+        };
+
         for test in 0..5_u8 {
-            let mut new_p = p;
-
-            new_p.rot = match dir {
-                Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
-                Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
-            };
-
             let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
 
             new_p.x += dx;
             new_p.y += dy;
 
             if board.collides(new_p) {
-                continue;
+                new_p.x -= dx;
+                new_p.y -= dy;
+            } else {
+                return Some((new_p, test));
             }
-
-            return Some((new_p, test));
         }
 
         None
@@ -90,25 +89,25 @@ pub fn rotate(board: &Board, p: Placement, dir: Spin) -> Option<(Placement, u8)>
             ],
         ];
 
-        // Seems inefficient right now, but it is possibly a low value fix
+        let mut new_p = p;
+
+        new_p.rot = match dir {
+            Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
+            Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
+        };
+
         for test in 0..5_u8 {
-            let mut new_p = p;
-
-            new_p.rot = match dir {
-                Spin::Cw => Rot::from_index(((p.rot as usize) + 1) % 4),
-                Spin::Ccw => Rot::from_index(((p.rot as usize) + 3) % 4),
-            };
-
             let (dx, dy) = KICKS_TABLE[p.rot as usize][dir as usize][test as usize];
 
             new_p.x += dx;
             new_p.y += dy;
 
             if board.collides(new_p) {
-                continue;
+                new_p.x -= dx;
+                new_p.y -= dy;
+            } else {
+                return Some((new_p, test));
             }
-
-            return Some((new_p, test));
         }
 
         None
