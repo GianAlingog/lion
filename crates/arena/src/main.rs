@@ -46,6 +46,7 @@ fn main() {
         label: &args.label,
         bot: bot.name(),
         weights: weights.clone(),
+        weight_names: bot.feature_names(),
         mode: &args.mode.to_string(),
     };
 

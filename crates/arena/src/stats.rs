@@ -108,9 +108,13 @@ impl SessionStats {
     /// Will return `Err` on a failure to create file or write the results to file
     pub fn export(&self, path: &PathBuf, m: &SessionMetadata) -> std::io::Result<()> {
         let mut w = BufWriter::new(File::create(path)?);
+
+        let weight_header = m.weight_names.join(",");
+        let weight_values = m.weights.iter().map(ToString::to_string).collect::<Vec<_>>().join(",");
+
         writeln!(
             w,
-            "label,bot,w_holes,w_bump,w_agg,w_lines,seed,mode,end_reason,pieces,lines,no_clear,lines_1,lines_2,lines_3,lines_4,net_holes,max_height,decision_p95,decision_p99"
+            "label,bot,{weight_header},seed,mode,end_reason,pieces,lines,no_clear,lines_1,lines_2,lines_3,lines_4,net_holes,max_height,decision_p95,decision_p99"
         )?;
 
         for g in &self.games {
@@ -119,13 +123,9 @@ impl SessionStats {
 
             writeln!(
                 w,
-                "{},{},{},{},{},{},{},{},{:?},{},{},{},{},{},{},{},{},{},{},{}",
+                "{},{},{weight_values},{},{},{:?},{},{},{},{},{},{},{},{},{},{},{}",
                 m.label,
                 m.bot,
-                m.weights[0],
-                m.weights[1],
-                m.weights[2],
-                m.weights[3],
                 g.seed,
                 m.mode,
                 g.end_reason,

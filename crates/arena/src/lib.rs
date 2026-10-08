@@ -102,5 +102,6 @@ pub struct SessionMetadata<'a> {
     pub label: &'a str,
     pub bot: &'a str,
     pub weights: Vec<f64>,
+    pub weight_names: &'static [&'static str],
     pub mode: &'a str,
 }
