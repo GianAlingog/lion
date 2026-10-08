@@ -1,6 +1,6 @@
 # lion
 
-**Lion** is a both a bot that plays and an engine for modern Tetris.
+**Lion** is both a bot that plays and an engine for modern Tetris.
 
 <img src="./docs/media/viewer.gif" width="500">
 
@@ -10,6 +10,7 @@
 
 - Greedy bot survives 100k pieces in zen mode (hard-drop, one piece preview + hold piece, hand-picked weights)
 - Greedy bot with zero bumpiness weight completes only 6 of 100 games in 40L (same setup as above)
+- [Dellacherie bot](https://arxiv.org/pdf/1905.01652) with BFS move generation averages max height of 4.64 and max at 7.00 across 100 games
 
 ## Recording
 
@@ -45,9 +46,9 @@ cargo run -p arena --release -- --label "$(git describe --always --dirty)" --csv
 - Statistics library
 - CSV session export
 - Benchmarks of baseline
+- Complete move generation
 
 **In progress**
-- Complete move generation
 - Bot lookahead
 - Versus mode
 
