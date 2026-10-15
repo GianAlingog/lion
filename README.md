@@ -17,6 +17,8 @@
 
 Right now, I use [VHS](https://github.com/charmbracelet/vhs) to generate GIFs of the bots playing through the TUI, built with [Ratatui](https://ratatui.rs/).
 
+<sub>*After the introduction of bot lookahead, the viewer has not been updated to support multi-step searches. The preview will show the first move of the sequence.</sub>
+
 To create recordings via the TUI, see the `viewer.tape` script [here](docs/media/viewer.tape).
 
 ## Quickstart
@@ -50,11 +52,12 @@ cargo run -p arena --release -- --label "$(git describe --always --dirty)" --csv
 - Complete move generation
 - Bot lookahead via beam search
 - Dellacherie feature set bot
+- Better benchmarking
 
 **In progress**
 - Versus mode
 - Arena 1v1
-- Better benchmarking
+- More benchmarks
 
 ## Contributing
 
