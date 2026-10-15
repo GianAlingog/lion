@@ -68,9 +68,9 @@ Set Theme "Catppuccin Mocha"
 Set Padding 10
 
 Hide
-Type "cargo run -p viewer --release -- --games 1 --mode endless --step-mode"
+Type "cargo run -p viewer --release -- --games 1 --mode endless --step-mode --bot beam --weights=-4,-1,-1,-1,-1,1"
 Enter
-Sleep 3s
+Sleep 5s
 Show
 Type "c"
 Sleep 10s
