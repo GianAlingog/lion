@@ -4,7 +4,7 @@
 
 <img src="./docs/media/viewer.gif" width="500">
 
-<sub>Greedy bot playing Tetris via the TUI, debounced at 100ms</sub>
+<sub>Dellacherie bot with beam search (depth 3, width 16) bot playing Tetris via the TUI, debounced at 100ms</sub>
 
 ## Results
 
