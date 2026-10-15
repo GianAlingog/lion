@@ -1,7 +1,11 @@
 use std::hint::black_box;
 
-use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main, Throughput};
-use engine::{board::Board, movegen::{hard_drop_placements, placements}, piece::Piece};
+use criterion::{BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
+use engine::{
+    board::Board,
+    movegen::{hard_drop_placements, placements},
+    piece::Piece,
+};
 
 const PIECES: [Piece; 7] = [
     Piece::I,
