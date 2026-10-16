@@ -148,26 +148,38 @@ mod tests {
 
     #[test]
     fn all_pieces_and_rotations() {
-        let mut placement = Placement {
-            piece: Piece::L,
-            rot: Rot::N,
-            x: 2,
-            y: 2,
-        };
+        const PIECES: [Piece; 7] = [
+            Piece::I,
+            Piece::O,
+            Piece::T,
+            Piece::S,
+            Piece::Z,
+            Piece::J,
+            Piece::L,
+        ];
 
-        println!("{placement:?}");
-        println!("{:?}", placement.cells());
-        placement.rot = Rot::E;
-        println!("{placement:?}");
-        println!("{:?}", placement.cells());
-        placement.rot = Rot::S;
-        println!("{placement:?}");
-        println!("{:?}", placement.cells());
-        placement.rot = Rot::W;
-        println!("{placement:?}");
-        println!("{:?}", placement.cells());
-        placement.rot = Rot::N;
-        println!("{placement:?}");
-        println!("{:?}", placement.cells());
+        for p in PIECES {
+            let mut placement = Placement {
+                piece: p,
+                rot: Rot::N,
+                x: 3,
+                y: 3,
+            };
+
+            println!("{placement:?}");
+            println!("{:?}", placement.cells());
+            placement.rot = Rot::E;
+            println!("{placement:?}");
+            println!("{:?}", placement.cells());
+            placement.rot = Rot::S;
+            println!("{placement:?}");
+            println!("{:?}", placement.cells());
+            placement.rot = Rot::W;
+            println!("{placement:?}");
+            println!("{:?}", placement.cells());
+            placement.rot = Rot::N;
+            println!("{placement:?}");
+            println!("{:?}", placement.cells());
+        }
     }
 }
