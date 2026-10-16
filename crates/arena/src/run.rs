@@ -218,7 +218,7 @@ mod tests {
             &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 1000 },
-                max_pieces: 1,
+                max_pieces: 1000,
                 preview: 5,
                 step_mode: false,
             },
