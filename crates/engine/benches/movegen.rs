@@ -69,7 +69,7 @@ fn bfs(c: &mut Criterion) {
 }
 
 fn hard_drop(c: &mut Criterion) {
-    let mut g = c.benchmark_group("bfs");
+    let mut g = c.benchmark_group("hard_drop");
     for (name, ascii) in FIXTURES {
         let board = Board::from_ascii(ascii);
         g.throughput(Throughput::Elements(PIECES.len() as u64));
