@@ -217,7 +217,8 @@ impl std::fmt::Display for SessionStats {
             .iter()
             .flat_map(|g| extract_hist(&g.decision_hist))
             .collect();
-        writeln!(f, "max decision latency (in microseconds)")?;
+        // writeln!(f, "max decision latency (in microseconds)")?; // Linear
+        writeln!(f, "max decision latency (in log base 2 microseconds)")?; // Logarithmic
         writeln!(
             f,
             "| mean       | median     | stddev     | min        | max        | p95        | p99        |"

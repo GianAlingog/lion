@@ -134,7 +134,8 @@ pub fn run_game(
         let pick_duration = pick_start.elapsed();
         let decision_nanos = u64::try_from(pick_duration.as_nanos()).unwrap();
         // Possibly dangerous if many overflow the last bucket
-        let decision_bucket = (decision_nanos / 1000).min(256);
+        // let decision_bucket = (decision_nanos / 1000).min(256); // Linear
+        let decision_bucket = (decision_nanos.ilog2()).min(256); // Logarithmic
         game_stats.max_decision = game_stats.max_decision.max(pick_duration);
         game_stats.decision_hist[decision_bucket as usize] += 1;
         game_stats.decision_total = game_stats.decision_total.add(pick_duration);
