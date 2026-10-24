@@ -10,7 +10,7 @@ impl Default for Ruleset {
     fn default() -> Self {
         Self {
             garbage_messiness: 1.0, // I have no clue how to implement this yet
-            b2b_bonus: 1.0, // Need to take in MTSS, MTSD, TSS, TSD, TST, Tetris values
+            b2b_bonus: 1.0,         // Need to take in MTSS, MTSD, TSS, TSD, TST, Tetris values
             perfect_clear_bonus: 10.0,
             combo_multiplier: 0.25,
         }
