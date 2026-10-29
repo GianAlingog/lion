@@ -14,11 +14,13 @@ pub struct GarbageQueue {
 impl GarbageQueue {
     #[must_use]
     pub fn incoming(&self) -> u32 {
-        todo!("Return number of incoming lines in the queue")
+        // May use in the future for visuals, though maybe returning the lines is better
+        self.pending.iter().map(|g| g.lines).sum()
     }
 
-    pub fn push(&mut self, _batch: GarbageBatch) {
-        todo!("Push the garbage to the vec; handle other initializations in the future")
+    pub fn push(&mut self, batch: GarbageBatch) {
+        // Other initializations go here if needed
+        self.pending.push(batch);
     }
 
     pub fn cancel(&mut self, mut amount: u32) -> u32 {
