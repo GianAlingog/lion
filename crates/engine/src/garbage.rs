@@ -26,10 +26,14 @@ impl GarbageQueue {
     pub fn cancel(&mut self, mut amount: u32) -> u32 {
         // Find the partition where the prefix sum is <= amount
         let mut prefix_sum = 0;
-        let index = self.pending.iter().position(|g| {
-            prefix_sum += g.lines;
-            prefix_sum > amount
-        }).unwrap_or(self.pending.len());
+        let index = self
+            .pending
+            .iter()
+            .position(|g| {
+                prefix_sum += g.lines;
+                prefix_sum > amount
+            })
+            .unwrap_or(self.pending.len());
 
         let prefix: Vec<_> = self.pending.drain(..index).collect();
         let cancelled_lines = prefix.iter().map(|g| g.lines).sum();
