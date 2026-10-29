@@ -1,5 +1,5 @@
 #[derive(Clone, Copy, Debug)]
-pub struct Rng(u64);
+pub struct Rng(pub u64);
 
 impl Rng {
     #[must_use]
