@@ -3,7 +3,9 @@ use std::collections::VecDeque;
 use crate::{
     bag::Bag,
     board::Board,
+    garbage::{Clear, attack},
     piece::{Piece, Placement},
+    rules::Ruleset,
     srs::SpinKind,
 };
 
@@ -82,7 +84,22 @@ impl Game {
         assert_eq!(p.piece, current_piece);
         let cleared_lines = self.board.lock(p).lines;
 
-        // WARN: Hardcoded b2b on quads only
+        let perfect_clear = cleared_lines > 0 && self.board.is_empty();
+
+        // NOTE: By my convention, attack is calculated given the b2b and combo
+        // of the player before this moved occurred
+        // TODO: Use the a dynamic Ruleset
+        let attack: u32 = attack(
+            &Ruleset::default(),
+            &Clear {
+                lines_cleared: cleared_lines,
+                spin,
+                perfect_clear,
+                b2b: self.b2b,
+                combo: self.combo,
+            },
+        );
+
         // TODO: Factor out into SRS rules
         let mut b2b_broken = false;
         if cleared_lines == 4 || (spin != SpinKind::None && cleared_lines > 0) {
@@ -100,11 +117,6 @@ impl Game {
         } else {
             self.combo += 1;
         }
-
-        let perfect_clear = cleared_lines > 0 && self.board.is_empty();
-
-        // TODO: Actually compute attack
-        let attack: u32 = 0;
 
         // TODO: Handle garbage cancelling
 
