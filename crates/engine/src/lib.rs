@@ -6,3 +6,4 @@ pub mod movegen;
 pub mod piece;
 pub mod rules;
 pub mod srs;
+pub mod utils;
