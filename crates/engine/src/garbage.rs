@@ -1,9 +1,9 @@
 use crate::{rules::Ruleset, srs::SpinKind};
 
 pub struct GarbageBatch {
-    pub lines: u8,
-    pub hole: u8,
-    pub delay: u16, // in ticks
+    pub lines: u32,
+    pub hole: u32,
+    pub delay: u32, // in ticks
 }
 
 pub struct GarbageQueue {
@@ -21,14 +21,35 @@ impl GarbageQueue {
         todo!("Push the garbage to the vec; handle other initializations in the future")
     }
 
-    pub fn cancel(&mut self, _amount: u32) -> u32 {
-        todo!("Should return number of attach left, use in while loop")
+    pub fn cancel(&mut self, mut amount: u32) -> u32 {
+        // Find the partition where the prefix sum is <= amount
+        let mut prefix_sum = 0;
+        let index = self.pending.iter().position(|g| {
+            prefix_sum += g.lines;
+            prefix_sum > amount
+        }).unwrap_or(self.pending.len());
+
+        let prefix: Vec<_> = self.pending.drain(..index).collect();
+        let cancelled_lines = prefix.iter().map(|g| g.lines).sum();
+        amount = amount.saturating_sub(cancelled_lines);
+
+        // Cancel anything left if there is
+        if !self.pending.is_empty() {
+            self.pending[0].lines = self.pending[0].lines.saturating_sub(amount);
+            amount = 0;
+        }
+
+        amount
     }
 
     pub fn tick(&mut self) -> Vec<GarbageBatch> {
+        // The invariant is that all entries in the queue should have delay > 0,
+        // though I will safeguard this for now.
+
         // Decrement the delay of everything in the queue
         for garbage in &mut self.pending {
-            garbage.delay -= 1;
+            garbage.delay = garbage.delay.saturating_sub(1);
+            // garbage.delay -= 1;
         }
 
         // For everything whose delay has expired, return it and remove it
