@@ -85,7 +85,7 @@ impl Game {
         // WARN: Hardcoded b2b on quads only
         // TODO: Factor out into SRS rules
         let mut b2b_broken = false;
-        if cleared_lines == 4 || spin != SpinKind::None {
+        if cleared_lines == 4 || (spin != SpinKind::None && cleared_lines > 0) {
             self.b2b += 1;
         } else if 0 < cleared_lines && cleared_lines < 4 {
             if self.b2b > 0 {
