@@ -3,12 +3,12 @@ use crate::{rules::Ruleset, srs::SpinKind};
 pub struct GarbageBatch {
     pub lines: u8,
     pub hole: u8,
-    pub delay: u16,
+    pub delay: u16, // in ticks
 }
 
 pub struct GarbageQueue {
     // Vec over VecDeque since this should remain small in size
-    _pending: Vec<GarbageBatch>,
+    pending: Vec<GarbageBatch>,
 }
 
 impl GarbageQueue {
@@ -26,7 +26,14 @@ impl GarbageQueue {
     }
 
     pub fn tick(&mut self) -> Vec<GarbageBatch> {
-        todo!("Return the batches that are to be pushed")
+        // Decrement the delay of everything in the queue
+        for garbage in &mut self.pending {
+            garbage.delay -= 1;
+        }
+
+        // For everything whose delay has expired, return it and remove it
+        let index = self.pending.partition_point(|g| g.delay == 0);
+        self.pending.drain(..index).collect()
     }
 }
 
