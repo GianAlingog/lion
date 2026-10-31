@@ -1,4 +1,4 @@
-use crate::piece::Placement;
+use crate::{garbage::GarbageBatch, piece::Placement};
 
 #[derive(Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Board {
@@ -272,6 +272,24 @@ impl Board {
     #[must_use]
     pub fn is_grounded(&self, p: Placement) -> bool {
         self.drop_y(p) == p.y
+    }
+
+    pub fn push_garbage(&mut self, g: &GarbageBatch) {
+        debug_assert_eq!(g.delay, 0);
+
+        let mut new_state = Board::empty();
+        let row_with_hole = Board::FULL_ROW ^ (1 << g.hole);
+        let lines = usize::try_from(g.lines).unwrap();
+
+        for y in 0..Board::HEIGHT {
+            new_state.rows[y] = if y < lines {
+                row_with_hole
+            } else {
+                self.rows[y - lines]
+            };
+        }
+
+        *self = new_state;
     }
 }
 
