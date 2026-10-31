@@ -274,6 +274,10 @@ impl Board {
         self.drop_y(p) == p.y
     }
 
+    /// # Panics
+    ///
+    /// Contains a conversion between u32 and usize for line clears.
+    /// Should not fail under normal circumstances.
     pub fn push_garbage(&mut self, g: &GarbageBatch) {
         debug_assert_eq!(g.delay, 0);
 

@@ -4,7 +4,7 @@ use std::{
 };
 
 use bot::{Bot, Move};
-use engine::{game::Game, garbage::{self, GarbageQueue}};
+use engine::{game::Game, garbage::GarbageQueue};
 
 use crate::observer::{Flow, Observer};
 
@@ -220,16 +220,20 @@ pub fn run_versus(
 
         // Select candidates on previous board state
         // TODO: Keep the generated move history to avoid redundant calculations
-        let Some(chosen_a) = bot_a.pick(&game_a) else { break; };
-        let Some(chosen_b) = bot_b.pick(&game_b) else { break; };
+        let Some(chosen_a) = bot_a.pick(&game_a) else {
+            break;
+        };
+        let Some(chosen_b) = bot_b.pick(&game_b) else {
+            break;
+        };
 
         // Update board states with current move
         let outcome_a = game_a.advance(chosen_a.placement, chosen_a.spin);
         let outcome_b = game_b.advance(chosen_b.placement, chosen_b.spin);
 
         // With the resulting attack, perform cancelling
-        let remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);
-        let remaining_attack_b = garbage_queue_b.cancel(outcome_b.attack);
+        let _remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);
+        let _remaining_attack_b = garbage_queue_b.cancel(outcome_b.attack);
 
         // WARN: unfinished
         // With the remaining attack, push garbage

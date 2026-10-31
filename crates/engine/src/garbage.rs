@@ -27,6 +27,10 @@ impl GarbageQueue {
         self.pending.iter().map(|g| g.lines).sum()
     }
 
+    /// # Panics
+    ///
+    /// Contains a conversion from u64 to u32 for hole selection.
+    /// Should not fail under normal circumstances.
     pub fn push(&mut self, lines: u32, delay: u32) {
         let hole = u32::try_from(self.rng.below(Board::WIDTH as u64)).unwrap();
         self.push_batch(GarbageBatch { lines, hole, delay });
