@@ -4,7 +4,7 @@ use std::{
 };
 
 use bot::{Bot, Move};
-use engine::game::Game;
+use engine::{game::Game, garbage::{self, GarbageQueue}};
 
 use crate::observer::{Flow, Observer};
 
@@ -87,6 +87,7 @@ pub fn run_game(
 ) -> GameStats {
     let game_start = Instant::now();
 
+    // TODO: Refactor such things with a Default()
     let mut game = Game::new(seed, cfg.preview);
     let mut game_stats = GameStats {
         seed,
@@ -252,10 +253,10 @@ mod tests {
 
     #[test]
     fn same_seed_game() {
-        let mut bot1 = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
-        let game1 = run_game(
+        let mut bot_a = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
+        let game_a = run_game(
             0xDEFE_C8ED_u64,
-            &mut *bot1,
+            &mut *bot_a,
             &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 1000 },
@@ -265,10 +266,10 @@ mod tests {
             },
         );
 
-        let mut bot2 = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
-        let game2 = run_game(
+        let mut bot_b = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
+        let game_b = run_game(
             0xDEFE_C8ED_u64,
-            &mut *bot2,
+            &mut *bot_b,
             &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 1000 },
@@ -278,7 +279,7 @@ mod tests {
             },
         );
 
-        assert_eq!(game1, game2);
+        assert_eq!(game_a, game_b);
     }
 
     #[test]

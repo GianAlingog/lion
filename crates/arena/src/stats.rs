@@ -284,7 +284,7 @@ mod tests {
 
     #[test]
     fn pooled_stats() {
-        let game1 = GameStats {
+        let game_a = GameStats {
             seed: 0xDEFE_C8ED_u64,
             end_reason: EndReason::TopOut,
 
@@ -306,7 +306,7 @@ mod tests {
             elapsed: Duration::new(0, 0),
         };
 
-        let game2 = GameStats {
+        let game_b = GameStats {
             seed: 0xDEFE_C8ED_u64,
             end_reason: EndReason::TopOut,
 
@@ -329,7 +329,7 @@ mod tests {
         };
 
         let session = SessionStats {
-            games: vec![game1, game2],
+            games: vec![game_a, game_b],
         };
 
         println!("{session}");
