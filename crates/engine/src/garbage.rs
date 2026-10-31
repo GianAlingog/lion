@@ -1,4 +1,4 @@
-use crate::{rules::Ruleset, srs::SpinKind};
+use crate::{board::Board, rules::Ruleset, srs::SpinKind, utils::Rng};
 
 pub struct GarbageBatch {
     pub lines: u32,
@@ -8,10 +8,19 @@ pub struct GarbageBatch {
 
 pub struct GarbageQueue {
     // Vec over VecDeque since this should remain small in size
+    rng: Rng,
     pending: Vec<GarbageBatch>,
 }
 
 impl GarbageQueue {
+    #[must_use]
+    pub fn new(seed: u64) -> Self {
+        GarbageQueue {
+            rng: Rng(seed),
+            pending: Vec::new(),
+        }
+    }
+
     #[must_use]
     pub fn incoming(&self) -> u32 {
         // May use in the future for visuals, though maybe returning the lines is better
