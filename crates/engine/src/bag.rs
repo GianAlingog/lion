@@ -12,7 +12,7 @@ impl Bag {
     // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle
     fn shuffle_buf(&mut self) {
         for i in (0..7_usize).rev() {
-            let j = self.rng.below(i + 1);
+            let j = usize::try_from(self.rng.below((i + 1) as u64)).unwrap();
             self.buf.swap(i, j);
         }
     }

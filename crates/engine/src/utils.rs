@@ -18,7 +18,7 @@ impl Rng {
 
     // For randomization, it is fine to truncate the bits
     #[allow(clippy::cast_possible_truncation)]
-    pub fn below(&mut self, n: usize) -> usize {
-        self.next_u64() as usize % n
+    pub fn below(&mut self, n: u64) -> u64 {
+        self.next_u64() % n
     }
 }
