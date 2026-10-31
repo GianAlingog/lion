@@ -18,7 +18,12 @@ impl GarbageQueue {
         self.pending.iter().map(|g| g.lines).sum()
     }
 
-    pub fn push(&mut self, batch: GarbageBatch) {
+    pub fn push(&mut self, lines: u32, delay: u32) {
+        let hole = u32::try_from(self.rng.below(Board::WIDTH as u64)).unwrap();
+        self.push_batch(GarbageBatch { lines, hole, delay });
+    }
+
+    pub fn push_batch(&mut self, batch: GarbageBatch) {
         // Other initializations go here if needed
         self.pending.push(batch);
     }
