@@ -28,6 +28,7 @@ pub struct RunConfig {
     pub max_pieces: u32,
     pub preview: usize,
     pub step_mode: bool,
+    pub garbage_delay: u32,
     // pub ruleset: Ruleset,
     // pub check_invariants: bool,
     // pub record_history: bool,
@@ -232,16 +233,27 @@ pub fn run_versus(
         let outcome_b = game_b.advance(chosen_b.placement, chosen_b.spin);
 
         // With the resulting attack, perform cancelling
-        let _remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);
-        let _remaining_attack_b = garbage_queue_b.cancel(outcome_b.attack);
+        let remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);
+        let remaining_attack_b = garbage_queue_b.cancel(outcome_b.attack);
 
-        // WARN: unfinished
         // With the remaining attack, push garbage
-        todo!();
+        garbage_queue_a.push(remaining_attack_b, cfg.garbage_delay);
+        garbage_queue_b.push(remaining_attack_a, cfg.garbage_delay);
 
         // Push any expired garbage
         // Must be on a non-line clear
-        // Do we only tick the garbage queues on non-line clears?
+        if outcome_a.lines == 0 {
+            let incoming_garbage = garbage_queue_a.tick();
+            for g in &incoming_garbage {
+                game_a.board.push_garbage(g);
+            }
+        }
+        if outcome_b.lines == 0 {
+            let incoming_garbage = garbage_queue_b.tick();
+            for g in &incoming_garbage {
+                game_a.board.push_garbage(g);
+            }
+        }
     }
 }
 
@@ -267,6 +279,7 @@ mod tests {
                 max_pieces: 1000,
                 preview: 5,
                 step_mode: false,
+                garbage_delay: 4,
             },
         );
 
@@ -280,6 +293,7 @@ mod tests {
                 max_pieces: 1,
                 preview: 5,
                 step_mode: false,
+                garbage_delay: 4,
             },
         );
 
@@ -298,6 +312,7 @@ mod tests {
                 max_pieces: 100_000,
                 preview: 5,
                 step_mode: false,
+                garbage_delay: 4,
             },
         );
 
@@ -316,6 +331,7 @@ mod tests {
                 max_pieces: 10,
                 preview: 5,
                 step_mode: false,
+                garbage_delay: 4,
             },
         );
 
@@ -335,6 +351,7 @@ mod tests {
                 max_pieces: 10,
                 preview: 5,
                 step_mode: false,
+                garbage_delay: 4,
             },
         );
 
