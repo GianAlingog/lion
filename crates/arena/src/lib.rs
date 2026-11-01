@@ -52,6 +52,9 @@ pub struct Args {
     #[arg(long, default_value_t = 5)]
     pub preview: usize,
 
+    #[arg(long, default_value_t = 4)]
+    pub garbage_delay: u32,
+
     #[arg(long, default_value_t = 3)]
     pub depth: usize,
 

@@ -26,6 +26,7 @@ fn main() {
         max_pieces: args.max_pieces,
         preview: args.preview,
         step_mode: args.step_mode,
+        garbage_delay: args.garbage_delay,
     };
 
     let mut bot = make_bot(args.bot, weights.clone(), args.depth, args.width);
