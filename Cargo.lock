@@ -168,6 +168,7 @@ name = "bot"
 version = "0.1.0"
 dependencies = [
  "engine",
+ "serde",
 ]
 
 [[package]]
@@ -547,6 +548,7 @@ name = "engine"
 version = "0.1.0"
 dependencies = [
  "criterion",
+ "serde",
 ]
 
 [[package]]

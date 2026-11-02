@@ -7,6 +7,10 @@ license.workspace = true
 
 [dependencies]
 engine = { path = "../engine" }
+serde = { version = "1.0.229", features = ["derive"], optional = true }
 
 [lints]
 workspace = true
+
+[features]
+serde = ["dep:serde"]
