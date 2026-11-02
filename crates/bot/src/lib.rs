@@ -3,6 +3,7 @@ pub mod dellacherie;
 pub mod greedy;
 pub mod nothing;
 
+use crate::{beam::Beam, dellacherie::Dellacherie, greedy::Greedy, nothing::Nothing};
 use engine::{game::Game, piece::Placement, srs::SpinKind};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -35,5 +36,28 @@ pub trait Bot {
     }
     fn feature_names(&self) -> &'static [&'static str] {
         &[]
+    }
+}
+
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(tag = "kind", rename_all = "lowercase")
+)]
+pub enum BotConfig {
+    Beam(beam::Config),
+    Dellacherie(dellacherie::Config),
+    Greedy(greedy::Config),
+    Nothing,
+}
+
+impl BotConfig {
+    pub fn build(&self) -> Box<dyn Bot> {
+        match self {
+            Self::Beam(cfg) => Box::new(Beam::new(cfg)),
+            Self::Dellacherie(cfg) => Box::new(Dellacherie::new(cfg)),
+            Self::Greedy(cfg) => Box::new(Greedy::new(cfg)),
+            Self::Nothing => Box::new(Nothing::new()),
+        }
     }
 }
