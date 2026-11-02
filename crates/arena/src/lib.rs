@@ -2,8 +2,7 @@ pub mod observer;
 pub mod run;
 pub mod stats;
 
-use bot::{Bot, beam::Beam, dellacherie::Dellacherie, greedy::Greedy, nothing::Nothing};
-use clap::{Parser, ValueEnum};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 use std::{fmt, path::PathBuf};
 
 #[derive(Clone, Copy, Debug, ValueEnum)]
@@ -29,8 +28,17 @@ pub enum BotKind {
     Nothing,
 }
 
+#[derive(Parser)]
+pub struct Cli {
+    #[command(flatten)]
+    game_args: GameArgs,
+
+    #[command(subcommand)]
+    game_mode: GameMode,
+}
+
 #[derive(Debug, Parser)]
-pub struct Args {
+pub struct GameArgs {
     #[arg(long, default_value = "no_label")]
     pub label: String,
 
@@ -43,23 +51,8 @@ pub struct Args {
     #[arg(long, value_enum, default_value_t = Mode::Endless)]
     pub mode: Mode,
 
-    #[arg(long, default_value_t = 40)]
-    pub sprint_lines: u32,
-
-    #[arg(long, default_value_t = 10_000)]
-    pub max_pieces: u32,
-
     #[arg(long, default_value_t = 5)]
     pub preview: usize,
-
-    #[arg(long, default_value_t = 4)]
-    pub garbage_delay: u32,
-
-    #[arg(long, default_value_t = 3)]
-    pub depth: usize,
-
-    #[arg(long, default_value_t = 16)]
-    pub width: usize,
 
     #[arg(long, value_enum, default_value_t = BotKind::Greedy)]
     pub bot: BotKind,
@@ -67,38 +60,45 @@ pub struct Args {
     #[arg(long)]
     pub step_mode: bool,
 
-    #[arg(long, value_delimiter = ',')]
-    pub weights: Option<Vec<f64>>,
-
     #[arg(long)]
     pub csv: Option<PathBuf>,
 }
 
-impl Args {
-    #[must_use]
-    pub fn parse_args() -> Self {
-        Args::parse()
-    }
+#[derive(Subcommand)]
+pub enum GameMode {
+    Endless(EndlessArgs),
+    Sprint(SprintArgs),
+    VersusArgs(VersusArgs),
 }
 
-/// # Panics
-///
-/// Will panic on incorrect argument for bot weights
-#[must_use]
-pub fn make_bot(kind: BotKind, w: Vec<f64>, depth: usize, width: usize) -> Box<dyn Bot> {
-    // TODO: Refactor to take in &Args instead, will require refactoring tests
-    match kind {
-        BotKind::Beam => Box::new(Beam::new(
-            bot::beam::Weights::try_from(w).unwrap(),
-            depth,
-            width,
-        )),
-        BotKind::Dellacherie => Box::new(Dellacherie::new(
-            bot::dellacherie::Weights::try_from(w).unwrap(),
-        )),
-        BotKind::Greedy => Box::new(Greedy::new(bot::greedy::Weights::try_from(w).unwrap())),
-        BotKind::Nothing => Box::new(Nothing::new()),
-    }
+#[derive(Args)]
+pub struct EndlessArgs {
+    #[arg(long, default_value_t = 40)]
+    pub sprint_lines: u32,
+
+    #[arg(long)]
+    pub bot: PathBuf,
+}
+
+#[derive(Args)]
+pub struct SprintArgs {
+    #[arg(long, default_value_t = 10_000)]
+    pub max_pieces: u32,
+
+    #[arg(long)]
+    pub bot: PathBuf,
+}
+
+#[derive(Args)]
+pub struct VersusArgs {
+    #[arg(long, default_value_t = 4)]
+    pub garbage_delay: u32,
+
+    #[arg(long)]
+    pub bot_a: PathBuf,
+
+    #[arg(long)]
+    pub bot_b: PathBuf,
 }
 
 pub struct SessionMetadata<'a> {
