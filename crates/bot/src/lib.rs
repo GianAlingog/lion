@@ -37,6 +37,9 @@ pub trait Bot {
     fn feature_names(&self) -> &'static [&'static str] {
         &[]
     }
+    fn weights(&self) -> Vec<f64> {
+        Vec::new()
+    }
 }
 
 #[cfg_attr(

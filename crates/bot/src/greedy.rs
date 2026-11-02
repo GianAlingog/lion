@@ -180,6 +180,10 @@ impl Bot for Greedy {
     fn feature_names(&self) -> &'static [&'static str] {
         &Greedy::NAMES
     }
+
+    fn weights(&self) -> Vec<f64> {
+        self.weights.to_array().to_vec()
+    }
 }
 
 #[cfg(test)]

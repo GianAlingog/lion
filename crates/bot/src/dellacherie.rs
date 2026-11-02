@@ -233,4 +233,8 @@ impl Bot for Dellacherie {
     fn feature_names(&self) -> &'static [&'static str] {
         &Dellacherie::NAMES
     }
+
+    fn weights(&self) -> Vec<f64> {
+        self.weights.to_array().to_vec()
+    }
 }
