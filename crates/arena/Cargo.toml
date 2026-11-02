@@ -9,6 +9,7 @@ license.workspace = true
 bot = { path = "../bot" }
 clap = { version = "4.6.6", features = ["derive"] }
 engine = { path = "../engine" }
+toml = "1.1.8"
 
 [lints]
 workspace = true
