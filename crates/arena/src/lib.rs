@@ -1,40 +1,19 @@
 pub mod observer;
-pub mod run;
+pub mod solo;
 pub mod stats;
+pub mod versus;
 
-use clap::{Args, Parser, Subcommand, ValueEnum};
-use std::{fmt, path::PathBuf};
+use bot::BotConfig;
+use clap::{Args, Parser, Subcommand};
+use std::{fs, path::PathBuf};
 
-#[derive(Clone, Copy, Debug, ValueEnum)]
-pub enum Mode {
-    Endless,
-    Sprint,
-}
-
-impl fmt::Display for Mode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Mode::Endless => write!(f, "Endless"),
-            Mode::Sprint => write!(f, "Sprint"),
-        }
-    }
-}
-
-#[derive(Clone, Copy, Debug, ValueEnum)]
-pub enum BotKind {
-    Beam,
-    Dellacherie,
-    Greedy,
-    Nothing,
-}
-
-#[derive(Parser)]
+#[derive(Debug, Parser)]
 pub struct Cli {
     #[command(flatten)]
-    game_args: GameArgs,
+    pub game_args: GameArgs,
 
     #[command(subcommand)]
-    game_mode: GameMode,
+    pub game_mode: GameMode,
 }
 
 #[derive(Debug, Parser)]
@@ -48,14 +27,8 @@ pub struct GameArgs {
     #[arg(long, default_value_t = 0xDEAD_BEEF_u64)]
     pub seed: u64,
 
-    #[arg(long, value_enum, default_value_t = Mode::Endless)]
-    pub mode: Mode,
-
     #[arg(long, default_value_t = 5)]
     pub preview: usize,
-
-    #[arg(long, value_enum, default_value_t = BotKind::Greedy)]
-    pub bot: BotKind,
 
     #[arg(long)]
     pub step_mode: bool,
@@ -64,32 +37,40 @@ pub struct GameArgs {
     pub csv: Option<PathBuf>,
 }
 
-#[derive(Subcommand)]
+#[derive(Debug, Subcommand)]
 pub enum GameMode {
+    Solo(SoloArgs),
+    Versus(VersusArgs),
+}
+
+#[derive(Args, Debug)]
+pub struct SoloArgs {
+    #[command(subcommand)]
+    pub goal_kind: GoalKind,
+
+    #[arg(long)]
+    pub bot: PathBuf,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum GoalKind {
     Endless(EndlessArgs),
     Sprint(SprintArgs),
-    VersusArgs(VersusArgs),
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub struct EndlessArgs {
     #[arg(long, default_value_t = 40)]
-    pub sprint_lines: u32,
-
-    #[arg(long)]
-    pub bot: PathBuf,
+    pub max_pieces: u32,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub struct SprintArgs {
     #[arg(long, default_value_t = 10_000)]
-    pub max_pieces: u32,
-
-    #[arg(long)]
-    pub bot: PathBuf,
+    pub lines: u32,
 }
 
-#[derive(Args)]
+#[derive(Args, Debug)]
 pub struct VersusArgs {
     #[arg(long, default_value_t = 4)]
     pub garbage_delay: u32,
@@ -107,4 +88,10 @@ pub struct SessionMetadata<'a> {
     pub weights: Vec<f64>,
     pub weight_names: &'static [&'static str],
     pub mode: &'a str,
+}
+
+pub fn load_bot(path: &PathBuf) -> BotConfig {
+    let content = fs::read_to_string(path)?;
+    let cfg = toml::from_str(&content)?;
+    cfg
 }
