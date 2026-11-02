@@ -1,59 +1,18 @@
 use arena::{
-    Args, Mode, SessionMetadata, make_bot,
+    Cli, GameMode, Mode, SessionMetadata,
     observer::Silent,
-    run::{RunConfig, RunMode, run_game},
+    solo::{RunConfig, RunMode, run_solo},
     stats::SessionStats,
+    versus::run_versus,
 };
+use clap::Parser;
 
 fn main() {
-    let args = Args::parse_args();
-    println!("{args:?}");
+    let cli = Cli::parse();
+    println!("{cli:?}");
 
-    let weights = args.weights.unwrap();
-
-    let cfg = RunConfig {
-        mode: match args.mode {
-            Mode::Endless => RunMode::Endless,
-            Mode::Sprint => RunMode::Sprint {
-                lines: args.sprint_lines,
-            },
-        },
-        max_pieces: args.max_pieces,
-        preview: args.preview,
-        step_mode: args.step_mode,
-        garbage_delay: args.garbage_delay,
+    match cli.game_mode {
+        GameMode::Solo(args) => run_solo(cli.game_args, args),
+        GameMode::Versus(args) => run_versus(cli.game_args, args),
     };
-
-    let mut bot = make_bot(args.bot, weights.clone(), args.depth, args.width);
-
-    let mut session_stats = SessionStats {
-        games: Vec::with_capacity(args.games as usize),
-    };
-
-    let mut observer = Silent;
-
-    for i in 0..args.games {
-        session_stats.games.push(run_game(
-            args.seed + u64::from(i),
-            &mut *bot,
-            &mut observer,
-            &cfg,
-        ));
-    }
-
-    println!("{session_stats}");
-
-    let session_metadata = SessionMetadata {
-        label: &args.label,
-        bot: bot.name(),
-        weights: weights.clone(),
-        weight_names: bot.feature_names(),
-        mode: &args.mode.to_string(),
-    };
-
-    if let Some(path) = args.csv {
-        session_stats
-            .export(&path, &session_metadata)
-            .expect("CSV Export failed");
-    }
 }
