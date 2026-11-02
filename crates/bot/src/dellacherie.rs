@@ -119,6 +119,15 @@ impl Features {
     }
 }
 
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(deny_unknown_fields)
+)]
+pub struct Config {
+    pub weights: Weights,
+}
+
 pub struct Dellacherie {
     pub weights: Weights,
     buf: Vec<(Placement, SpinKind)>,
@@ -128,9 +137,9 @@ impl Dellacherie {
     const NAMES: [&'static str; N] = ["hol", "wel", "row", "col", "hei", "ero"];
 
     #[must_use]
-    pub fn new(weights: Weights) -> Self {
+    pub fn new(cfg: &Config) -> Self {
         Dellacherie {
-            weights,
+            weights: cfg.weights,
             buf: Vec::new(),
         }
     }

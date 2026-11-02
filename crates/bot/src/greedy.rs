@@ -83,6 +83,15 @@ impl Features {
     }
 }
 
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(deny_unknown_fields)
+)]
+pub struct Config {
+    pub weights: Weights,
+}
+
 pub struct Greedy {
     pub weights: Weights,
     buf: Vec<Placement>,
@@ -92,9 +101,9 @@ impl Greedy {
     const NAMES: [&'static str; N] = ["hol", "bmp", "agh", "lin"];
 
     #[must_use]
-    pub fn new(weights: Weights) -> Self {
+    pub fn new(cfg: &Config) -> Self {
         Greedy {
-            weights,
+            weights: cfg.weights,
             buf: Vec::new(),
         }
     }
@@ -201,11 +210,13 @@ mod tests {
 
         println!("{:?}", game.board);
 
-        let mut bot = Greedy::new(Weights {
-            holes: -4.0,
-            bumpiness: -1.0,
-            aggregate_height: -0.5,
-            lines: 0.0,
+        let mut bot = Greedy::new(&Config {
+            weights: Weights {
+                holes: -4.0,
+                bumpiness: -1.0,
+                aggregate_height: -0.5,
+                lines: 0.0,
+            },
         });
 
         let Move {
@@ -227,11 +238,13 @@ mod tests {
         let seed = 0xDEAD_BEEF_u64;
         let mut game = Game::new(seed, 5);
 
-        let mut bot = Greedy::new(Weights {
-            holes: -4.0,
-            bumpiness: -1.0,
-            aggregate_height: -0.5,
-            lines: 0.0,
+        let mut bot = Greedy::new(&Config {
+            weights: Weights {
+                holes: -4.0,
+                bumpiness: -1.0,
+                aggregate_height: -0.5,
+                lines: 0.0,
+            },
         });
 
         for _ in 0..1000 {

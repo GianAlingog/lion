@@ -157,6 +157,17 @@ fn rank_nodes(a: &Node, b: &Node) -> std::cmp::Ordering {
         .then_with(|| a.next.cmp(&b.next))
 }
 
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(deny_unknown_fields)
+)]
+pub struct Config {
+    pub weights: Weights,
+    pub depth: usize,
+    pub width: usize,
+}
+
 pub struct Beam {
     pub weights: Weights,
     pub depth: usize,
@@ -168,11 +179,11 @@ impl Beam {
     const NAMES: [&'static str; N] = ["hol", "wel", "row", "col", "hei", "ero"];
 
     #[must_use]
-    pub fn new(weights: Weights, depth: usize, width: usize) -> Self {
+    pub fn new(cfg: &Config) -> Self {
         Beam {
-            weights,
-            depth,
-            width,
+            weights: cfg.weights,
+            depth: cfg.depth,
+            width: cfg.width,
             buf: Vec::new(),
         }
     }
@@ -313,11 +324,12 @@ mod tests {
     #[test]
     fn deterministic_beam() {
         let mut game = Game::new(0xDEAD_BEEF_u64, 5);
-        let mut bot = Beam::new(
-            crate::beam::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0]).unwrap(),
-            3,
-            16,
-        );
+        let mut bot = Beam::new(&super::Config {
+            weights: crate::beam::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0])
+                .unwrap(),
+            depth: 3,
+            width: 16,
+        });
         for _ in 0..10 {
             let base = bot.pick(&game).unwrap();
             for _ in 0..20 {
