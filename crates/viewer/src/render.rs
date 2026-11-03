@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, iter::once};
 
-use arena::run::GameStats;
+use arena::solo::GameStats;
 use bot::{Candidate, Move};
 use engine::{
     board::Board,

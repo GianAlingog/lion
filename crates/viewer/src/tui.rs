@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use arena::{
     observer::{Flow, Observer},
-    run::GameStats,
+    solo::GameStats,
 };
 use bot::{Candidate, Move};
 use engine::{

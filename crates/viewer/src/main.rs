@@ -1,6 +1,6 @@
 use arena::{
     Args, Mode, make_bot,
-    run::{RunConfig, RunMode, run_game},
+    solo::{RunConfig, RunMode, run_game},
     stats::SessionStats,
 };
 

@@ -4,13 +4,17 @@ use std::{
 };
 
 use bot::{Bot, Move};
-use engine::{game::Game, garbage::GarbageQueue};
+use engine::game::Game;
 
-use crate::observer::{Flow, Observer};
+use crate::{
+    GameArgs, GoalKind, SessionMetadata, SoloArgs, load_bot,
+    observer::{Flow, Observer, Silent},
+    stats::SessionStats,
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RunMode {
-    Endless,
+    Endless { max_pieces: u32 },
     Sprint { lines: u32 },
 }
 
@@ -25,10 +29,8 @@ pub enum EndReason {
 
 pub struct RunConfig {
     pub mode: RunMode,
-    pub max_pieces: u32,
     pub preview: usize,
     pub step_mode: bool,
-    pub garbage_delay: u32,
     // pub ruleset: Ruleset,
     // pub check_invariants: bool,
     // pub record_history: bool,
@@ -74,6 +76,57 @@ impl PartialEq for GameStats {
             && self.attack == other.attack
             && self.spins == other.spins
             && self.height_hist == other.height_hist
+    }
+}
+
+pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
+    let cfg = RunConfig {
+        mode: match solo_args.goal_kind {
+            GoalKind::Endless(args) => RunMode::Endless {
+                max_pieces: args.max_pieces,
+            },
+            GoalKind::Sprint(args) => RunMode::Sprint { lines: args.lines },
+        },
+        preview: game_args.preview,
+        step_mode: game_args.step_mode,
+    };
+
+    let mut bot_config = load_bot(&solo_args.bot);
+    let mut bot = bot_config.build();
+
+    let mut session_stats = SessionStats {
+        games: Vec::with_capacity(game_args.games as usize),
+    };
+
+    let mut observer = Silent;
+
+    for i in 0..game_args.games {
+        session_stats.games.push(run_game(
+            game_args.seed + u64::from(i),
+            &mut *bot,
+            &mut observer,
+            &cfg,
+        ));
+    }
+
+    println!("{session_stats}");
+
+    // TODO: Use strum for string conversion and other QoL
+    let session_metadata = SessionMetadata {
+        label: &game_args.label,
+        bot: bot.name(),
+        weights: bot.weights(),
+        weight_names: bot.feature_names(),
+        mode: match solo_args.goal_kind {
+            GoalKind::Endless(_) => "Endless",
+            GoalKind::Sprint(_) => "Sprint",
+        },
+    };
+
+    if let Some(path) = game_args.csv {
+        session_stats
+            .export(&path, &session_metadata)
+            .expect("CSV Export failed");
     }
 }
 
@@ -202,98 +255,46 @@ pub fn run_game(
     game_stats
 }
 
-pub fn run_versus(
-    seed: u64,
-    bot_a: &mut dyn Bot,
-    bot_b: &mut dyn Bot,
-    // observer: &mut dyn Observer,
-    cfg: &RunConfig,
-) {
-    // No game stats for now
-    let mut game_a = Game::new(seed, cfg.preview);
-    let mut game_b = Game::new(seed, cfg.preview);
-
-    let mut garbage_queue_a = GarbageQueue::new(seed);
-    let mut garbage_queue_b = GarbageQueue::new(seed);
-
-    while !game_a.topped_out() && !game_b.topped_out() {
-        // Simulate one tick
-
-        // Select candidates on previous board state
-        // TODO: Keep the generated move history to avoid redundant calculations
-        let Some(chosen_a) = bot_a.pick(&game_a) else {
-            break;
-        };
-        let Some(chosen_b) = bot_b.pick(&game_b) else {
-            break;
-        };
-
-        // Update board states with current move
-        let outcome_a = game_a.advance(chosen_a.placement, chosen_a.spin);
-        let outcome_b = game_b.advance(chosen_b.placement, chosen_b.spin);
-
-        // With the resulting attack, perform cancelling
-        let remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);
-        let remaining_attack_b = garbage_queue_b.cancel(outcome_b.attack);
-
-        // With the remaining attack, push garbage
-        garbage_queue_a.push(remaining_attack_b, cfg.garbage_delay);
-        garbage_queue_b.push(remaining_attack_a, cfg.garbage_delay);
-
-        // Push any expired garbage
-        // Must be on a non-line clear
-        if outcome_a.lines == 0 {
-            let incoming_garbage = garbage_queue_a.tick();
-            for g in &incoming_garbage {
-                game_a.board.push_garbage(g);
-            }
-        }
-        if outcome_b.lines == 0 {
-            let incoming_garbage = garbage_queue_b.tick();
-            for g in &incoming_garbage {
-                game_a.board.push_garbage(g);
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
+    use bot::greedy;
+
     use super::*;
     use crate::{
-        BotKind::{Greedy, Nothing},
-        make_bot,
         observer::Silent,
-        run::EndReason::{GoalReached, PieceCap},
+        solo::EndReason::{GoalReached, PieceCap},
     };
+    use bot::BotConfig;
 
     #[test]
     fn same_seed_game() {
-        let mut bot_a = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
+        let mut cfg_a = BotConfig::Greedy(greedy::Config {
+            weights: greedy::Weights::try_from(vec![-10.0, -10.0, -1.0, 0.0]).unwrap(),
+        });
+        let mut bot_a = cfg_a.build();
         let game_a = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot_a,
             &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 1000 },
-                max_pieces: 1000,
                 preview: 5,
                 step_mode: false,
-                garbage_delay: 4,
             },
         );
 
-        let mut bot_b = make_bot(Greedy, vec![-10.0, -10.0, -1.0, 0.0], 0, 0);
+        let mut cfg_b = BotConfig::Greedy(greedy::Config {
+            weights: greedy::Weights::try_from(vec![-10.0, -10.0, -1.0, 0.0]).unwrap(),
+        });
+        let mut bot_b = cfg_b.build();
         let game_b = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot_b,
             &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 1000 },
-                max_pieces: 1,
                 preview: 5,
                 step_mode: false,
-                garbage_delay: 4,
             },
         );
 
@@ -302,17 +303,18 @@ mod tests {
 
     #[test]
     fn bot_fail() {
-        let mut bot = make_bot(Nothing, vec![], 0, 0);
+        let mut cfg = BotConfig::Nothing;
+        let mut bot = cfg.build();
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
             &mut Silent,
             &RunConfig {
-                mode: RunMode::Endless,
-                max_pieces: 100_000,
+                mode: RunMode::Endless {
+                    max_pieces: 100_000,
+                },
                 preview: 5,
                 step_mode: false,
-                garbage_delay: 4,
             },
         );
 
@@ -321,17 +323,18 @@ mod tests {
 
     #[test]
     fn piece_cap() {
-        let mut bot = make_bot(Greedy, vec![-4.0, -1.0, -0.5, 0.0], 0, 0);
+        let mut cfg = BotConfig::Greedy(greedy::Config {
+            weights: greedy::Weights::try_from(vec![-4.0, -1.0, -0.5, 0.0]).unwrap(),
+        });
+        let mut bot = cfg.build();
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
             &mut Silent,
             &RunConfig {
-                mode: RunMode::Endless,
-                max_pieces: 10,
+                mode: RunMode::Endless { max_pieces: 10 },
                 preview: 5,
                 step_mode: false,
-                garbage_delay: 4,
             },
         );
 
@@ -341,17 +344,18 @@ mod tests {
 
     #[test]
     fn sprint_cap() {
-        let mut bot = make_bot(Greedy, vec![-4.0, -1.0, -0.5, 0.0], 0, 0);
+        let mut cfg = BotConfig::Greedy(greedy::Config {
+            weights: greedy::Weights::try_from(vec![-4.0, -1.0, -0.5, 0.0]).unwrap(),
+        });
+        let mut bot = cfg.build();
         let game = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot,
             &mut Silent,
             &RunConfig {
                 mode: RunMode::Sprint { lines: 50 },
-                max_pieces: 10,
                 preview: 5,
                 step_mode: false,
-                garbage_delay: 4,
             },
         );
 

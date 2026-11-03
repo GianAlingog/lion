@@ -4,7 +4,7 @@ use std::{
     path::PathBuf,
 };
 
-use crate::{SessionMetadata, run::GameStats};
+use crate::{SessionMetadata, solo::GameStats};
 
 #[derive(Debug)]
 pub struct Summary {
@@ -238,7 +238,7 @@ mod tests {
     use std::time::Duration;
 
     use crate::{
-        run::{EndReason, GameStats},
+        solo::{EndReason, GameStats},
         stats::SessionStats,
     };
 

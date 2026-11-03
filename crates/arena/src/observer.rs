@@ -1,7 +1,7 @@
 use bot::{Candidate, Move};
 use engine::game::{Game, Outcome};
 
-use crate::run::GameStats;
+use crate::solo::GameStats;
 
 #[derive(PartialEq, Eq)]
 pub enum Flow {
