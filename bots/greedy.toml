@@ -1,0 +1,7 @@
+kind = "greedy"
+
+[weights]
+holes = -4.0
+bumpiness = -1.0
+aggregate_height = -0.5
+lines = 0.0
