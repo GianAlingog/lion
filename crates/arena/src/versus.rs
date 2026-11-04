@@ -15,6 +15,10 @@ pub struct RunConfig {
     // pub record_history: bool,
 }
 
+/// # Panics
+///
+/// Will panic if unable to load bot from config file
+#[allow(clippy::needless_pass_by_value)]
 pub fn run_versus(game_args: GameArgs, versus_args: VersusArgs) {
     let cfg = RunConfig {
         preview: game_args.preview,

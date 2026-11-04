@@ -70,6 +70,11 @@ impl PartialEq for GameStats {
     }
 }
 
+/// # Panics
+///
+/// Will panic if unable to load bot from config file
+// Note: Both Args are lightweight for now though we can take them by reference
+#[allow(clippy::needless_pass_by_value)]
 pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
     let cfg = RunConfig {
         mode: match &solo_args.goal_kind {

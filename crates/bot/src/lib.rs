@@ -55,6 +55,7 @@ pub enum BotConfig {
 }
 
 impl BotConfig {
+    #[must_use]
     pub fn build(&self) -> Box<dyn Bot> {
         match self {
             Self::Beam(cfg) => Box::new(Beam::new(cfg)),

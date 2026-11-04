@@ -94,6 +94,9 @@ pub struct SessionMetadata<'a> {
     pub mode: &'a str,
 }
 
+/// # Errors
+///
+/// May error out on file read or toml parsing mismatch
 pub fn load_bot(path: &Path) -> Result<BotConfig, Box<dyn Error>> {
     let content = fs::read_to_string(path)?;
     let cfg = toml::from_str(&content)?;
