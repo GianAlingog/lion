@@ -1,0 +1,11 @@
+kind = "beam"
+depth = 3
+width = 16
+
+[weights]
+holes = -4.0
+cumulative_wells = -1.0
+row_transitions = -1.0
+column_transitions = -1.0
+landing_height = -1.0
+eroded_cells = 1.0
