@@ -81,7 +81,7 @@ impl PartialEq for GameStats {
 
 pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
     let cfg = RunConfig {
-        mode: match solo_args.goal_kind {
+        mode: match &solo_args.goal_kind {
             GoalKind::Endless(args) => RunMode::Endless {
                 max_pieces: args.max_pieces,
             },
@@ -117,7 +117,7 @@ pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
         bot: bot.name(),
         weights: bot.weights(),
         weight_names: bot.feature_names(),
-        mode: match solo_args.goal_kind {
+        mode: match &solo_args.goal_kind {
             GoalKind::Endless(_) => "Endless",
             GoalKind::Sprint(_) => "Sprint",
         },
