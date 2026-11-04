@@ -1,3 +1,4 @@
+#[cfg_attr(feature = "serde", derive(serde::Deserialize))]
 pub struct Ruleset {
     pub garbage_messiness: f64,
     pub b2b_bonus: f64,
@@ -5,7 +6,6 @@ pub struct Ruleset {
     pub combo_multiplier: f64,
 }
 
-// TODO: use serde
 impl Default for Ruleset {
     fn default() -> Self {
         Self {
