@@ -237,8 +237,10 @@ pub fn run_game(
             break;
         }
 
-        if cfg.mode == RunMode::Endless && game_stats.pieces >= cfg.max_pieces {
-            game_stats.end_reason = EndReason::PieceCap;
+        if let RunMode::Endless { max_pieces } = cfg.mode
+            && game_stats.pieces >= max_pieces
+        {
+            game_stats.end_reason = EndReason::GoalReached;
             break;
         }
 
