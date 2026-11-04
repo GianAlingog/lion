@@ -5,7 +5,11 @@ pub mod versus;
 
 use bot::BotConfig;
 use clap::{Args, Parser, Subcommand};
-use std::{fs, path::PathBuf};
+use std::{
+    error::Error,
+    fs,
+    path::{Path, PathBuf},
+};
 
 #[derive(Debug, Parser)]
 pub struct Cli {
@@ -90,8 +94,16 @@ pub struct SessionMetadata<'a> {
     pub mode: &'a str,
 }
 
-pub fn load_bot(path: &PathBuf) -> BotConfig {
+pub fn load_bot(path: &Path) -> Result<BotConfig, Box<dyn Error>> {
     let content = fs::read_to_string(path)?;
     let cfg = toml::from_str(&content)?;
-    cfg
+    Ok(cfg)
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EndReason {
+    BotFailed,
+    ViewerClosed,
+    TopOut,
+    GoalReached,
 }

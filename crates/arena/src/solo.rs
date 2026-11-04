@@ -7,7 +7,7 @@ use bot::{Bot, Move};
 use engine::game::Game;
 
 use crate::{
-    GameArgs, GoalKind, SessionMetadata, SoloArgs, load_bot,
+    EndReason, GameArgs, GoalKind, SessionMetadata, SoloArgs, load_bot,
     observer::{Flow, Observer, Silent},
     stats::SessionStats,
 };
