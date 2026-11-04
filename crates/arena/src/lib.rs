@@ -64,13 +64,13 @@ pub enum GoalKind {
 
 #[derive(Args, Debug)]
 pub struct EndlessArgs {
-    #[arg(long, default_value_t = 40)]
+    #[arg(long, default_value_t = 10_000)]
     pub max_pieces: u32,
 }
 
 #[derive(Args, Debug)]
 pub struct SprintArgs {
-    #[arg(long, default_value_t = 10_000)]
+    #[arg(long, default_value_t = 40)]
     pub lines: u32,
 }
 
