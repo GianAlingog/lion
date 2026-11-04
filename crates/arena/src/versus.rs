@@ -72,7 +72,9 @@ pub fn run_game(
         };
 
         // Update board states with current move
+        if chosen_a.use_hold { game_a.swap_hold(); }
         let outcome_a = game_a.advance(chosen_a.placement, chosen_a.spin);
+        if chosen_b.use_hold { game_b.swap_hold(); }
         let outcome_b = game_b.advance(chosen_b.placement, chosen_b.spin);
 
         // With the resulting attack, perform cancelling
