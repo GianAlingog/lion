@@ -237,10 +237,7 @@ impl std::fmt::Display for SessionStats {
 mod tests {
     use std::time::Duration;
 
-    use crate::{
-        solo::{EndReason, GameStats},
-        stats::SessionStats,
-    };
+    use crate::{EndReason, solo::GameStats, stats::SessionStats};
 
     #[test]
     fn empty_values() {

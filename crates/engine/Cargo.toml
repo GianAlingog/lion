@@ -6,6 +6,9 @@ rust-version.workspace = true
 license.workspace = true
 
 [dependencies]
+serde = { version = "1.0.229", features = ["derive"], optional = true }
+
+[dev-dependencies]
 criterion = { version = "0.8", features = ["html_reports"] }
 
 [lints]
@@ -14,3 +17,6 @@ workspace = true
 [[bench]]
 name = "movegen"
 harness = false
+
+[features]
+serde = ["dep:serde"]

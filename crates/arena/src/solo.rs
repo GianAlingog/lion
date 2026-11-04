@@ -18,15 +18,6 @@ pub enum RunMode {
     Sprint { lines: u32 },
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum EndReason {
-    BotFailed,
-    ViewerClosed,
-    TopOut,
-    PieceCap,
-    GoalReached,
-}
-
 pub struct RunConfig {
     pub mode: RunMode,
     pub preview: usize,
@@ -91,7 +82,7 @@ pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
         step_mode: game_args.step_mode,
     };
 
-    let mut bot_config = load_bot(&solo_args.bot);
+    let bot_config = load_bot(&solo_args.bot).unwrap();
     let mut bot = bot_config.build();
 
     let mut session_stats = SessionStats {
@@ -262,15 +253,12 @@ mod tests {
     use bot::greedy;
 
     use super::*;
-    use crate::{
-        observer::Silent,
-        solo::EndReason::{GoalReached, PieceCap},
-    };
+    use crate::{observer::Silent, solo::EndReason::GoalReached};
     use bot::BotConfig;
 
     #[test]
     fn same_seed_game() {
-        let mut cfg_a = BotConfig::Greedy(greedy::Config {
+        let cfg_a = BotConfig::Greedy(greedy::Config {
             weights: greedy::Weights::try_from(vec![-10.0, -10.0, -1.0, 0.0]).unwrap(),
         });
         let mut bot_a = cfg_a.build();
@@ -285,7 +273,7 @@ mod tests {
             },
         );
 
-        let mut cfg_b = BotConfig::Greedy(greedy::Config {
+        let cfg_b = BotConfig::Greedy(greedy::Config {
             weights: greedy::Weights::try_from(vec![-10.0, -10.0, -1.0, 0.0]).unwrap(),
         });
         let mut bot_b = cfg_b.build();
@@ -305,7 +293,7 @@ mod tests {
 
     #[test]
     fn bot_fail() {
-        let mut cfg = BotConfig::Nothing;
+        let cfg = BotConfig::Nothing;
         let mut bot = cfg.build();
         let game = run_game(
             0xDEFE_C8ED_u64,
@@ -325,7 +313,7 @@ mod tests {
 
     #[test]
     fn piece_cap() {
-        let mut cfg = BotConfig::Greedy(greedy::Config {
+        let cfg = BotConfig::Greedy(greedy::Config {
             weights: greedy::Weights::try_from(vec![-4.0, -1.0, -0.5, 0.0]).unwrap(),
         });
         let mut bot = cfg.build();
@@ -341,12 +329,12 @@ mod tests {
         );
 
         assert_eq!(game.pieces, 10);
-        assert_eq!(game.end_reason, PieceCap);
+        assert_eq!(game.end_reason, GoalReached);
     }
 
     #[test]
     fn sprint_cap() {
-        let mut cfg = BotConfig::Greedy(greedy::Config {
+        let cfg = BotConfig::Greedy(greedy::Config {
             weights: greedy::Weights::try_from(vec![-4.0, -1.0, -0.5, 0.0]).unwrap(),
         });
         let mut bot = cfg.build();

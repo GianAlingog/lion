@@ -7,6 +7,11 @@ use {
 
 pub const N: usize = 4;
 
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(deny_unknown_fields)
+)]
 #[derive(Clone, Copy)]
 pub struct Weights {
     pub holes: f64,

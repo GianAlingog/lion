@@ -10,6 +10,11 @@ use crate::{Bot, Candidate, Move, rank};
 
 pub const N: usize = 6;
 
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize),
+    serde(deny_unknown_fields)
+)]
 #[derive(Clone, Copy)]
 pub struct Weights {
     pub holes: f64,
