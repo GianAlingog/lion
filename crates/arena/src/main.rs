@@ -1,8 +1,6 @@
 use arena::{
-    Cli, GameMode, Mode, SessionMetadata,
-    observer::Silent,
-    solo::{RunConfig, RunMode, run_solo},
-    stats::SessionStats,
+    Cli, GameMode,
+    solo::{run_solo},
     versus::run_versus,
 };
 use clap::Parser;
