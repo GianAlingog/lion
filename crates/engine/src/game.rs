@@ -74,7 +74,7 @@ impl Game {
     /// # Panics
     ///
     /// It must hold that Placement p is grounded to place it.
-    pub fn advance(&mut self, p: Placement, spin: SpinKind) -> Outcome {
+    pub fn advance(&mut self, p: Placement, spin: SpinKind, rules: &Ruleset) -> Outcome {
         assert!(self.board.is_grounded(p));
 
         // We need to send the displayed piece as well
@@ -90,7 +90,7 @@ impl Game {
         // of the player before this moved occurred
         // TODO: Use the a dynamic Ruleset
         let attack: u32 = attack(
-            &Ruleset::default(),
+            rules,
             &Clear {
                 lines_cleared: cleared_lines,
                 spin,
@@ -117,8 +117,6 @@ impl Game {
         } else {
             self.combo += 1;
         }
-
-        // TODO: Handle garbage cancelling
 
         // Refill bag
         self.queue.push_back(self.bag.next_piece());

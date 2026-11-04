@@ -328,7 +328,7 @@ impl Bot for Beam {
 #[cfg(test)]
 mod tests {
     use crate::{Bot, beam::Beam};
-    use engine::game::Game;
+    use engine::{game::Game, rules::Ruleset};
 
     #[test]
     fn deterministic_beam() {
@@ -339,6 +339,7 @@ mod tests {
             depth: 3,
             width: 16,
         });
+        let rules = Ruleset::default();
         for _ in 0..10 {
             let base = bot.pick(&game).unwrap();
             for _ in 0..20 {
@@ -348,7 +349,7 @@ mod tests {
             if base.use_hold {
                 game.swap_hold();
             }
-            game.advance(base.placement, base.spin);
+            game.advance(base.placement, base.spin, &rules);
         }
     }
 }

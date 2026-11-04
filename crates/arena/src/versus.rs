@@ -1,8 +1,8 @@
 use bot::Bot;
-use engine::{game::Game, garbage::GarbageQueue};
+use engine::{game::Game, garbage::GarbageQueue, rules::Ruleset};
 
 use crate::{
-    GameArgs, VersusArgs, load_bot,
+    GameArgs, VersusArgs, load_bot, load_rules,
     observer::{Observer, Silent},
 };
 
@@ -10,7 +10,7 @@ pub struct RunConfig {
     pub preview: usize,
     pub step_mode: bool,
     pub garbage_delay: u32,
-    // pub ruleset: Ruleset,
+    pub ruleset: Ruleset,
     // pub check_invariants: bool,
     // pub record_history: bool,
 }
@@ -24,6 +24,11 @@ pub fn run_versus(game_args: GameArgs, versus_args: VersusArgs) {
         preview: game_args.preview,
         step_mode: game_args.step_mode,
         garbage_delay: versus_args.garbage_delay,
+        ruleset: if let Some(rules) = game_args.rules {
+            load_rules(&rules).unwrap()
+        } else {
+            Ruleset::default()
+        },
     };
 
     let bot_config_a = load_bot(&versus_args.bot_a).unwrap();
@@ -75,11 +80,11 @@ pub fn run_game(
         if chosen_a.use_hold {
             game_a.swap_hold();
         }
-        let outcome_a = game_a.advance(chosen_a.placement, chosen_a.spin);
+        let outcome_a = game_a.advance(chosen_a.placement, chosen_a.spin, &cfg.ruleset);
         if chosen_b.use_hold {
             game_b.swap_hold();
         }
-        let outcome_b = game_b.advance(chosen_b.placement, chosen_b.spin);
+        let outcome_b = game_b.advance(chosen_b.placement, chosen_b.spin, &cfg.ruleset);
 
         // With the resulting attack, perform cancelling
         let remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);

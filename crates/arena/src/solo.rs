@@ -4,10 +4,10 @@ use std::{
 };
 
 use bot::{Bot, Move};
-use engine::game::Game;
+use engine::{game::Game, rules::Ruleset};
 
 use crate::{
-    EndReason, GameArgs, GoalKind, SessionMetadata, SoloArgs, load_bot,
+    EndReason, GameArgs, GoalKind, SessionMetadata, SoloArgs, load_bot, load_rules,
     observer::{Flow, Observer, Silent},
     stats::SessionStats,
 };
@@ -22,7 +22,7 @@ pub struct RunConfig {
     pub mode: RunMode,
     pub preview: usize,
     pub step_mode: bool,
-    // pub ruleset: Ruleset,
+    pub ruleset: Ruleset,
     // pub check_invariants: bool,
     // pub record_history: bool,
 }
@@ -85,6 +85,11 @@ pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
         },
         preview: game_args.preview,
         step_mode: game_args.step_mode,
+        ruleset: if let Some(rules) = game_args.rules {
+            load_rules(&rules).unwrap()
+        } else {
+            Ruleset::default()
+        },
     };
 
     let bot_config = load_bot(&solo_args.bot).unwrap();
@@ -194,7 +199,7 @@ pub fn run_game(
         if use_hold {
             game.swap_hold();
         }
-        let outcome = game.advance(placement, spin);
+        let outcome = game.advance(placement, spin, &cfg.ruleset);
 
         // Record relevant statistics
         game_stats.pieces += 1;
@@ -275,6 +280,7 @@ mod tests {
                 mode: RunMode::Sprint { lines: 1000 },
                 preview: 5,
                 step_mode: false,
+                ruleset: Ruleset::default(),
             },
         );
 
@@ -290,6 +296,7 @@ mod tests {
                 mode: RunMode::Sprint { lines: 1000 },
                 preview: 5,
                 step_mode: false,
+                ruleset: Ruleset::default(),
             },
         );
 
@@ -310,6 +317,7 @@ mod tests {
                 },
                 preview: 5,
                 step_mode: false,
+                ruleset: Ruleset::default(),
             },
         );
 
@@ -330,6 +338,7 @@ mod tests {
                 mode: RunMode::Endless { max_pieces: 10 },
                 preview: 5,
                 step_mode: false,
+                ruleset: Ruleset::default(),
             },
         );
 
@@ -351,6 +360,7 @@ mod tests {
                 mode: RunMode::Sprint { lines: 50 },
                 preview: 5,
                 step_mode: false,
+                ruleset: Ruleset::default(),
             },
         );
 

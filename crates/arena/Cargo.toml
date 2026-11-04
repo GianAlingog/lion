@@ -8,7 +8,7 @@ license.workspace = true
 [dependencies]
 bot = { path = "../bot", features = ["serde"] }
 clap = { version = "4.6.6", features = ["derive"] }
-engine = { path = "../engine" }
+engine = { path = "../engine", features = ["serde"] }
 toml = "1.1.8"
 
 [lints]

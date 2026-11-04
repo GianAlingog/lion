@@ -5,6 +5,7 @@ pub mod versus;
 
 use bot::BotConfig;
 use clap::{Args, Parser, Subcommand};
+use engine::rules::Ruleset;
 use std::{
     error::Error,
     fs,
@@ -36,6 +37,9 @@ pub struct GameArgs {
 
     #[arg(long)]
     pub step_mode: bool,
+
+    #[arg(long)]
+    pub rules: Option<PathBuf>,
 
     #[arg(long)]
     pub csv: Option<PathBuf>,
@@ -101,6 +105,15 @@ pub fn load_bot(path: &Path) -> Result<BotConfig, Box<dyn Error>> {
     let content = fs::read_to_string(path)?;
     let cfg = toml::from_str(&content)?;
     Ok(cfg)
+}
+
+/// # Errors
+///
+/// May error out on file read or toml parsing mismatch
+pub fn load_rules(path: &Path) -> Result<Ruleset, Box<dyn Error>> {
+    let content = fs::read_to_string(path)?;
+    let rules = toml::from_str(&content)?;
+    Ok(rules)
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

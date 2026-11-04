@@ -194,7 +194,7 @@ impl Bot for Greedy {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use engine::piece::Piece;
+    use engine::{piece::Piece, rules::Ruleset};
 
     #[test]
     fn greedy_well_placement() {
@@ -227,6 +227,7 @@ mod tests {
                 lines: 0.0,
             },
         });
+        let rules = Ruleset::default();
 
         let Move {
             placement,
@@ -237,7 +238,7 @@ mod tests {
         if use_hold {
             game.swap_hold();
         }
-        game.advance(placement, spin);
+        game.advance(placement, spin, &rules);
 
         println!("{:?}", game.board);
     }
@@ -255,6 +256,7 @@ mod tests {
                 lines: 0.0,
             },
         });
+        let rules = Ruleset::default();
 
         for _ in 0..1000 {
             let moves = bot.moves(&game);
@@ -269,7 +271,7 @@ mod tests {
                 game.swap_hold();
             }
 
-            game.advance(placement, spin);
+            game.advance(placement, spin, &rules);
         }
     }
 }
