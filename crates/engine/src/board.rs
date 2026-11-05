@@ -297,6 +297,24 @@ impl Board {
     }
 }
 
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for y in (0..Self::VIEW_HEIGHT).rev() {
+            for x in 0..Self::WIDTH {
+                match (self.rows[y] >> x) & 1 {
+                    0 => write!(f, "O")?,
+                    1 => write!(f, "X")?,
+                    _ => {}
+                }
+            }
+
+            writeln!(f)?;
+        }
+
+        Ok(())
+    }
+}
+
 impl std::fmt::Debug for Board {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for y in (0..Self::HEIGHT).rev() {
