@@ -94,6 +94,10 @@ pub struct Clear {
 #[must_use]
 #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 pub fn attack(rules: &Ruleset, clear: &Clear) -> u32 {
+    if clear.lines_cleared == 0 {
+        return 0;
+    }
+
     // BASE_ATTACK_TABLE[spin][lines_cleared]
     const BASE_ATTACK_TABLE: [[u32; 5]; 3] = [
         // None
