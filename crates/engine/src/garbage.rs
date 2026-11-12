@@ -12,15 +12,16 @@ const BASE_ATTACK_TABLE: [[u32; 5]; 3] = [
     [0, 2, 4, 6, 0],
 ];
 
+// https://tetris.wiki/Garbage (NOT TETR.IO)
 // B2B_BONUS_TABLE[spin][lines_cleared]
-const B2B_BONUS_TABLE: [[u32; 5]; 3] = [
-    // None
-    [0, 0, 0, 0, 2],
-    // Mini
-    [0, 1, 1, 0, 0],
-    // Full
-    [0, 1, 2, 3, 0],
-];
+// const B2B_BONUS_TABLE: [[u32; 5]; 3] = [
+//     // None
+//     [0, 0, 0, 0, 2],
+//     // Mini
+//     [0, 1, 1, 0, 0],
+//     // Full
+//     [0, 1, 2, 3, 0],
+// ];
 
 pub struct GarbageBatch {
     pub lines: u32,
@@ -137,7 +138,10 @@ pub fn attack(rules: &Ruleset, clear: &Clear) -> u32 {
         base_attack += rules.perfect_clear_bonus as u32;
     }
 
-    base_attack += B2B_BONUS_TABLE[clear.spin as usize][clear.lines_cleared as usize];
+    if clear.b2b > 0 {
+        base_attack += rules.b2b_bonus as u32;
+    }
+    // base_attack += B2B_BONUS_TABLE[clear.spin as usize][clear.lines_cleared as usize];
 
     base_attack
 }
