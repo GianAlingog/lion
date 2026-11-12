@@ -1,6 +1,4 @@
-use std::{
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
 use bot::{Bot, Move};
 use engine::{game::Game, rules::Ruleset};
