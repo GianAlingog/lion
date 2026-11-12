@@ -88,6 +88,9 @@ pub struct VersusArgs {
     #[arg(long, default_value_t = 4)]
     pub garbage_delay: u32,
 
+    #[arg(long, default_value_t = 10_000)]
+    pub max_ticks: u32,
+
     #[arg(long)]
     pub bot_a: PathBuf,
 
