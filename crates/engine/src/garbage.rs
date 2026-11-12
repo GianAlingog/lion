@@ -1,5 +1,25 @@
 use crate::{board::Board, rules::Ruleset, srs::SpinKind, utils::Rng};
 
+// BASE_ATTACK_TABLE[spin][lines_cleared]
+const BASE_ATTACK_TABLE: [[u32; 5]; 3] = [
+    // None
+    [0, 0, 1, 2, 4],
+    // Mini
+    [0, 0, 1, 0, 0],
+    // Full
+    [0, 2, 4, 6, 0],
+];
+
+// B2B_BONUS_TABLE[spin][lines_cleared]
+const B2B_BONUS_TABLE: [[u32; 5]; 3] = [
+    // None
+    [0, 0, 0, 0, 2],
+    // Mini
+    [0, 1, 1, 0, 0],
+    // Full
+    [0, 1, 2, 3, 0],
+];
+
 pub struct GarbageBatch {
     pub lines: u32,
     pub hole: u32,
@@ -98,24 +118,24 @@ pub fn attack(rules: &Ruleset, clear: &Clear) -> u32 {
         return 0;
     }
 
-    // BASE_ATTACK_TABLE[spin][lines_cleared]
-    const BASE_ATTACK_TABLE: [[u32; 5]; 3] = [
-        // None
-        [0, 0, 1, 2, 4],
-        // Mini
-        [0, 0, 1, 0, 0],
-        // Full
-        [0, 2, 4, 6, 0],
-    ];
+    // Calculate base attack
+    let mut base_attack = BASE_ATTACK_TABLE[clear.spin as usize][clear.lines_cleared as usize];
 
-    let base_attack = BASE_ATTACK_TABLE[clear.spin as usize][clear.lines_cleared as usize];
-
-    if base_attack == 0 {
-        // WARN: This is a hardcoded bonus. It may differ in other systems
-        return (1.0 + (1.0 + rules.combo_multiplier) * f64::from(clear.combo))
+    // Apply combo bonuses
+    base_attack = if base_attack == 0 {
+        (1.0 + (1.0 + rules.combo_multiplier) * f64::from(clear.combo))
             .ln()
-            .floor() as u32;
+            .floor() as u32
+    } else {
+        (f64::from(base_attack) * (1.0 + rules.combo_multiplier * f64::from(clear.combo))) as u32
+    };
+
+    // Apply miscellaneous bonuses
+    if clear.perfect_clear {
+        base_attack += rules.perfect_clear_bonus as u32;
     }
 
-    (f64::from(base_attack) * (1.0 + rules.combo_multiplier * f64::from(clear.combo))) as u32
+    base_attack += B2B_BONUS_TABLE[clear.spin as usize][clear.lines_cleared as usize];
+
+    base_attack
 }
