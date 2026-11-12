@@ -1,3 +1,5 @@
+use std::{thread, time::Duration};
+
 use bot::Bot;
 use engine::{game::Game, garbage::GarbageQueue, rules::Ruleset};
 
@@ -105,8 +107,18 @@ pub fn run_game(
         if outcome_b.lines == 0 {
             let incoming_garbage = garbage_queue_b.tick();
             for g in &incoming_garbage {
-                game_a.board.push_garbage(g);
+                game_b.board.push_garbage(g);
             }
         }
+
+        // println!("{}", game_a.board);
+        // println!("{}", game_b.board);
+
+        // println!("Attack: {} {}", outcome_a.attack, outcome_b.attack);
+        // println!("Lines: {} {}", outcome_a.lines, outcome_b.lines);
+        // println!("Spin: {:?} {:?}", outcome_a.spin, outcome_b.spin);
+        // println!("Combo: {} {}", game_a.combo, game_b.combo);
+        // println!("B2B: {} {}", game_a.b2b, game_b.b2b);
+        // thread::sleep(Duration::from_millis(1000));
     }
 }
