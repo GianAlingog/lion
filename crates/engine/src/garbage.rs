@@ -1,5 +1,7 @@
 use crate::{board::Board, rules::Ruleset, srs::SpinKind, utils::Rng};
 
+const GARBAGE_RNG_SALT: u64 = 0xFEED_ABBA_u64;
+
 // BASE_ATTACK_TABLE[spin][lines_cleared]
 const BASE_ATTACK_TABLE: [[u32; 5]; 3] = [
     // None
@@ -36,7 +38,7 @@ impl GarbageQueue {
     #[must_use]
     pub fn new(seed: u64) -> Self {
         GarbageQueue {
-            rng: Rng(seed),
+            rng: Rng(seed ^ GARBAGE_RNG_SALT),
             pending: Vec::new(),
         }
     }
