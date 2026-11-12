@@ -96,16 +96,20 @@ pub fn run_game(
         garbage_queue_a.push(remaining_attack_b, cfg.garbage_delay);
         garbage_queue_b.push(remaining_attack_a, cfg.garbage_delay);
 
+        // Call next tick
+        garbage_queue_a.tick();
+        garbage_queue_b.tick();
+
         // Push any expired garbage
         // Must be on a non-line clear
         if outcome_a.lines == 0 {
-            let incoming_garbage = garbage_queue_a.tick();
+            let incoming_garbage = garbage_queue_a.take();
             for g in &incoming_garbage {
                 game_a.board.push_garbage(g);
             }
         }
         if outcome_b.lines == 0 {
-            let incoming_garbage = garbage_queue_b.tick();
+            let incoming_garbage = garbage_queue_b.take();
             for g in &incoming_garbage {
                 game_b.board.push_garbage(g);
             }

@@ -89,16 +89,18 @@ impl GarbageQueue {
         amount
     }
 
-    pub fn tick(&mut self) -> Vec<GarbageBatch> {
+    pub fn tick(&mut self) {
         // The invariant is that all entries in the queue should have delay > 0,
-        // though I will safeguard this for now.
+        // WARN: This invariant requires max(0, --x) due to stalling
 
         // Decrement the delay of everything in the queue
         for garbage in &mut self.pending {
             garbage.delay = garbage.delay.saturating_sub(1);
             // garbage.delay -= 1;
         }
+    }
 
+    pub fn take(&mut self) -> Vec<GarbageBatch> {
         // For everything whose delay has expired, return it and remove it
         let index = self.pending.partition_point(|g| g.delay == 0);
         self.pending.drain(..index).collect()
