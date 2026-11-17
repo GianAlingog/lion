@@ -4,10 +4,10 @@ use bot::{Bot, Move};
 use engine::{game::Game, rules::Ruleset};
 
 use crate::{
-    BotStats, EndReason, GameArgs, GoalKind, SessionMetadata, SoloArgs, load_bot, load_rules,
+    BotStats, EndReason, GameArgs, GoalKind, SoloArgs, SoloMetadata, load_bot, load_rules,
     observer::{Flow, Observer, Silent},
     pick_move,
-    stats::SessionStats,
+    stats::SoloSession,
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -66,7 +66,7 @@ pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
     let bot_config = load_bot(&solo_args.bot).unwrap();
     let mut bot = bot_config.build();
 
-    let mut session_stats = SessionStats {
+    let mut session_stats = SoloSession {
         games: Vec::with_capacity(game_args.games as usize),
     };
 
@@ -84,7 +84,7 @@ pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
     println!("{session_stats}");
 
     // TODO: Use strum for string conversion and other QoL
-    let session_metadata = SessionMetadata {
+    let session_metadata = SoloMetadata {
         label: &game_args.label,
         bot: bot.name(),
         weights: bot.weights(),
