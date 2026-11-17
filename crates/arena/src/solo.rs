@@ -1,11 +1,11 @@
 use std::time::{Duration, Instant};
 
-use bot::{Bot, Move};
+use bot::{Bot};
 use engine::{game::Game, rules::Ruleset};
 
 use crate::{
     BotStats, EndReason, GameArgs, GoalKind, SoloArgs, SoloMetadata, load_bot, load_rules,
-    observer::{Flow, Observer, Silent},
+    observer::{Observer, Silent},
     pick_move,
     stats::SoloSession,
 };
@@ -108,7 +108,7 @@ pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
 pub fn run_game(
     seed: u64,
     bot: &mut dyn Bot,
-    observer: &mut dyn Observer,
+    _observer: &mut dyn Observer,
     cfg: &RunConfig,
 ) -> GameStats {
     let game_start = Instant::now();
@@ -121,13 +121,13 @@ pub fn run_game(
 
     let mut prev_holes = 0_u32;
     while !game.topped_out() {
-        let candidates = if cfg.step_mode {
-            bot.moves(&game)
-        } else {
-            Vec::new()
-        };
+        // let candidates = if cfg.step_mode {
+        //     bot.moves(&game)
+        // } else {
+        //     Vec::new()
+        // };
 
-        let Some((chosen, outcome)) = pick_move(
+        let Some((_chosen, _outcome)) = pick_move(
             bot,
             &mut game,
             &mut bot_stats,
@@ -138,24 +138,24 @@ pub fn run_game(
             break;
         };
 
-        let Move {
-            placement,
-            spin,
-            use_hold,
-        } = chosen;
+        // let Move {
+        //     placement,
+        //     spin,
+        //     use_hold,
+        // } = chosen;
 
-        let flow = observer.on_step(
-            &game,
-            &chosen,
-            &candidates,
-            &outcome,
-            &game_stats,
-            bot.feature_names(),
-        );
-        if flow == Flow::Stop {
-            end_reason = EndReason::ViewerClosed;
-            break;
-        }
+        // let flow = observer.on_step(
+        //     &game,
+        //     &chosen,
+        //     &candidates,
+        //     &outcome,
+        //     &game_stats,
+        //     bot.feature_names(),
+        // );
+        // if flow == Flow::Stop {
+        //     end_reason = EndReason::ViewerClosed;
+        //     break;
+        // }
 
         if let RunMode::Endless { max_pieces } = cfg.mode
             && bot_stats.pieces >= max_pieces
