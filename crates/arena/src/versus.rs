@@ -20,7 +20,7 @@ pub struct RunConfig {
     // pub record_history: bool,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MatchResult {
     A,
     B,
@@ -126,7 +126,7 @@ pub fn run_game(
 
         // Select candidates on previous board state
         // TODO: Keep the generated move history to avoid redundant calculations
-        let Some((chosen_a, outcome_a)) = pick_move(
+        let Some((_chosen_a, outcome_a)) = pick_move(
             bot_a,
             &mut game_a,
             &mut bot_stats_a,
@@ -136,7 +136,7 @@ pub fn run_game(
             end_reason = EndReason::BotFailed;
             break;
         };
-        let Some((chosen_b, outcome_b)) = pick_move(
+        let Some((_chosen_b, outcome_b)) = pick_move(
             bot_b,
             &mut game_b,
             &mut bot_stats_b,
@@ -148,12 +148,6 @@ pub fn run_game(
         };
 
         // Update board states with current move
-        if chosen_a.use_hold {
-            game_a.swap_hold();
-        }
-        if chosen_b.use_hold {
-            game_b.swap_hold();
-        }
 
         // With the resulting attack, perform cancelling
         let remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);
@@ -191,7 +185,6 @@ pub fn run_game(
         // println!("Spin: {:?} {:?}", outcome_a.spin, outcome_b.spin);
         // println!("Combo: {} {}", game_a.combo, game_b.combo);
         // println!("B2B: {} {}", game_a.b2b, game_b.b2b);
-        // thread::sleep(Duration::from_millis(1000));
 
         if !game_a.topped_out() && game_b.topped_out() {
             match_result = MatchResult::A;
@@ -216,5 +209,81 @@ pub fn run_game(
         bot_stats_a,
         bot_stats_b,
         elapsed: match_start.elapsed(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use bot::{BotConfig, dellacherie, greedy};
+    use engine::rules::Ruleset;
+    use crate::{observer::Silent, versus::{MatchResult, RunConfig, run_game}};
+
+    #[test]
+    fn mirror_game() {
+        let cfg = BotConfig::Greedy(greedy::Config {
+            weights: greedy::Weights::try_from(vec![-4.0, -1.0, -0.5, 0.0]).unwrap(),
+        });
+
+        let mut bot_a = cfg.build();
+        let mut bot_b = cfg.build();
+
+        let m = run_game(
+            0xDEFE_C8ED_u64, 
+            &mut *bot_a,
+            &mut *bot_b,
+            &mut Silent,
+            &RunConfig {
+                max_ticks: 10_000,
+                preview: 5,
+                step_mode: false,
+                garbage_delay: 10,
+                ruleset: Ruleset::default(),
+            }
+        );
+
+        assert_eq!(m.match_result, MatchResult::Draw);
+    }
+
+    #[test]
+    fn seat_swap_game() {
+        let cfg_a = BotConfig::Greedy(greedy::Config {
+            weights: greedy::Weights::try_from(vec![-4.0, -1.0, -0.5, 0.0]).unwrap(),
+        });
+        let mut bot_a = cfg_a.build();
+
+        let cfg_b = BotConfig::Dellacherie(dellacherie::Config {
+            weights: dellacherie::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0]).unwrap(),
+        });
+        let mut bot_b = cfg_b.build();
+
+        let m_a = run_game(
+            0xDEFE_C8ED_u64, 
+            &mut *bot_a,
+            &mut *bot_b,
+            &mut Silent,
+            &RunConfig {
+                max_ticks: 10_000,
+                preview: 5,
+                step_mode: false,
+                garbage_delay: 10,
+                ruleset: Ruleset::default(),
+            }
+        );
+
+        let m_b = run_game(
+            0xDEFE_C8ED_u64, 
+            &mut *bot_b,
+            &mut *bot_a,
+            &mut Silent,
+            &RunConfig {
+                max_ticks: 10_000,
+                preview: 5,
+                step_mode: false,
+                garbage_delay: 10,
+                ruleset: Ruleset::default(),
+            }
+        );
+
+        println!("{:?} / {:?}", m_a.match_result, m_b.match_result);
     }
 }
