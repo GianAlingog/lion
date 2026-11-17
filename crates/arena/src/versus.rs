@@ -4,9 +4,10 @@ use bot::Bot;
 use engine::{game::Game, garbage::GarbageQueue, rules::Ruleset};
 
 use crate::{
-    BotStats, EndReason, GameArgs, VersusArgs, load_bot, load_rules,
+    BotStats, EndReason, GameArgs, VersusArgs, VersusMetadata, load_bot, load_rules,
     observer::{Observer, Silent},
     pick_move,
+    stats::VersusSession,
 };
 
 pub struct RunConfig {
@@ -60,16 +61,39 @@ pub fn run_versus(game_args: GameArgs, versus_args: VersusArgs) {
     let bot_config_b = load_bot(&versus_args.bot_b).unwrap();
     let mut bot_b = bot_config_b.build();
 
+    let mut session_stats = VersusSession {
+        matches: Vec::with_capacity(game_args.games as usize),
+    };
+
     let mut observer = Silent;
 
     for i in 0..game_args.games {
-        run_game(
+        session_stats.matches.push(run_game(
             game_args.seed + u64::from(i),
             &mut *bot_a,
             &mut *bot_b,
             &mut observer,
             &cfg,
-        );
+        ));
+    }
+
+    println!("{session_stats}");
+
+    let session_metadata = VersusMetadata {
+        label: &game_args.label,
+        bot_a: bot_a.name(),
+        bot_b: bot_b.name(),
+        weights_a: bot_a.weights(),
+        weights_b: bot_b.weights(),
+        weight_names_a: bot_a.feature_names(),
+        weight_names_b: bot_b.feature_names(),
+        mode: "Default",
+    };
+
+    if let Some(path) = game_args.csv {
+        session_stats
+            .export(&path, &session_metadata)
+            .expect("CSV Export failed");
     }
 }
 
