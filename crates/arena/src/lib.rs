@@ -98,11 +98,22 @@ pub struct VersusArgs {
     pub bot_b: PathBuf,
 }
 
-pub struct SessionMetadata<'a> {
+pub struct SoloMetadata<'a> {
     pub label: &'a str,
     pub bot: &'a str,
     pub weights: Vec<f64>,
     pub weight_names: &'static [&'static str],
+    pub mode: &'a str,
+}
+
+pub struct VersusMetadata<'a> {
+    pub label: &'a str,
+    pub bot_a: &'a str,
+    pub bot_b: &'a str,
+    pub weights_a: Vec<f64>,
+    pub weights_b: Vec<f64>,
+    pub weight_names_a: &'static [&'static str],
+    pub weight_names_b: &'static [&'static str],
     pub mode: &'a str,
 }
 
