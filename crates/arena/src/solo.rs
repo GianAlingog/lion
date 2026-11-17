@@ -1,6 +1,6 @@
 use std::time::{Duration, Instant};
 
-use bot::{Bot};
+use bot::Bot;
 use engine::{game::Game, rules::Ruleset};
 
 use crate::{

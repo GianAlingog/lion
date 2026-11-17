@@ -199,6 +199,10 @@ impl Default for BotStats {
     }
 }
 
+/// # Panics
+///
+/// May panic under `duration_nanos` conversion.
+/// Provably should not panic under normal runs.
 pub fn pick_move(
     bot: &mut dyn Bot,
     game: &mut Game,
@@ -208,9 +212,7 @@ pub fn pick_move(
 ) -> Option<(Move, Outcome)> {
     let pick_start = Instant::now();
 
-    let Some(chosen) = bot.pick(&game) else {
-        return None;
-    };
+    let chosen = bot.pick(game)?;
 
     let pick_duration = pick_start.elapsed();
 

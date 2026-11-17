@@ -49,6 +49,11 @@ fn percentile(sorted: &[f64], p: f64) -> f64 {
 /// # Warning
 ///
 /// Will consume the `values` parameter (sorted)
+#[allow(
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss
+)]
 pub fn summarize_values(values: &mut [f64]) -> Summary {
     let n = values.len();
     let mut summary = Summary {
@@ -101,6 +106,7 @@ pub fn summarize_values(values: &mut [f64]) -> Summary {
 //         .collect()
 // }
 
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 #[must_use]
 pub fn hist_percentile(hist: &[u32], p: f64) -> usize {
     let n: u32 = hist.iter().sum();
@@ -109,7 +115,7 @@ pub fn hist_percentile(hist: &[u32], p: f64) -> usize {
         return 0;
     }
 
-    let target = ((n as f64) * p).ceil().max(1.0) as u32;
+    let target = ((f64::from(n)) * p).ceil().max(1.0) as u32;
     let mut seen = 0_u32;
     for (bucket, &count) in hist.iter().enumerate() {
         seen += count;
@@ -323,6 +329,7 @@ impl Record {
 }
 
 impl VersusSession {
+    #[must_use]
     pub fn record(&self) -> Record {
         self.matches.iter().fold(Record::default(), |mut r, m| {
             match m.match_result {
