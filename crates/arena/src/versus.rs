@@ -191,7 +191,7 @@ pub fn run_game(
             break;
         }
         if game_a.topped_out() && !game_b.topped_out() {
-            match_result = MatchResult::A;
+            match_result = MatchResult::B;
             break;
         }
 
@@ -214,9 +214,12 @@ pub fn run_game(
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        observer::Silent,
+        versus::{MatchResult, RunConfig, run_game},
+    };
     use bot::{BotConfig, dellacherie, greedy};
     use engine::rules::Ruleset;
-    use crate::{observer::Silent, versus::{MatchResult, RunConfig, run_game}};
 
     #[test]
     fn mirror_game() {
@@ -228,7 +231,7 @@ mod tests {
         let mut bot_b = cfg.build();
 
         let m = run_game(
-            0xDEFE_C8ED_u64, 
+            0xDEFE_C8ED_u64,
             &mut *bot_a,
             &mut *bot_b,
             &mut Silent,
@@ -238,7 +241,7 @@ mod tests {
                 step_mode: false,
                 garbage_delay: 10,
                 ruleset: Ruleset::default(),
-            }
+            },
         );
 
         assert_eq!(m.match_result, MatchResult::Draw);
@@ -252,12 +255,13 @@ mod tests {
         let mut bot_a = cfg_a.build();
 
         let cfg_b = BotConfig::Dellacherie(dellacherie::Config {
-            weights: dellacherie::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0]).unwrap(),
+            weights: dellacherie::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0])
+                .unwrap(),
         });
         let mut bot_b = cfg_b.build();
 
         let m_a = run_game(
-            0xDEFE_C8ED_u64, 
+            0xDEFE_C8ED_u64,
             &mut *bot_a,
             &mut *bot_b,
             &mut Silent,
@@ -267,11 +271,11 @@ mod tests {
                 step_mode: false,
                 garbage_delay: 10,
                 ruleset: Ruleset::default(),
-            }
+            },
         );
 
         let m_b = run_game(
-            0xDEFE_C8ED_u64, 
+            0xDEFE_C8ED_u64,
             &mut *bot_b,
             &mut *bot_a,
             &mut Silent,
@@ -281,7 +285,7 @@ mod tests {
                 step_mode: false,
                 garbage_delay: 10,
                 ruleset: Ruleset::default(),
-            }
+            },
         );
 
         println!("{:?} / {:?}", m_a.match_result, m_b.match_result);
