@@ -411,7 +411,8 @@ impl fmt::Display for VersusSession {
         let record = self.record();
         let score = record.score();
         let (lo, hi) = wilson(score, record.games(), 1.96);
-        let format_elo = |x: Option<f64>| x.map_or_else(|| "inf".to_string(), |y| format!("{y:+.0}"));
+        let format_elo =
+            |x: Option<f64>| x.map_or_else(|| "inf".to_string(), |y| format!("{y:+.0}"));
 
         writeln!(f, "result (for Bot A)")?;
         writeln!(
