@@ -340,6 +340,21 @@ pub fn wilson(p: f64, n: u32, z: f64) -> (f64, f64) {
     (center - error, center + error)
 }
 
+// https://en.wikipedia.org/wiki/Elo_rating_system
+// Rating_Diff := Rating_A - Rating_B
+// Score = 1 / (1 + 10^(-Rating_Diff/400))
+// 1 / Score - 1 = 10^(-Rating_Diff/400)
+// Rating_Diff = 400 * log10(Score / (1 - Score))
+#[must_use]
+pub fn elo(p: f64) -> Option<f64> {
+    if p < 0.0 || p > 1.0 {
+        // Invalid or infinitely losing / winning
+        None
+    } else {
+        Some(400.0 * (p / (1.0 - p)).log10())
+    }
+}
+
 impl VersusSession {
     #[must_use]
     pub fn record(&self) -> Record {
