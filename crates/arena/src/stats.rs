@@ -411,6 +411,7 @@ impl fmt::Display for VersusSession {
         let record = self.record();
         let score = record.score();
         let (lo, hi) = wilson(score, record.games(), 1.96);
+        let format_elo = |x: Option<f64>| x.map_or_else(|| "inf".to_string(), |y| format!("{y:+.0}"));
 
         writeln!(f, "result (for Bot A)")?;
         writeln!(
@@ -424,6 +425,13 @@ impl fmt::Display for VersusSession {
             100.0 * score,
             100.0 * lo,
             100.0 * hi,
+        )?;
+        writeln!(
+            f,
+            "| elo difference    | {}  (95% CI {} to {})",
+            format_elo(elo(score)),
+            format_elo(elo(lo)),
+            format_elo(elo(hi)),
         )?;
 
         writeln!(f)?;
