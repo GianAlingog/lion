@@ -335,8 +335,8 @@ pub fn wilson(p: f64, n: u32, z: f64) -> (f64, f64) {
     let n = f64::from(n);
     let z2 = z * z;
     let denom = 1.0 + z2 / n;
-    let center = p + z2 / (2.0 * n) / denom;
-    let error = z * (2.0 * n) * (4.0 * n * p * (1.0 - p) + z2).sqrt() / denom;
+    let center = (p + z2 / (2.0 * n)) / denom;
+    let error = z / (2.0 * n) * (4.0 * n * p * (1.0 - p) + z2).sqrt() / denom;
     (center - error, center + error)
 }
 
