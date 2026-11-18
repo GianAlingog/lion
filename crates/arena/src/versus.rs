@@ -289,5 +289,8 @@ mod tests {
         );
 
         println!("{:?} / {:?}", m_a.match_result, m_b.match_result);
+
+        // Note: I expected the Dellacherie bot to win, but it did not...
+        // Will test more
     }
 }
