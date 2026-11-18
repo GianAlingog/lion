@@ -5,7 +5,10 @@ fn main() {
     let cli = Cli::parse();
 
     assert!(cli.game_args.games > 0, "Games must be a positive integer.");
-    assert!(cli.game_args.preview > 0, "Queue preview must be a positive integer.");
+    assert!(
+        cli.game_args.preview > 0,
+        "Queue preview must be a positive integer."
+    );
 
     println!("{cli:?}");
 
