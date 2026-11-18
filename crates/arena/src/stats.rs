@@ -245,7 +245,7 @@ impl SoloSession {
                 g.seed,
                 m.mode,
                 g.end_reason,
-                bot_row(&g.bot_stats)
+                bot_row(&g.bot_stats),
             )?;
         }
 
@@ -259,31 +259,31 @@ impl std::fmt::Display for SoloSession {
         writeln!(f, "per-game distributions")?;
         writeln!(
             f,
-            "| metric            | mean       | median     | stddev     | min        | max        | p95        | p99        |"
+            "| metric            | mean       | median     | stddev     | min        | max        | p95        | p99        |",
         )?;
         writeln!(
             f,
-            "|-------------------|------------|------------|------------|------------|------------|------------|------------|"
+            "|-------------------|------------|------------|------------|------------|------------|------------|------------|",
         )?;
         writeln!(
             f,
             "| pieces            {}",
-            self.summarize(|g| f64::from(g.bot_stats.pieces))
+            self.summarize(|g| f64::from(g.bot_stats.pieces)),
         )?;
         writeln!(
             f,
             "| lines             {}",
-            self.summarize(|g| f64::from(g.bot_stats.lines))
+            self.summarize(|g| f64::from(g.bot_stats.lines)),
         )?;
         writeln!(
             f,
             "| holes created     {}",
-            self.summarize(|g| f64::from(g.bot_stats.net_hole_change))
+            self.summarize(|g| f64::from(g.bot_stats.net_hole_change)),
         )?;
         writeln!(
             f,
             "| max height        {}",
-            self.summarize(|g| f64::from(g.bot_stats.max_height))
+            self.summarize(|g| f64::from(g.bot_stats.max_height)),
         )?;
 
         writeln!(f)?;
@@ -297,7 +297,7 @@ impl std::fmt::Display for SoloSession {
         writeln!(
             f,
             "| net holes / 1000  | {:>10.2} |",
-            p.holes / p.pieces * 1000.0
+            p.holes / p.pieces * 1000.0,
         )?;
         writeln!(f, "| pieces per second | {:>10.2} |", p.pieces_per_second())?;
 
@@ -409,7 +409,8 @@ impl VersusSession {
 impl fmt::Display for VersusSession {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let record = self.record();
-        // let score = record.score();
+        let score = record.score();
+        let (lo, hi) = wilson(score, record.games(), 1.96);
 
         writeln!(f, "result (for Bot A)")?;
         writeln!(
@@ -417,22 +418,29 @@ impl fmt::Display for VersusSession {
             "| W / D / L         | {} / {} / {}",
             record.wins, record.draws, record.losses,
         )?;
+        writeln!(
+            f,
+            "| score             | {:.1}%  (95% CI {:.1}% – {:.1}%)",
+            100.0 * score,
+            100.0 * lo,
+            100.0 * hi,
+        )?;
 
         writeln!(f)?;
 
         writeln!(f, "match length (ticks)")?;
         writeln!(
             f,
-            "| metric            | mean       | median     | stddev     | min        | max        | p95        | p99        |"
+            "| metric            | mean       | median     | stddev     | min        | max        | p95        | p99        |",
         )?;
         writeln!(
             f,
-            "|-------------------|------------|------------|------------|------------|------------|------------|------------|"
+            "|-------------------|------------|------------|------------|------------|------------|------------|------------|",
         )?;
         writeln!(
             f,
             "| ticks             {}",
-            self.summarize(|m| f64::from(m.ticks))
+            self.summarize(|m| f64::from(m.ticks)),
         )?;
 
         writeln!(f)?;
@@ -446,19 +454,19 @@ impl fmt::Display for VersusSession {
             f,
             "| attack per piece  | {:>10.3} | {:>10.3} |",
             pa.attack_per_piece(),
-            pb.attack_per_piece()
+            pb.attack_per_piece(),
         )?;
         writeln!(
             f,
             "| lines per piece   | {:>10.3} | {:>10.3} |",
             pa.lines_per_piece(),
-            pb.lines_per_piece()
+            pb.lines_per_piece(),
         )?;
         writeln!(
             f,
             "| pieces per second | {:>10.2} | {:>10.2} |",
             pa.pieces_per_second(),
-            pb.pieces_per_second()
+            pb.pieces_per_second(),
         )?;
 
         Ok(())
