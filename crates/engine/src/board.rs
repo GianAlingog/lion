@@ -279,7 +279,7 @@ impl Board {
 
     #[must_use]
     pub fn is_grounded(&self, p: Placement) -> bool {
-        self.drop_y(p) == p.y
+        self.collides(Placement { y: p.y - 1, ..p })
     }
 
     /// # Panics
