@@ -97,6 +97,11 @@ impl Game {
         game
     }
 
+    #[must_use]
+    pub fn rules(&self) -> Ruleset {
+        self.rules
+    }
+
     // Drives action, calls all internal logic
     /// # Panics
     ///
