@@ -339,7 +339,7 @@ mod tests {
             depth: 3,
             width: 16,
         });
-        
+
         for _ in 0..10 {
             let base = bot.pick(&game).unwrap();
             for _ in 0..20 {

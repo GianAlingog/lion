@@ -127,12 +127,8 @@ pub fn run_game(
         //     Vec::new()
         // };
 
-        let Some((_chosen, _outcome)) = pick_move(
-            bot,
-            &mut game,
-            &mut bot_stats,
-            &mut prev_holes,
-        ) else {
+        let Some((_chosen, _outcome)) = pick_move(bot, &mut game, &mut bot_stats, &mut prev_holes)
+        else {
             end_reason = EndReason::BotFailed;
             break;
         };

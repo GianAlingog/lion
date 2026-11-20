@@ -123,21 +123,15 @@ pub fn run_game(
 
         // Select candidates on previous board state
         // TODO: Keep the generated move history to avoid redundant calculations
-        let Some((_chosen_a, outcome_a)) = pick_move(
-            bot_a,
-            &mut game_a,
-            &mut bot_stats_a,
-            &mut prev_holes_a,
-        ) else {
+        let Some((_chosen_a, outcome_a)) =
+            pick_move(bot_a, &mut game_a, &mut bot_stats_a, &mut prev_holes_a)
+        else {
             end_reason = EndReason::BotFailed;
             break;
         };
-        let Some((_chosen_b, outcome_b)) = pick_move(
-            bot_b,
-            &mut game_b,
-            &mut bot_stats_b,
-            &mut prev_holes_b,
-        ) else {
+        let Some((_chosen_b, outcome_b)) =
+            pick_move(bot_b, &mut game_b, &mut bot_stats_b, &mut prev_holes_b)
+        else {
             end_reason = EndReason::BotFailed;
             break;
         };
