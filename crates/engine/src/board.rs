@@ -143,6 +143,14 @@ impl Board {
         holes
     }
 
+    /// # Panics
+    ///
+    /// Provably should not panic. Uses enclosed `column_heights()` helper to extract heights.
+    #[must_use]
+    pub fn max_height(&self) -> u32 {
+        u32::from(*self.column_heights().iter().max().unwrap())
+    }
+
     #[must_use]
     pub fn aggregate_height(&self) -> u32 {
         self.column_heights().iter().map(|&x| u32::from(x)).sum()
