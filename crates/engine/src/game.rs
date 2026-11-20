@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use crate::{
     bag::Bag,
     board::Board,
-    garbage::{Clear, attack},
+    garbage::{Clear, GarbageQueue, attack},
     piece::{Piece, Placement},
     rules::Ruleset,
     srs::SpinKind,
@@ -16,7 +16,7 @@ pub struct Game {
     pub queue: VecDeque<Piece>,
     pub b2b: u32,
     pub combo: u32,
-    // pub garbage;,
+    pub garbage: GarbageQueue,
     bag: Bag,
 }
 
@@ -32,6 +32,7 @@ impl Game {
             queue: VecDeque::new(),
             b2b: 0,
             combo: 0,
+            garbage: GarbageQueue::new(seed),
             bag: Bag::new(seed),
         };
 
@@ -60,6 +61,7 @@ impl Game {
             queue,
             b2b,
             combo,
+            garbage: GarbageQueue::new(seed),
             bag: Bag::new(seed),
         };
 
@@ -88,7 +90,6 @@ impl Game {
 
         // NOTE: By my convention, attack is calculated given the b2b and combo
         // of the player before this moved occurred
-        // TODO: Use the a dynamic Ruleset
         let attack: u32 = attack(
             rules,
             &Clear {
@@ -99,6 +100,9 @@ impl Game {
                 combo: self.combo,
             },
         );
+
+        // Cancel the attack immediately, return the remaining attack
+        let attack = self.garbage.cancel(attack);
 
         // TODO: Factor out into SRS rules
         let mut b2b_broken = false;

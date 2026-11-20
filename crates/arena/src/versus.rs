@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
 use bot::Bot;
-use engine::{game::Game, garbage::GarbageQueue, rules::Ruleset};
+use engine::{game::Game, rules::Ruleset};
 
 use crate::{
     BotStats, EndReason, GameArgs, VersusArgs, VersusMetadata, load_bot, load_rules,
@@ -114,9 +114,6 @@ pub fn run_game(
     let mut bot_stats_a = BotStats::default();
     let mut bot_stats_b = BotStats::default();
 
-    let mut garbage_queue_a = GarbageQueue::new(seed);
-    let mut garbage_queue_b = GarbageQueue::new(seed);
-
     let mut prev_holes_a = 0_u32;
     let mut prev_holes_b = 0_u32;
 
@@ -149,29 +146,25 @@ pub fn run_game(
 
         // Update board states with current move
 
-        // With the resulting attack, perform cancelling
-        let remaining_attack_a = garbage_queue_a.cancel(outcome_a.attack);
-        let remaining_attack_b = garbage_queue_b.cancel(outcome_b.attack);
-
         // With the remaining attack, push garbage
-        garbage_queue_a.push(remaining_attack_b, cfg.garbage_delay);
-        garbage_queue_b.push(remaining_attack_a, cfg.garbage_delay);
+        game_a.garbage.push(outcome_a.attack, cfg.garbage_delay);
+        game_b.garbage.push(outcome_b.attack, cfg.garbage_delay);
 
         // Call next tick
-        garbage_queue_a.tick();
-        garbage_queue_b.tick();
+        game_a.garbage.tick();
+        game_b.garbage.tick();
         ticks += 1;
 
         // Push any expired garbage
         // Must be on a non-line clear
         if outcome_a.lines == 0 {
-            let incoming_garbage = garbage_queue_a.take();
+            let incoming_garbage = game_a.garbage.take();
             for g in &incoming_garbage {
                 game_a.board.push_garbage(g);
             }
         }
         if outcome_b.lines == 0 {
-            let incoming_garbage = garbage_queue_b.take();
+            let incoming_garbage = game_b.garbage.take();
             for g in &incoming_garbage {
                 game_b.board.push_garbage(g);
             }
