@@ -285,7 +285,7 @@ impl Beam {
                         let attack: u32 = attack(
                             &rules,
                             &Clear {
-                                lines_cleared: lines_cleared,
+                                lines_cleared,
                                 spin,
                                 perfect_clear,
                                 b2b: node.b2b,

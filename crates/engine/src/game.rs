@@ -21,6 +21,7 @@ pub struct Game {
     rules: Ruleset,
 }
 
+#[must_use]
 pub fn next_streaks(lines: u32, spin: SpinKind, mut b2b: u32, mut combo: u32) -> (u32, u32) {
     // let mut b2b_broken = false;
     if lines == 4 || (spin != SpinKind::None && lines > 0) {
@@ -123,7 +124,7 @@ impl Game {
         let attack: u32 = attack(
             &self.rules,
             &Clear {
-                lines_cleared: lines_cleared,
+                lines_cleared,
                 spin,
                 perfect_clear,
                 b2b: self.b2b,
