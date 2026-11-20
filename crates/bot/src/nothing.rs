@@ -33,11 +33,12 @@ impl Bot for Nothing {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use engine::rules::Ruleset;
 
     #[test]
     fn do_nothing() {
         let seed = 0xDEAD_BEEF_u64;
-        let game = Game::new(seed, 5);
+        let game = Game::new(seed, 5, Ruleset::default());
 
         let mut bot = Nothing::new();
 

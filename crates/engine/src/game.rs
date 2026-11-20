@@ -18,11 +18,12 @@ pub struct Game {
     pub combo: u32,
     pub garbage: GarbageQueue,
     bag: Bag,
+    rules: Ruleset,
 }
 
 impl Game {
     #[must_use]
-    pub fn new(seed: u64, preview: usize) -> Self {
+    pub fn new(seed: u64, preview: usize, rules: Ruleset) -> Self {
         // Panic if preview is less than 0
 
         let mut game = Game {
@@ -34,6 +35,7 @@ impl Game {
             combo: 0,
             garbage: GarbageQueue::new(seed),
             bag: Bag::new(seed),
+            rules,
         };
 
         // Initialize the queue
@@ -53,6 +55,7 @@ impl Game {
         combo: u32,
         seed: u64,
         steps: u32,
+        rules: Ruleset,
     ) -> Self {
         let mut game = Game {
             board,
@@ -63,6 +66,7 @@ impl Game {
             combo,
             garbage: GarbageQueue::new(seed),
             bag: Bag::new(seed),
+            rules,
         };
 
         for _ in 0..steps {
@@ -76,7 +80,7 @@ impl Game {
     /// # Panics
     ///
     /// It must hold that Placement p is grounded to place it.
-    pub fn advance(&mut self, p: Placement, spin: SpinKind, rules: &Ruleset) -> Outcome {
+    pub fn advance(&mut self, p: Placement, spin: SpinKind) -> Outcome {
         assert!(self.board.is_grounded(p));
 
         // We need to send the displayed piece as well
@@ -91,7 +95,7 @@ impl Game {
         // NOTE: By my convention, attack is calculated given the b2b and combo
         // of the player before this moved occurred
         let attack: u32 = attack(
-            rules,
+            &self.rules,
             &Clear {
                 lines_cleared: cleared_lines,
                 spin,

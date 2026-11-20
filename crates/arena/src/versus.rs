@@ -107,8 +107,8 @@ pub fn run_game(
     let match_start = Instant::now();
     let mut match_result = MatchResult::Draw;
 
-    let mut game_a = Game::new(seed, cfg.preview);
-    let mut game_b = Game::new(seed, cfg.preview);
+    let mut game_a = Game::new(seed, cfg.preview, cfg.ruleset);
+    let mut game_b = Game::new(seed, cfg.preview, cfg.ruleset);
     let mut end_reason = EndReason::TopOut;
 
     let mut bot_stats_a = BotStats::default();
@@ -127,7 +127,6 @@ pub fn run_game(
             bot_a,
             &mut game_a,
             &mut bot_stats_a,
-            &cfg.ruleset,
             &mut prev_holes_a,
         ) else {
             end_reason = EndReason::BotFailed;
@@ -137,7 +136,6 @@ pub fn run_game(
             bot_b,
             &mut game_b,
             &mut bot_stats_b,
-            &cfg.ruleset,
             &mut prev_holes_b,
         ) else {
             end_reason = EndReason::BotFailed;

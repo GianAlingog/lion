@@ -207,7 +207,6 @@ pub fn pick_move(
     bot: &mut dyn Bot,
     game: &mut Game,
     bot_stats: &mut BotStats,
-    rules: &Ruleset,
     prev_holes: &mut u32,
 ) -> Option<(Move, Outcome)> {
     let pick_start = Instant::now();
@@ -225,7 +224,7 @@ pub fn pick_move(
     if use_hold {
         game.swap_hold();
     }
-    let outcome = game.advance(placement, spin, rules);
+    let outcome = game.advance(placement, spin);
 
     let decision_nanos = u64::try_from(pick_duration.as_nanos()).unwrap();
     // Possibly dangerous if many overflow the last bucket

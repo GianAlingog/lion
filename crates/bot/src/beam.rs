@@ -332,14 +332,14 @@ mod tests {
 
     #[test]
     fn deterministic_beam() {
-        let mut game = Game::new(0xDEAD_BEEF_u64, 5);
+        let mut game = Game::new(0xDEAD_BEEF_u64, 5, Ruleset::default());
         let mut bot = Beam::new(&super::Config {
             weights: crate::beam::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0])
                 .unwrap(),
             depth: 3,
             width: 16,
         });
-        let rules = Ruleset::default();
+        
         for _ in 0..10 {
             let base = bot.pick(&game).unwrap();
             for _ in 0..20 {
@@ -349,7 +349,7 @@ mod tests {
             if base.use_hold {
                 game.swap_hold();
             }
-            game.advance(base.placement, base.spin, &rules);
+            game.advance(base.placement, base.spin);
         }
     }
 }

@@ -114,7 +114,7 @@ pub fn run_game(
     let game_start = Instant::now();
 
     // TODO: Refactor such things with a Default()
-    let mut game = Game::new(seed, cfg.preview);
+    let mut game = Game::new(seed, cfg.preview, cfg.ruleset);
     let mut end_reason = EndReason::TopOut;
 
     let mut bot_stats = BotStats::default();
@@ -131,7 +131,6 @@ pub fn run_game(
             bot,
             &mut game,
             &mut bot_stats,
-            &cfg.ruleset,
             &mut prev_holes,
         ) else {
             end_reason = EndReason::BotFailed;

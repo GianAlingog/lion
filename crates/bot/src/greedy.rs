@@ -200,10 +200,10 @@ mod tests {
     fn greedy_well_placement() {
         // Shuffle until it's the right piece
         let mut seed = 0xDEAD_BEEF_u64;
-        let mut game = Game::new(seed, 5);
+        let mut game = Game::new(seed, 5, Ruleset::default());
         while game.queue[0] != Piece::I {
             seed = seed.wrapping_add(1);
-            game = Game::new(seed, 5);
+            game = Game::new(seed, 5, Ruleset::default());
         }
 
         for x in 1..10_i8 {
@@ -227,7 +227,6 @@ mod tests {
                 lines: 0.0,
             },
         });
-        let rules = Ruleset::default();
 
         let Move {
             placement,
@@ -238,7 +237,7 @@ mod tests {
         if use_hold {
             game.swap_hold();
         }
-        game.advance(placement, spin, &rules);
+        game.advance(placement, spin);
 
         println!("{:?}", game.board);
     }
@@ -246,7 +245,7 @@ mod tests {
     #[test]
     fn top_candidate_is_chosen() {
         let seed = 0xDEAD_BEEF_u64;
-        let mut game = Game::new(seed, 5);
+        let mut game = Game::new(seed, 5, Ruleset::default());
 
         let mut bot = Greedy::new(&Config {
             weights: Weights {
@@ -256,7 +255,6 @@ mod tests {
                 lines: 0.0,
             },
         });
-        let rules = Ruleset::default();
 
         for _ in 0..1000 {
             let moves = bot.moves(&game);
@@ -271,7 +269,7 @@ mod tests {
                 game.swap_hold();
             }
 
-            game.advance(placement, spin, &rules);
+            game.advance(placement, spin);
         }
     }
 }
