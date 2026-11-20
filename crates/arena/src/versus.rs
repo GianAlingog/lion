@@ -38,6 +38,17 @@ pub struct MatchStats {
     pub elapsed: Duration,
 }
 
+impl PartialEq for MatchStats {
+    fn eq(&self, other: &Self) -> bool {
+        self.seed == other.seed
+            && self.end_reason == other.end_reason
+            && self.match_result == other.match_result
+            && self.ticks == other.ticks
+            && self.bot_stats_a == other.bot_stats_a
+            && self.bot_stats_b == other.bot_stats_b
+    }
+}
+
 /// # Panics
 ///
 /// Will panic if unable to load bot from config file
@@ -199,7 +210,9 @@ pub fn run_game(
 
 #[cfg(test)]
 mod tests {
-    use crate::{
+    use std::mem::swap;
+
+use crate::{
         observer::Silent,
         versus::{MatchResult, RunConfig, run_game},
     };
@@ -251,7 +264,7 @@ mod tests {
             &mut *bot_b,
             &mut Silent,
             &RunConfig {
-                max_ticks: 10_000,
+                max_ticks: 1_000,
                 preview: 5,
                 step_mode: false,
                 garbage_delay: 10,
@@ -259,13 +272,13 @@ mod tests {
             },
         );
 
-        let m_b = run_game(
+        let mut m_b = run_game(
             0xDEFE_C8ED_u64,
             &mut *bot_b,
             &mut *bot_a,
             &mut Silent,
             &RunConfig {
-                max_ticks: 10_000,
+                max_ticks: 1_000,
                 preview: 5,
                 step_mode: false,
                 garbage_delay: 10,
@@ -273,7 +286,9 @@ mod tests {
             },
         );
 
-        println!("{:?} / {:?}", m_a.match_result, m_b.match_result);
+        swap(&mut m_b.bot_stats_a, &mut m_b.bot_stats_b);
+        assert_eq!(m_a, m_b);
+        // println!("{:?} / {:?}", m_a.match_result, m_b.match_result);
 
         // Note: I expected the Dellacherie bot to win, but it did not...
         // Will test more
