@@ -9,3 +9,6 @@ row_transitions = -1.0
 column_transitions = -1.0
 landing_height = -1.0
 eroded_cells = 1.0
+attack = 0.0
+b2b = 0.0
+danger = 0.0
