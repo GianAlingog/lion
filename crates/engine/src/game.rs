@@ -21,6 +21,27 @@ pub struct Game {
     rules: Ruleset,
 }
 
+pub fn next_streaks(lines: u32, spin: SpinKind, mut b2b: u32, mut combo: u32) -> (u32, u32) {
+    // let mut b2b_broken = false;
+    if lines == 4 || (spin != SpinKind::None && lines > 0) {
+        b2b += 1;
+    } else if 0 < lines && lines < 4 {
+        // if b2b > 0 {
+        //     b2b_broken = true;
+        // }
+
+        b2b = 0;
+    }
+
+    if lines == 0 {
+        combo = 0;
+    } else {
+        combo += 1;
+    }
+
+    (b2b, combo)
+}
+
 impl Game {
     #[must_use]
     pub fn new(seed: u64, preview: usize, rules: Ruleset) -> Self {
@@ -88,16 +109,16 @@ impl Game {
         // or take it from the first element. Former may be preferred
         let current_piece = self.queue.pop_front().expect("Queue was empty on advance");
         assert_eq!(p.piece, current_piece);
-        let cleared_lines = self.board.lock(p).lines;
+        let lines_cleared = self.board.lock(p).lines;
 
-        let perfect_clear = cleared_lines > 0 && self.board.is_empty();
+        let perfect_clear = lines_cleared > 0 && self.board.is_empty();
 
         // NOTE: By my convention, attack is calculated given the b2b and combo
         // of the player before this moved occurred
         let attack: u32 = attack(
             &self.rules,
             &Clear {
-                lines_cleared: cleared_lines,
+                lines_cleared: lines_cleared,
                 spin,
                 perfect_clear,
                 b2b: self.b2b,
@@ -109,22 +130,9 @@ impl Game {
         let attack = self.garbage.cancel(attack);
 
         // TODO: Factor out into SRS rules
-        let mut b2b_broken = false;
-        if cleared_lines == 4 || (spin != SpinKind::None && cleared_lines > 0) {
-            self.b2b += 1;
-        } else if 0 < cleared_lines && cleared_lines < 4 {
-            if self.b2b > 0 {
-                b2b_broken = true;
-            }
-
-            self.b2b = 0;
-        }
-
-        if cleared_lines == 0 {
-            self.combo = 0;
-        } else {
-            self.combo += 1;
-        }
+        let (b2b, combo) = next_streaks(lines_cleared, spin, self.b2b, self.combo);
+        self.b2b = b2b;
+        self.combo = combo;
 
         // Refill bag
         self.queue.push_back(self.bag.next_piece());
@@ -133,11 +141,11 @@ impl Game {
         self.can_hold = true;
 
         Outcome {
-            lines: cleared_lines,
+            lines: lines_cleared,
             spin,
             attack,
             perfect_clear,
-            b2b_broken,
+            // b2b_broken,
         }
     }
 
@@ -176,5 +184,5 @@ pub struct Outcome {
     pub spin: SpinKind,
     pub attack: u32,
     pub perfect_clear: bool,
-    pub b2b_broken: bool,
+    // pub b2b_broken: bool,
 }
