@@ -88,8 +88,7 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<(Placement, SpinKin
     visited.clear();
     visited.set(index(piece.spawn()));
 
-    while !queue.is_empty() {
-        let p = queue.pop_front().unwrap();
+    while let Some(p) = queue.pop_front() {
         for i in EDGES {
             if let Some((q, kick)) = step(board, p, &i) {
                 if board.is_grounded(q) {
