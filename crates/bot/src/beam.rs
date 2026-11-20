@@ -150,7 +150,7 @@ impl Features {
             b2b: f64::from(b2b),
             danger: ((f64::from(board.max_height() + incoming) - 8.0)
                 / (f64::from(Board::VIEW_HEIGHT_U8) - 8.0))
-            .clamp(0.0, 1.0),
+                .clamp(0.0, 1.0),
             // Piecewise starting from 8
         }
     }
