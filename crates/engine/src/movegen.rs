@@ -91,7 +91,9 @@ pub fn placements(board: &Board, piece: Piece, out: &mut Vec<(Placement, SpinKin
     while let Some(p) = queue.pop_front() {
         for i in EDGES {
             if let Some((q, kick)) = step(board, p, &i) {
-                if board.is_grounded(q) {
+                let seen = visited.get(index(q));
+                let rotated = matches!(i, Input::Cw | Input::Ccw);
+                if (!seen || rotated) && board.is_grounded(q) {
                     let spin = match i {
                         Input::Cw | Input::Ccw => detect_spin(board, q, kick),
                         _ => SpinKind::None,
