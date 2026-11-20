@@ -420,8 +420,10 @@ mod tests {
     fn deterministic_beam() {
         let mut game = Game::new(0xDEAD_BEEF_u64, 5, Ruleset::default());
         let mut bot = Beam::new(&super::Config {
-            weights: crate::beam::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0, 0.0, 0.0, 0.0])
-                .unwrap(),
+            weights: crate::beam::Weights::try_from(vec![
+                -4.0, -1.0, -1.0, -1.0, -1.0, 1.0, 0.0, 0.0, 0.0,
+            ])
+            .unwrap(),
             depth: 3,
             width: 16,
         });

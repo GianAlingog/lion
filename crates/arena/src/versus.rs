@@ -212,7 +212,7 @@ pub fn run_game(
 mod tests {
     use std::mem::swap;
 
-use crate::{
+    use crate::{
         observer::Silent,
         versus::{MatchResult, RunConfig, run_game},
     };
