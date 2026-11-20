@@ -139,8 +139,8 @@ pub fn run_game(
         // Update board states with current move
 
         // With the remaining attack, push garbage
-        game_a.garbage.push(outcome_a.attack, cfg.garbage_delay);
-        game_b.garbage.push(outcome_b.attack, cfg.garbage_delay);
+        game_a.garbage.push(outcome_b.attack, cfg.garbage_delay);
+        game_b.garbage.push(outcome_a.attack, cfg.garbage_delay);
 
         // Call next tick
         game_a.garbage.tick();
