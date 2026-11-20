@@ -2,7 +2,8 @@ use std::collections::{BTreeMap, VecDeque};
 
 use engine::{
     board::{Board, LockData},
-    game::Game,
+    game::{Game, next_streaks},
+    garbage::{Clear, attack},
     movegen::placements,
     piece::{Piece, Placement},
     srs::SpinKind,
@@ -10,7 +11,7 @@ use engine::{
 
 use crate::{Bot, Candidate, Move, rank};
 
-pub const N: usize = 6;
+pub const N: usize = 9;
 
 #[cfg_attr(
     feature = "serde",
@@ -25,6 +26,10 @@ pub struct Weights {
     pub column_transitions: f64,
     pub landing_height: f64,
     pub eroded_cells: f64,
+    pub attack: f64,
+    pub b2b: f64,
+    // pub combo: f64,
+    pub danger: f64,
 }
 
 impl Weights {
@@ -37,6 +42,9 @@ impl Weights {
             column_transitions,
             landing_height,
             eroded_cells,
+            attack,
+            b2b,
+            danger,
         } = self;
         [
             holes,
@@ -45,6 +53,9 @@ impl Weights {
             column_transitions,
             landing_height,
             eroded_cells,
+            attack,
+            b2b,
+            danger,
         ]
     }
 }
@@ -59,6 +70,9 @@ impl TryFrom<Vec<f64>> for Weights {
             column_transitions,
             landing_height,
             eroded_cells,
+            attack,
+            b2b,
+            danger,
         ] = value
             .try_into()
             .map_err(|v: Vec<f64>| format!("need exactly {N} weights, got {}", v.len()))?;
@@ -69,6 +83,9 @@ impl TryFrom<Vec<f64>> for Weights {
             column_transitions,
             landing_height,
             eroded_cells,
+            attack,
+            b2b,
+            danger,
         })
     }
 }
@@ -81,6 +98,9 @@ pub struct Features {
     pub column_transitions: f64,
     pub landing_height: f64,
     pub eroded_cells: f64,
+    pub attack: f64,
+    pub b2b: f64,
+    pub danger: f64,
 }
 
 impl Features {
@@ -93,6 +113,9 @@ impl Features {
             column_transitions,
             landing_height,
             eroded_cells,
+            attack,
+            b2b,
+            danger,
         } = self;
         [
             holes,
@@ -101,11 +124,21 @@ impl Features {
             column_transitions,
             landing_height,
             eroded_cells,
+            attack,
+            b2b,
+            danger,
         ]
     }
 
     #[must_use]
-    pub fn extract(board: &Board, landing_height: f64, eroded_cells: u32) -> Self {
+    pub fn extract(
+        board: &Board,
+        landing_height: f64,
+        eroded_cells: u32,
+        attack: u32,
+        b2b: u32,
+        incoming: u32,
+    ) -> Self {
         Features {
             holes: f64::from(board.count_holes()),
             cumulative_wells: f64::from(board.cumulative_wells()),
@@ -113,6 +146,12 @@ impl Features {
             column_transitions: f64::from(board.column_transitions()),
             landing_height,
             eroded_cells: f64::from(eroded_cells),
+            attack: f64::from(attack),
+            b2b: f64::from(b2b),
+            danger: (f64::from(board.max_height() + incoming - 8_u32)
+                / f64::from(Board::VIEW_HEIGHT_U8 - 8_u8))
+            .clamp(0.0, 1.0),
+            // Piecewise starting from 8
         }
     }
 
@@ -132,7 +171,11 @@ struct Node {
     hold: Option<Piece>,
     // use_hold: bool,
     next: usize,
-    score: f64,
+    incoming: u32,
+    b2b: u32,
+    combo: u32,
+    cumulative: f64,
+    estimate: f64,
     root: Option<(Placement, SpinKind, bool)>,
 }
 
@@ -154,8 +197,8 @@ impl Node {
 }
 
 fn rank_nodes(a: &Node, b: &Node) -> std::cmp::Ordering {
-    b.score
-        .total_cmp(&a.score)
+    b.estimate
+        .total_cmp(&a.estimate)
         .then_with(|| a.root.cmp(&b.root))
         .then_with(|| a.board.cmp(&b.board))
         .then_with(|| a.hold.cmp(&b.hold))
@@ -181,7 +224,9 @@ pub struct Beam {
 }
 
 impl Beam {
-    const NAMES: [&'static str; N] = ["hol", "wel", "row", "col", "hei", "ero"];
+    const NAMES: [&'static str; N] = [
+        "hol", "wel", "row", "col", "hei", "ero", "att", "b2b", "dng",
+    ];
 
     #[must_use]
     pub fn new(cfg: &Config) -> Self {
@@ -205,11 +250,17 @@ impl Beam {
             board: game.board,
             hold: game.hold,
             next: 0,
-            score: 0.0,
+            incoming: game.garbage.incoming(),
+            b2b: game.b2b,
+            combo: game.combo,
+            cumulative: 0.0,
+            estimate: 0.0,
             root: None,
         };
 
         self.buf.push(base);
+
+        let rules = game.rules();
 
         // Go through all depths
         for _ in 1..=self.depth {
@@ -221,7 +272,7 @@ impl Beam {
                     for (placement, spin) in out {
                         let mut next_board = node.board;
                         let LockData {
-                            lines: _,
+                            lines: lines_cleared,
                             eroded_cells,
                         } = next_board.lock(placement);
 
@@ -229,18 +280,53 @@ impl Beam {
                         let max_y = placement.cells().iter().map(|(_, y)| *y).max().unwrap();
                         let landing_height = f64::from(min_y + max_y) / 2.0 + 1.0;
 
+                        let perfect_clear = lines_cleared > 0 && next_board.is_empty();
+
+                        let attack: u32 = attack(
+                            &rules,
+                            &Clear {
+                                lines_cleared: lines_cleared,
+                                spin,
+                                perfect_clear,
+                                b2b: node.b2b,
+                                combo: node.combo,
+                            },
+                        );
+
+                        let cancel = node.incoming.min(attack);
+                        let attack = attack - cancel;
+                        let incoming = node.incoming - cancel;
+
+                        let (b2b, combo) = next_streaks(lines_cleared, spin, node.b2b, node.combo);
+
+                        // Perform attack calculations here and pass result to extract
+
+                        let features = Features::extract(
+                            &next_board,
+                            landing_height,
+                            eroded_cells,
+                            attack,
+                            b2b,
+                            incoming,
+                        );
+
                         // Calculate any accumulated score here
-                        let mut accumulated_score = 0.0;
+                        let mut accumulated_score = node.cumulative;
 
                         // Manual unrolling for now I guess
                         accumulated_score += f64::from(eroded_cells) * self.weights.eroded_cells;
                         accumulated_score += landing_height * self.weights.landing_height;
+                        accumulated_score += f64::from(attack) * self.weights.attack;
 
                         next_buf.push(Node {
                             board: next_board,
                             hold,
                             next,
-                            score: node.score + accumulated_score,
+                            incoming,
+                            b2b,
+                            combo,
+                            cumulative: accumulated_score,
+                            estimate: node.cumulative + features.score(&self.weights),
                             root: if let Some(root) = node.root {
                                 Some(root)
                             } else {
@@ -283,7 +369,7 @@ impl Beam {
         // As well as all pieces' previews(?) weird with line clears, need to shift them back
         let mut out = Vec::new();
         for node in &self.buf {
-            let features = Features::extract(&node.board, 0.0, 0);
+            let features = Features::extract(&node.board, 0.0, 0, 0, node.b2b, node.incoming);
             let (placement, spin, use_hold) = node.root.unwrap();
             out.push(Candidate {
                 mv: Move {
@@ -291,7 +377,7 @@ impl Beam {
                     spin,
                     use_hold,
                 },
-                score: node.score + features.score(&self.weights),
+                score: node.cumulative + features.score(&self.weights),
                 features: Vec::new(),
             });
         }
