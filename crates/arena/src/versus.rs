@@ -27,6 +27,17 @@ pub enum MatchResult {
     Draw,
 }
 
+impl MatchResult {
+    #[must_use]
+    pub fn flipped(self) -> Self {
+        match self {
+            Self::A => Self::B,
+            Self::B => Self::A,
+            Self::Draw => Self::Draw,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct MatchStats {
     pub seed: u64,
@@ -253,7 +264,7 @@ mod tests {
         let mut bot_a = cfg_a.build();
 
         let cfg_b = BotConfig::Dellacherie(dellacherie::Config {
-            weights: dellacherie::Weights::try_from(vec![-4.0, -1.0, -1.0, -1.0, -1.0, 1.0])
+            weights: dellacherie::Weights::try_from(vec![40.0, -1.0, -1.0, -1.0, -1.0, 1.0])
                 .unwrap(),
         });
         let mut bot_b = cfg_b.build();
@@ -287,6 +298,7 @@ mod tests {
         );
 
         swap(&mut m_b.bot_stats_a, &mut m_b.bot_stats_b);
+        m_b.match_result = m_b.match_result.flipped();
         assert_eq!(m_a, m_b);
         // println!("{:?} / {:?}", m_a.match_result, m_b.match_result);
 
