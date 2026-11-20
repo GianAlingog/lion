@@ -1,4 +1,4 @@
-use crate::{board::Board, rules::Ruleset, srs::SpinKind, utils::Rng};
+use crate::{board::Board, game::is_difficult, rules::Ruleset, srs::SpinKind, utils::Rng};
 
 const GARBAGE_RNG_SALT: u64 = 0xFEED_ABBA_u64;
 
@@ -140,7 +140,7 @@ pub fn attack(rules: &Ruleset, clear: &Clear) -> u32 {
         base_attack += rules.perfect_clear_bonus as u32;
     }
 
-    if clear.b2b > 0 {
+    if clear.b2b > 0 && is_difficult(clear.lines_cleared, clear.spin) {
         base_attack += rules.b2b_bonus as u32;
     }
     // base_attack += B2B_BONUS_TABLE[clear.spin as usize][clear.lines_cleared as usize];
