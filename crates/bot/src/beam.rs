@@ -148,8 +148,8 @@ impl Features {
             eroded_cells: f64::from(eroded_cells),
             attack: f64::from(attack),
             b2b: f64::from(b2b),
-            danger: (f64::from(board.max_height() + incoming - 8_u32)
-                / f64::from(Board::VIEW_HEIGHT_U8 - 8_u8))
+            danger: ((f64::from(board.max_height() + incoming) - 8.0)
+                / (f64::from(Board::VIEW_HEIGHT_U8) - 8.0))
             .clamp(0.0, 1.0),
             // Piecewise starting from 8
         }
