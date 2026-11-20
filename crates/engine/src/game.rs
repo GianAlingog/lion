@@ -22,9 +22,14 @@ pub struct Game {
 }
 
 #[must_use]
+pub fn is_difficult(lines: u32, spin: SpinKind) -> bool {
+    lines == 4 || (spin != SpinKind::None && lines > 0)
+}
+
+#[must_use]
 pub fn next_streaks(lines: u32, spin: SpinKind, mut b2b: u32, mut combo: u32) -> (u32, u32) {
     // let mut b2b_broken = false;
-    if lines == 4 || (spin != SpinKind::None && lines > 0) {
+    if is_difficult(lines, spin) {
         b2b += 1;
     } else if 0 < lines && lines < 4 {
         // if b2b > 0 {
