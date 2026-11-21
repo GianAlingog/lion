@@ -242,6 +242,9 @@ impl Beam {
     ///
     /// May panic on taking cell min/max
     /// May panic on taking preview indices 0 or 1
+    // I don't see a good way to refactor this for the line count.
+    // A lot of the code is completely localized and low EV to factor out.
+    #[allow(clippy::too_many_lines)]
     pub fn candidates(&mut self, game: &Game) -> Vec<Candidate> {
         self.buf.clear();
 
@@ -299,8 +302,6 @@ impl Beam {
 
                         let (b2b, combo) = next_streaks(lines_cleared, spin, node.b2b, node.combo);
 
-                        // Perform attack calculations here and pass result to extract
-
                         let features = Features::extract(
                             &next_board,
                             landing_height,
@@ -312,8 +313,6 @@ impl Beam {
 
                         // Calculate any accumulated score here
                         let mut accumulated_score = node.cumulative;
-
-                        // Manual unrolling for now I guess
                         accumulated_score += f64::from(eroded_cells) * self.weights.eroded_cells;
                         accumulated_score += landing_height * self.weights.landing_height;
                         accumulated_score += f64::from(attack) * self.weights.attack;
@@ -362,11 +361,8 @@ impl Beam {
             self.buf = next_buf;
         }
 
-        // Transform into candidates
+        // TODO: Revisit for multi-piece preview display
         // Take accumulated score + static board score
-        // For now, we let the features set to zero
-        // For preview modes, we want to be able to extract the whole depth's features
-        // As well as all pieces' previews(?) weird with line clears, need to shift them back
         let mut out = Vec::new();
         for node in &self.buf {
             let features = Features::extract(&node.board, 0.0, 0, 0, node.b2b, node.incoming);

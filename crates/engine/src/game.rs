@@ -73,6 +73,9 @@ impl Game {
         game
     }
 
+    // In this case, extracting this into a struct would defeat the purpose of the helper.
+    // This helper is never used, however, might deprecate at some point.
+    #[allow(clippy::too_many_arguments)]
     #[must_use]
     pub fn from(
         board: Board,
