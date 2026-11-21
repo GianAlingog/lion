@@ -347,7 +347,7 @@ pub fn wilson(p: f64, n: u32, z: f64) -> (f64, f64) {
 // Rating_Diff = 400 * log10(Score / (1 - Score))
 #[must_use]
 pub fn elo(p: f64) -> Option<f64> {
-    if p < 0.0 || p > 1.0 {
+    if p <= 0.0 || p >= 1.0 {
         // Invalid or infinitely losing / winning
         None
     } else {
