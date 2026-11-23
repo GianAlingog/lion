@@ -24,13 +24,19 @@ pub trait SoloObserver {
 }
 
 pub trait VersusObserver {
-    fn on_step(&mut self, tick_a: &TickData, tick_b: &TickData) -> Flow;
+    fn on_tick(&mut self, tick_a: &TickData, tick_b: &TickData) -> Flow;
 }
 
 pub struct Silent;
 
 impl SoloObserver for Silent {
     fn on_tick(&mut self, _tick: &TickData) -> Flow {
+        Flow::Continue
+    }
+}
+
+impl VersusObserver for Silent {
+    fn on_tick(&mut self, _tick_a: &TickData, _tick_b: &TickData) -> Flow {
         Flow::Continue
     }
 }
