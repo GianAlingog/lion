@@ -1,7 +1,7 @@
 use bot::{Candidate, Move};
 use engine::game::{Game, Outcome};
 
-use crate::solo::GameStats;
+use crate::{solo::GameStats, versus::MatchStats};
 
 #[derive(PartialEq, Eq)]
 pub enum Flow {
@@ -9,30 +9,27 @@ pub enum Flow {
     Stop,
 }
 
-pub trait Observer {
-    fn on_step(
-        &mut self,
-        game: &Game,
-        chosen: &Move,
-        candidates: &[Candidate],
-        outcome: &Outcome,
-        stats: &GameStats,
-        feature_names: &'static [&'static str],
-    ) -> Flow;
+// For one bot, use references
+pub struct TickData<'a> {
+    pub game: &'a Game,
+    pub chosen: &'a Move,
+    pub candidates: &'a [Candidate],
+    pub outcome: &'a Outcome,
+    pub feature_names: &'static [&'static str],
+}
+
+pub trait SoloObserver {
+    fn on_tick(&mut self, tick: &TickData, stats: &GameStats) -> Flow;
+}
+
+pub trait VersusObserver {
+    fn on_step(&mut self, tick_a: &TickData, tick_b: &TickData, stats: &MatchStats) -> Flow;
 }
 
 pub struct Silent;
 
-impl Observer for Silent {
-    fn on_step(
-        &mut self,
-        _game: &Game,
-        _chosen: &Move,
-        _candidates: &[Candidate],
-        _outcome: &Outcome,
-        _stats: &GameStats,
-        _feature_names: &'static [&'static str],
-    ) -> Flow {
+impl SoloObserver for Silent {
+    fn on_tick(&mut self, _tick: &TickData, _stats: &GameStats) -> Flow {
         Flow::Continue
     }
 }
