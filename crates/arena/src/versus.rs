@@ -5,7 +5,7 @@ use engine::{game::Game, rules::Ruleset};
 
 use crate::{
     BotStats, EndReason, GameArgs, VersusArgs, VersusMetadata, load_bot, load_rules,
-    observer::{Observer, Silent},
+    observer::{Flow, Silent, TickData, VersusObserver},
     pick_move,
     stats::VersusSession,
 };
@@ -123,7 +123,7 @@ pub fn run_game(
     seed: u64,
     bot_a: &mut dyn Bot,
     bot_b: &mut dyn Bot,
-    _observer: &mut dyn Observer,
+    observer: &mut dyn VersusObserver,
     cfg: &RunConfig,
 ) -> MatchStats {
     let match_start = Instant::now();
@@ -143,15 +143,29 @@ pub fn run_game(
     while !game_a.topped_out() && !game_b.topped_out() {
         // Simulate one tick
 
+        // Note: This calls the slow .candidates() function
+        // So, it will be called twice per tick, which is fine for display
+        // But be wary.
+        let candidates_a = if cfg.step_mode {
+            bot_a.moves(&game_a)
+        } else {
+            Vec::new()
+        };
+        let candidates_b = if cfg.step_mode {
+            bot_b.moves(&game_b)
+        } else {
+            Vec::new()
+        };
+
         // Select candidates on previous board state
         // TODO: Keep the generated move history to avoid redundant calculations
-        let Some((_chosen_a, outcome_a)) =
+        let Some((chosen_a, outcome_a)) =
             pick_move(bot_a, &mut game_a, &mut bot_stats_a, &mut prev_holes_a)
         else {
             end_reason = EndReason::BotFailed;
             break;
         };
-        let Some((_chosen_b, outcome_b)) =
+        let Some((chosen_b, outcome_b)) =
             pick_move(bot_b, &mut game_b, &mut bot_stats_b, &mut prev_holes_b)
         else {
             end_reason = EndReason::BotFailed;
@@ -159,6 +173,28 @@ pub fn run_game(
         };
 
         // Update board states with current move
+        let flow = observer.on_tick(
+            &TickData {
+                game: &game_a,
+                chosen: &chosen_a,
+                candidates: &candidates_a,
+                outcome: &outcome_a,
+                stats: &bot_stats_a,
+                feature_names: bot_a.feature_names(),
+            },
+            &TickData {
+                game: &game_b,
+                chosen: &chosen_b,
+                candidates: &candidates_b,
+                outcome: &outcome_b,
+                stats: &bot_stats_b,
+                feature_names: &bot_b.feature_names(),
+            },
+        );
+        if flow == Flow::Stop {
+            end_reason = EndReason::ViewerClosed;
+            break;
+        }
 
         // With the remaining attack, push garbage
         game_a.garbage.push(outcome_b.attack, cfg.garbage_delay);
