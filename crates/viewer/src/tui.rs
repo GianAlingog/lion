@@ -1,14 +1,7 @@
 use std::time::Duration;
 
-use arena::{
-    observer::{Flow, Observer},
-    solo::GameStats,
-};
-use bot::{Candidate, Move};
-use engine::{
-    board::Board,
-    game::{Game, Outcome},
-};
+use arena::observer::{Flow, SoloObserver, TickData};
+use engine::board::Board;
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
@@ -38,16 +31,8 @@ impl Tui {
     }
 }
 
-impl Observer for Tui {
-    fn on_step(
-        &mut self,
-        game: &Game,
-        chosen: &Move,
-        candidates: &[Candidate],
-        _outcome: &Outcome,
-        stats: &GameStats,
-        feature_names: &'static [&'static str],
-    ) -> Flow {
+impl SoloObserver for Tui {
+    fn on_tick(&mut self, tick: &TickData) -> Flow {
         self.table.select(Some(0));
 
         loop {
@@ -61,18 +46,18 @@ impl Observer for Tui {
 
             let ghost = table
                 .selected()
-                .and_then(|i| candidates.get(i))
+                .and_then(|i| tick.candidates.get(i))
                 .map(|c| c.mv.placement);
 
             let view = ViewState {
-                game,
-                chosen,
+                game: tick.game,
+                chosen: tick.chosen,
                 ghost,
-                candidates,
-                stats,
+                candidates: tick.candidates,
+                stats: tick.stats,
                 step_mode: *step_mode,
                 prev_board: *prev_board,
-                feature_names,
+                feature_names: tick.feature_names,
             };
 
             if terminal.draw(|f| render(f, &view, table)).is_err() {
@@ -106,7 +91,7 @@ impl Observer for Tui {
                 KeyCode::Char('s') => *step_mode = true,
                 KeyCode::Char('j') => {
                     let i = table.selected().unwrap_or(0);
-                    table.select(Some((i + 1).min(candidates.len().saturating_sub(1))));
+                    table.select(Some((i + 1).min(tick.candidates.len().saturating_sub(1))));
                 }
                 KeyCode::Char('k') => table.select_previous(),
                 KeyCode::Char('+') => *delay_ms = delay_ms.saturating_sub(20).max(10),
@@ -115,7 +100,7 @@ impl Observer for Tui {
             }
         }
 
-        self.prev_board = game.board;
+        self.prev_board = tick.game.board;
 
         Flow::Continue
     }

@@ -1,6 +1,6 @@
 use std::{collections::VecDeque, iter::once};
 
-use arena::solo::GameStats;
+use arena::BotStats;
 use bot::{Candidate, Move};
 use engine::{
     board::Board,
@@ -125,7 +125,7 @@ pub struct ViewState<'a> {
     pub chosen: &'a Move,
     pub ghost: Option<Placement>,
     pub candidates: &'a [Candidate],
-    pub stats: &'a GameStats,
+    pub stats: &'a BotStats,
     pub step_mode: bool,
     pub prev_board: Board,
     pub feature_names: &'static [&'static str],
