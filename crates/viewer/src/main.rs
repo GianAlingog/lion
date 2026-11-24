@@ -1,54 +1,31 @@
 use arena::{
-    Args, Mode, make_bot,
-    solo::{RunConfig, RunMode, run_game},
-    stats::SessionStats,
+    Cli, GameMode,
+    solo::{SoloConfig, run_solo},
+    versus::{VersusConfig, run_versus},
 };
 
-use crate::tui::Tui;
+use crate::tui::{SoloTui, VersusTui};
 
 pub mod render;
 pub mod tui;
 
 fn main() {
-    let args = Args::parse_args();
-    assert_eq!(args.games, 1);
-    println!("{args:?}");
+    let cli = Cli::parse_args();
 
-    let weights = args.weights.unwrap();
-
-    let cfg = RunConfig {
-        mode: match args.mode {
-            Mode::Endless => RunMode::Endless,
-            Mode::Sprint => RunMode::Sprint {
-                lines: args.sprint_lines,
-            },
-        },
-        max_pieces: args.max_pieces,
-        preview: args.preview,
-        step_mode: args.step_mode,
-        garbage_delay: args.garbage_delay,
-    };
-
-    let mut bot = make_bot(args.bot, weights.clone(), args.depth, args.width);
-
-    let mut session_stats = SessionStats {
-        games: Vec::with_capacity(args.games as usize),
-    };
-
-    let terminal = ratatui::init();
-
-    let mut observer = Tui::new(terminal, args.step_mode);
-
-    for i in 0..args.games {
-        session_stats.games.push(run_game(
-            args.seed + u64::from(i),
-            &mut *bot,
-            &mut observer,
-            &cfg,
-        ));
+    match cli.game_mode {
+        GameMode::Solo(args) => {
+            let cfg = SoloConfig::new(&cli.game_args, &args);
+            let mut tui = SoloTui::new(ratatui::init(), cli.game_args.step_mode);
+            let session_stats = run_solo(&cfg, &mut tui);
+            ratatui::restore();
+            println!("{session_stats}");
+        }
+        GameMode::Versus(args) => {
+            let cfg = VersusConfig::new(&cli.game_args, &args);
+            let mut tui = VersusTui::new(ratatui::init(), cli.game_args.step_mode);
+            let session_stats = run_versus(&cfg, &mut tui);
+            ratatui::restore();
+            println!("{session_stats}");
+        }
     }
-
-    ratatui::restore();
-
-    println!("{session_stats}");
 }
