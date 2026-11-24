@@ -1,4 +1,9 @@
-use arena::{Cli, GameMode, solo::run_solo, versus::run_versus};
+use arena::{
+    Cli, GameMode,
+    observer::Silent,
+    solo::{SoloConfig, run_solo},
+    versus::{VersusConfig, run_versus},
+};
 use clap::Parser;
 
 fn main() {
@@ -13,7 +18,25 @@ fn main() {
     println!("{cli:?}");
 
     match cli.game_mode {
-        GameMode::Solo(args) => run_solo(cli.game_args, args),
-        GameMode::Versus(args) => run_versus(cli.game_args, args),
+        GameMode::Solo(args) => {
+            let cfg = SoloConfig::new(&cli.game_args, &args);
+            let session_stats = run_solo(&cfg, &mut Silent);
+            println!("{session_stats}");
+            if let Some(path) = &cli.game_args.csv {
+                session_stats
+                    .export(&path, &cfg.metadata(&cli.game_args.label, &args.goal_kind))
+                    .expect("CSV Export failed");
+            }
+        }
+        GameMode::Versus(args) => {
+            let cfg = VersusConfig::new(&cli.game_args, &args);
+            let session_stats = run_versus(&cfg, &mut Silent);
+            println!("{session_stats}");
+            if let Some(path) = &cli.game_args.csv {
+                session_stats
+                    .export(&path, &cfg.metadata(&cli.game_args.label))
+                    .expect("CSV Export failed");
+            }
+        }
     }
 }
