@@ -1,14 +1,61 @@
 use std::time::{Duration, Instant};
 
-use bot::Bot;
+use bot::{Bot, BotConfig};
 use engine::{game::Game, rules::Ruleset};
 
 use crate::{
     BotStats, EndReason, GameArgs, GoalKind, SoloArgs, SoloMetadata, load_bot, load_rules,
-    observer::{Flow, Silent, SoloObserver, TickData},
+    observer::{Flow, SoloObserver, TickData},
     pick_move,
     stats::SoloSession,
 };
+
+pub struct SoloConfig {
+    pub run: RunConfig,
+    pub bot: BotConfig,
+    pub seed: u64,
+    pub games: u32,
+}
+
+impl SoloConfig {
+    pub fn new(game_args: &GameArgs, solo_args: &SoloArgs) -> Self {
+        Self {
+            run: RunConfig {
+                mode: match &solo_args.goal_kind {
+                    GoalKind::Endless(args) => RunMode::Endless {
+                        max_pieces: args.max_pieces,
+                    },
+                    GoalKind::Sprint(args) => RunMode::Sprint { lines: args.lines },
+                },
+                preview: game_args.preview,
+                step_mode: game_args.step_mode,
+                ruleset: if let Some(rules) = &game_args.rules {
+                    load_rules(rules).unwrap()
+                } else {
+                    Ruleset::default()
+                },
+            },
+            bot: load_bot(&solo_args.bot).unwrap(),
+            seed: game_args.seed,
+            games: game_args.games,
+        }
+    }
+
+    pub fn metadata<'a>(&'a self, label: &'a str, goal_kind: &GoalKind) -> SoloMetadata<'a> {
+        let bot = self.bot.build();
+
+        SoloMetadata {
+            label,
+            bot: bot.name(),
+            weights: bot.weights(),
+            weight_names: bot.feature_names(),
+            mode: match goal_kind {
+                GoalKind::Endless(_) => "Endless",
+                GoalKind::Sprint(_) => "Sprint",
+            },
+        }
+    }
+}
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RunMode {
@@ -46,60 +93,23 @@ impl PartialEq for GameStats {
 /// Will panic if unable to load bot from config file
 // Note: Both Args are lightweight for now though we can take them by reference
 #[allow(clippy::needless_pass_by_value)]
-pub fn run_solo(game_args: GameArgs, solo_args: SoloArgs) {
-    let cfg = RunConfig {
-        mode: match &solo_args.goal_kind {
-            GoalKind::Endless(args) => RunMode::Endless {
-                max_pieces: args.max_pieces,
-            },
-            GoalKind::Sprint(args) => RunMode::Sprint { lines: args.lines },
-        },
-        preview: game_args.preview,
-        step_mode: game_args.step_mode,
-        ruleset: if let Some(rules) = game_args.rules {
-            load_rules(&rules).unwrap()
-        } else {
-            Ruleset::default()
-        },
-    };
-
-    let bot_config = load_bot(&solo_args.bot).unwrap();
-    let mut bot = bot_config.build();
+pub fn run_solo(cfg: &SoloConfig, observer: &mut dyn SoloObserver) -> SoloSession {
+    let mut bot = cfg.bot.build();
 
     let mut session_stats = SoloSession {
-        games: Vec::with_capacity(game_args.games as usize),
+        games: Vec::with_capacity(cfg.games as usize),
     };
 
-    let mut observer = Silent;
-
-    for i in 0..game_args.games {
+    for i in 0..cfg.games {
         session_stats.games.push(run_game(
-            game_args.seed + u64::from(i),
+            cfg.seed + u64::from(i),
             &mut *bot,
-            &mut observer,
-            &cfg,
+            observer,
+            &cfg.run,
         ));
     }
 
-    println!("{session_stats}");
-
-    // TODO: Use strum for string conversion and other QoL
-    let session_metadata = SoloMetadata {
-        label: &game_args.label,
-        bot: bot.name(),
-        weights: bot.weights(),
-        weight_names: bot.feature_names(),
-        mode: match &solo_args.goal_kind {
-            GoalKind::Endless(_) => "Endless",
-            GoalKind::Sprint(_) => "Sprint",
-        },
-    };
-
-    if let Some(path) = game_args.csv {
-        session_stats
-            .export(&path, &session_metadata)
-            .expect("CSV Export failed");
-    }
+    session_stats
 }
 
 /// # Panics
@@ -132,12 +142,6 @@ pub fn run_game(
             end_reason = EndReason::BotFailed;
             break;
         };
-
-        // let Move {
-        //     placement,
-        //     spin,
-        //     use_hold,
-        // } = chosen;
 
         let flow = observer.on_tick(&TickData {
             game: &game,
