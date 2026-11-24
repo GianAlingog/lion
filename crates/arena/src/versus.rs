@@ -1,14 +1,60 @@
 use std::time::{Duration, Instant};
 
-use bot::Bot;
+use bot::{Bot, BotConfig};
 use engine::{game::Game, rules::Ruleset};
 
 use crate::{
     BotStats, EndReason, GameArgs, VersusArgs, VersusMetadata, load_bot, load_rules,
-    observer::{Flow, Silent, TickData, VersusObserver},
+    observer::{Flow, TickData, VersusObserver},
     pick_move,
     stats::VersusSession,
 };
+
+pub struct VersusConfig {
+    pub run: RunConfig,
+    pub bot_a: BotConfig,
+    pub bot_b: BotConfig,
+    pub seed: u64,
+    pub games: u32,
+}
+
+impl VersusConfig {
+    pub fn new(game_args: &GameArgs, versus_args: &VersusArgs) -> Self {
+        Self {
+            run: RunConfig {
+                max_ticks: versus_args.max_ticks,
+                preview: game_args.preview,
+                step_mode: game_args.step_mode,
+                garbage_delay: versus_args.garbage_delay,
+                ruleset: if let Some(rules) = &game_args.rules {
+                    load_rules(rules).unwrap()
+                } else {
+                    Ruleset::default()
+                },
+            },
+            bot_a: load_bot(&versus_args.bot_a).unwrap(),
+            bot_b: load_bot(&versus_args.bot_b).unwrap(),
+            seed: game_args.seed,
+            games: game_args.games,
+        }
+    }
+
+    pub fn metadata<'a>(&'a self, label: &'a str) -> VersusMetadata<'a> {
+        let bot_a = self.bot_a.build();
+        let bot_b = self.bot_b.build();
+
+        VersusMetadata {
+            label,
+            bot_a: bot_a.name(),
+            bot_b: bot_b.name(),
+            weights_a: bot_a.weights(),
+            weights_b: bot_b.weights(),
+            weight_names_a: bot_a.feature_names(),
+            weight_names_b: bot_b.feature_names(),
+            mode: "Default",
+        }
+    }
+}
 
 pub struct RunConfig {
     pub max_ticks: u32,
@@ -64,59 +110,25 @@ impl PartialEq for MatchStats {
 ///
 /// Will panic if unable to load bot from config file
 #[allow(clippy::needless_pass_by_value)]
-pub fn run_versus(game_args: GameArgs, versus_args: VersusArgs) {
-    let cfg = RunConfig {
-        max_ticks: versus_args.max_ticks,
-        preview: game_args.preview,
-        step_mode: game_args.step_mode,
-        garbage_delay: versus_args.garbage_delay,
-        ruleset: if let Some(rules) = game_args.rules {
-            load_rules(&rules).unwrap()
-        } else {
-            Ruleset::default()
-        },
-    };
-
-    let bot_config_a = load_bot(&versus_args.bot_a).unwrap();
-    let mut bot_a = bot_config_a.build();
-
-    let bot_config_b = load_bot(&versus_args.bot_b).unwrap();
-    let mut bot_b = bot_config_b.build();
+pub fn run_versus(cfg: &VersusConfig, observer: &mut dyn VersusObserver) -> VersusSession {
+    let mut bot_a = cfg.bot_a.build();
+    let mut bot_b = cfg.bot_b.build();
 
     let mut session_stats = VersusSession {
-        matches: Vec::with_capacity(game_args.games as usize),
+        matches: Vec::with_capacity(cfg.games as usize),
     };
 
-    let mut observer = Silent;
-
-    for i in 0..game_args.games {
+    for i in 0..cfg.games {
         session_stats.matches.push(run_game(
-            game_args.seed + u64::from(i),
+            cfg.seed + u64::from(i),
             &mut *bot_a,
             &mut *bot_b,
-            &mut observer,
-            &cfg,
+            observer,
+            &cfg.run,
         ));
     }
 
-    println!("{session_stats}");
-
-    let session_metadata = VersusMetadata {
-        label: &game_args.label,
-        bot_a: bot_a.name(),
-        bot_b: bot_b.name(),
-        weights_a: bot_a.weights(),
-        weights_b: bot_b.weights(),
-        weight_names_a: bot_a.feature_names(),
-        weight_names_b: bot_b.feature_names(),
-        mode: "Default",
-    };
-
-    if let Some(path) = game_args.csv {
-        session_stats
-            .export(&path, &session_metadata)
-            .expect("CSV Export failed");
-    }
+    session_stats
 }
 
 pub fn run_game(
