@@ -4,10 +4,9 @@ use arena::{
     solo::{SoloConfig, run_solo},
     versus::{VersusConfig, run_versus},
 };
-use clap::Parser;
 
 fn main() {
-    let cli = Cli::parse();
+    let cli = Cli::parse_args();
 
     assert!(cli.game_args.games > 0, "Games must be a positive integer.");
     assert!(
