@@ -185,28 +185,6 @@ pub fn run_game(
         };
 
         // Update board states with current move
-        let flow = observer.on_tick(
-            &TickData {
-                game: &game_a,
-                chosen: &chosen_a,
-                candidates: &candidates_a,
-                outcome: &outcome_a,
-                stats: &bot_stats_a,
-                feature_names: bot_a.feature_names(),
-            },
-            &TickData {
-                game: &game_b,
-                chosen: &chosen_b,
-                candidates: &candidates_b,
-                outcome: &outcome_b,
-                stats: &bot_stats_b,
-                feature_names: &bot_b.feature_names(),
-            },
-        );
-        if flow == Flow::Stop {
-            end_reason = EndReason::ViewerClosed;
-            break;
-        }
 
         // With the remaining attack, push garbage
         game_a.garbage.push(outcome_b.attack, cfg.garbage_delay);
@@ -230,6 +208,29 @@ pub fn run_game(
             for g in &incoming_garbage {
                 game_b.board.push_garbage(g);
             }
+        }
+
+        let flow = observer.on_tick(
+            &TickData {
+                game: &game_a,
+                chosen: &chosen_a,
+                candidates: &candidates_a,
+                outcome: &outcome_a,
+                stats: &bot_stats_a,
+                feature_names: bot_a.feature_names(),
+            },
+            &TickData {
+                game: &game_b,
+                chosen: &chosen_b,
+                candidates: &candidates_b,
+                outcome: &outcome_b,
+                stats: &bot_stats_b,
+                feature_names: &bot_b.feature_names(),
+            },
+        );
+        if flow == Flow::Stop {
+            end_reason = EndReason::ViewerClosed;
+            break;
         }
 
         // println!("{}", game_a.board);
