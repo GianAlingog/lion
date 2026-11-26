@@ -50,6 +50,15 @@ impl GarbageQueue {
         self.pending.iter().map(|g| g.lines).sum()
     }
 
+    #[must_use]
+    pub fn ready(&self) -> u32 {
+        self.pending
+            .iter()
+            .filter(|g| g.delay == 0)
+            .map(|g| g.lines)
+            .sum()
+    }
+
     /// # Panics
     ///
     /// Contains a conversion from u64 to u32 for hole selection.
