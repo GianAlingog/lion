@@ -57,12 +57,12 @@ impl SoloObserver for SoloTui {
 
             let view = SoloViewState {
                 game: tick.game,
-                chosen: tick.chosen,
+                chosen: *tick.chosen,
                 ghost,
                 candidates: tick.candidates,
                 stats: prev_stats,
                 step_mode: *step_mode,
-                prev_board: prev_board,
+                prev_board,
                 feature_names: tick.feature_names,
             };
 
@@ -128,6 +128,7 @@ pub struct VersusTui {
 }
 
 impl VersusTui {
+    #[must_use]
     pub fn new(terminal: DefaultTerminal, step_mode: bool) -> Self {
         Self {
             terminal,
@@ -163,9 +164,11 @@ impl VersusObserver for VersusTui {
             //     .and_then(|i| tick.candidates.get(i))
             //     .map(|c| c.mv.placement);
 
+            // TODO: Refactor so that the reference of small states are not take
+            // Ex. chosen
             let view = VersusViewState {
                 game_a: tick_a.game,
-                chosen_a: tick_a.chosen,
+                chosen_a: *tick_a.chosen,
                 ghost_a: Some(tick_a.chosen.placement),
                 candidates_a: tick_a.candidates,
                 prev_stats_a,
@@ -173,7 +176,7 @@ impl VersusObserver for VersusTui {
                 prev_garbage_a,
 
                 game_b: tick_b.game,
-                chosen_b: tick_b.chosen,
+                chosen_b: *tick_b.chosen,
                 ghost_b: Some(tick_b.chosen.placement),
                 candidates_b: tick_b.candidates,
                 prev_stats_b,
