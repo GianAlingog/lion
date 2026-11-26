@@ -1,7 +1,10 @@
 use std::time::Duration;
 
-use arena::observer::{Flow, SoloObserver, TickData, VersusObserver};
-use engine::board::Board;
+use arena::{
+    BotStats,
+    observer::{Flow, SoloObserver, TickData, VersusObserver},
+};
+use engine::{board::Board, garbage::GarbageQueue};
 use ratatui::{
     DefaultTerminal,
     crossterm::event::{self, Event, KeyCode, KeyEventKind},
@@ -16,6 +19,7 @@ pub struct SoloTui {
     delay_ms: u64,
     step_mode: bool,
     prev_board: Board,
+    prev_stats: BotStats,
 }
 
 impl SoloTui {
@@ -27,6 +31,7 @@ impl SoloTui {
             delay_ms: 100,
             step_mode,
             prev_board: Board::empty(),
+            prev_stats: BotStats::default(),
         }
     }
 }
@@ -42,6 +47,7 @@ impl SoloObserver for SoloTui {
                 delay_ms,
                 step_mode,
                 prev_board,
+                prev_stats,
             } = self;
 
             let ghost = table
@@ -54,9 +60,9 @@ impl SoloObserver for SoloTui {
                 chosen: tick.chosen,
                 ghost,
                 candidates: tick.candidates,
-                stats: tick.stats,
+                stats: prev_stats,
                 step_mode: *step_mode,
-                prev_board: *prev_board,
+                prev_board: prev_board,
                 feature_names: tick.feature_names,
             };
 
@@ -102,6 +108,8 @@ impl SoloObserver for SoloTui {
 
         self.prev_board = tick.game.board;
 
+        self.prev_stats = *tick.stats;
+
         Flow::Continue
     }
 }
@@ -113,6 +121,10 @@ pub struct VersusTui {
     step_mode: bool,
     prev_board_a: Board,
     prev_board_b: Board,
+    prev_stats_a: BotStats,
+    prev_stats_b: BotStats,
+    prev_garbage_a: GarbageQueue,
+    prev_garbage_b: GarbageQueue,
 }
 
 impl VersusTui {
@@ -123,6 +135,10 @@ impl VersusTui {
             step_mode,
             prev_board_a: Board::empty(),
             prev_board_b: Board::empty(),
+            prev_stats_a: BotStats::default(),
+            prev_stats_b: BotStats::default(),
+            prev_garbage_a: GarbageQueue::new(0),
+            prev_garbage_b: GarbageQueue::new(0),
         }
     }
 }
@@ -136,6 +152,10 @@ impl VersusObserver for VersusTui {
                 step_mode,
                 prev_board_a,
                 prev_board_b,
+                prev_stats_a,
+                prev_stats_b,
+                prev_garbage_a,
+                prev_garbage_b,
             } = self;
 
             // let ghost = table
@@ -148,15 +168,17 @@ impl VersusObserver for VersusTui {
                 chosen_a: tick_a.chosen,
                 ghost_a: Some(tick_a.chosen.placement),
                 candidates_a: tick_a.candidates,
-                stats_a: tick_a.stats,
-                prev_board_a: *prev_board_a,
+                prev_stats_a,
+                prev_board_a,
+                prev_garbage_a,
 
                 game_b: tick_b.game,
                 chosen_b: tick_b.chosen,
                 ghost_b: Some(tick_b.chosen.placement),
                 candidates_b: tick_b.candidates,
-                stats_b: tick_b.stats,
-                prev_board_b: *prev_board_b,
+                prev_stats_b,
+                prev_board_b,
+                prev_garbage_b,
 
                 step_mode: *step_mode,
             };
@@ -203,6 +225,12 @@ impl VersusObserver for VersusTui {
 
         self.prev_board_a = tick_a.game.board;
         self.prev_board_b = tick_b.game.board;
+
+        self.prev_stats_a = *tick_a.stats;
+        self.prev_stats_b = *tick_b.stats;
+
+        self.prev_garbage_a = tick_a.game.garbage.clone();
+        self.prev_garbage_b = tick_b.game.garbage.clone();
 
         Flow::Continue
     }
