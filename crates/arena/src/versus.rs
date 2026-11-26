@@ -184,17 +184,6 @@ pub fn run_game(
             break;
         };
 
-        // Update board states with current move
-
-        // With the remaining attack, push garbage
-        game_a.garbage.push(outcome_b.attack, cfg.garbage_delay);
-        game_b.garbage.push(outcome_a.attack, cfg.garbage_delay);
-
-        // Call next tick
-        game_a.garbage.tick();
-        game_b.garbage.tick();
-        ticks += 1;
-
         // Push any expired garbage
         // Must be on a non-line clear
         if outcome_a.lines == 0 {
@@ -209,6 +198,16 @@ pub fn run_game(
                 game_b.board.push_garbage(g);
             }
         }
+
+        // Update board states with current move
+        // With the remaining attack, push garbage
+        game_a.garbage.push(outcome_b.attack, cfg.garbage_delay);
+        game_b.garbage.push(outcome_a.attack, cfg.garbage_delay);
+
+        // Call next tick
+        game_a.garbage.tick();
+        game_b.garbage.tick();
+        ticks += 1;
 
         let flow = observer.on_tick(
             &TickData {
