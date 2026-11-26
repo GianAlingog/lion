@@ -23,7 +23,7 @@ fn main() {
             println!("{session_stats}");
             if let Some(path) = &cli.game_args.csv {
                 session_stats
-                    .export(&path, &cfg.metadata(&cli.game_args.label, &args.goal_kind))
+                    .export(path, &cfg.metadata(&cli.game_args.label, &args.goal_kind))
                     .expect("CSV Export failed");
             }
         }
@@ -33,7 +33,7 @@ fn main() {
             println!("{session_stats}");
             if let Some(path) = &cli.game_args.csv {
                 session_stats
-                    .export(&path, &cfg.metadata(&cli.game_args.label))
+                    .export(path, &cfg.metadata(&cli.game_args.label))
                     .expect("CSV Export failed");
             }
         }
