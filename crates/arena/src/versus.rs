@@ -1,14 +1,66 @@
 use std::time::{Duration, Instant};
 
-use bot::Bot;
+use bot::{Bot, BotConfig};
 use engine::{game::Game, rules::Ruleset};
 
 use crate::{
     BotStats, EndReason, GameArgs, VersusArgs, VersusMetadata, load_bot, load_rules,
-    observer::{Observer, Silent},
+    observer::{Flow, TickData, VersusObserver},
     pick_move,
     stats::VersusSession,
 };
+
+pub struct VersusConfig {
+    pub run: RunConfig,
+    pub bot_a: BotConfig,
+    pub bot_b: BotConfig,
+    pub seed: u64,
+    pub games: u32,
+}
+
+impl VersusConfig {
+    /// # Panics
+    ///
+    /// May panic on failure to read configuration file
+    // TODO: Change to move to default
+    #[must_use]
+    pub fn new(game_args: &GameArgs, versus_args: &VersusArgs) -> Self {
+        Self {
+            run: RunConfig {
+                max_ticks: versus_args.max_ticks,
+                preview: game_args.preview,
+                step_mode: game_args.step_mode,
+                garbage_delay: versus_args.garbage_delay,
+                ruleset: if let Some(rules) = &game_args.rules {
+                    load_rules(rules).unwrap()
+                } else {
+                    Ruleset::default()
+                },
+            },
+            bot_a: load_bot(&versus_args.bot_a).unwrap(),
+            bot_b: load_bot(&versus_args.bot_b).unwrap(),
+            seed: game_args.seed,
+            games: game_args.games,
+        }
+    }
+
+    #[must_use]
+    pub fn metadata<'a>(&'a self, label: &'a str) -> VersusMetadata<'a> {
+        let bot_a = self.bot_a.build();
+        let bot_b = self.bot_b.build();
+
+        VersusMetadata {
+            label,
+            bot_a: bot_a.name(),
+            bot_b: bot_b.name(),
+            weights_a: bot_a.weights(),
+            weights_b: bot_b.weights(),
+            weight_names_a: bot_a.feature_names(),
+            weight_names_b: bot_b.feature_names(),
+            mode: "Default",
+        }
+    }
+}
 
 pub struct RunConfig {
     pub max_ticks: u32,
@@ -64,66 +116,32 @@ impl PartialEq for MatchStats {
 ///
 /// Will panic if unable to load bot from config file
 #[allow(clippy::needless_pass_by_value)]
-pub fn run_versus(game_args: GameArgs, versus_args: VersusArgs) {
-    let cfg = RunConfig {
-        max_ticks: versus_args.max_ticks,
-        preview: game_args.preview,
-        step_mode: game_args.step_mode,
-        garbage_delay: versus_args.garbage_delay,
-        ruleset: if let Some(rules) = game_args.rules {
-            load_rules(&rules).unwrap()
-        } else {
-            Ruleset::default()
-        },
-    };
-
-    let bot_config_a = load_bot(&versus_args.bot_a).unwrap();
-    let mut bot_a = bot_config_a.build();
-
-    let bot_config_b = load_bot(&versus_args.bot_b).unwrap();
-    let mut bot_b = bot_config_b.build();
+pub fn run_versus(cfg: &VersusConfig, observer: &mut dyn VersusObserver) -> VersusSession {
+    let mut bot_a = cfg.bot_a.build();
+    let mut bot_b = cfg.bot_b.build();
 
     let mut session_stats = VersusSession {
-        matches: Vec::with_capacity(game_args.games as usize),
+        matches: Vec::with_capacity(cfg.games as usize),
     };
 
-    let mut observer = Silent;
-
-    for i in 0..game_args.games {
+    for i in 0..cfg.games {
         session_stats.matches.push(run_game(
-            game_args.seed + u64::from(i),
+            cfg.seed + u64::from(i),
             &mut *bot_a,
             &mut *bot_b,
-            &mut observer,
-            &cfg,
+            observer,
+            &cfg.run,
         ));
     }
 
-    println!("{session_stats}");
-
-    let session_metadata = VersusMetadata {
-        label: &game_args.label,
-        bot_a: bot_a.name(),
-        bot_b: bot_b.name(),
-        weights_a: bot_a.weights(),
-        weights_b: bot_b.weights(),
-        weight_names_a: bot_a.feature_names(),
-        weight_names_b: bot_b.feature_names(),
-        mode: "Default",
-    };
-
-    if let Some(path) = game_args.csv {
-        session_stats
-            .export(&path, &session_metadata)
-            .expect("CSV Export failed");
-    }
+    session_stats
 }
 
 pub fn run_game(
     seed: u64,
     bot_a: &mut dyn Bot,
     bot_b: &mut dyn Bot,
-    _observer: &mut dyn Observer,
+    observer: &mut dyn VersusObserver,
     cfg: &RunConfig,
 ) -> MatchStats {
     let match_start = Instant::now();
@@ -143,31 +161,34 @@ pub fn run_game(
     while !game_a.topped_out() && !game_b.topped_out() {
         // Simulate one tick
 
+        // Note: This calls the slow .candidates() function
+        // So, it will be called twice per tick, which is fine for display
+        // But be wary.
+        let candidates_a = if cfg.step_mode {
+            bot_a.moves(&game_a)
+        } else {
+            Vec::new()
+        };
+        let candidates_b = if cfg.step_mode {
+            bot_b.moves(&game_b)
+        } else {
+            Vec::new()
+        };
+
         // Select candidates on previous board state
         // TODO: Keep the generated move history to avoid redundant calculations
-        let Some((_chosen_a, outcome_a)) =
+        let Some((chosen_a, outcome_a)) =
             pick_move(bot_a, &mut game_a, &mut bot_stats_a, &mut prev_holes_a)
         else {
             end_reason = EndReason::BotFailed;
             break;
         };
-        let Some((_chosen_b, outcome_b)) =
+        let Some((chosen_b, outcome_b)) =
             pick_move(bot_b, &mut game_b, &mut bot_stats_b, &mut prev_holes_b)
         else {
             end_reason = EndReason::BotFailed;
             break;
         };
-
-        // Update board states with current move
-
-        // With the remaining attack, push garbage
-        game_a.garbage.push(outcome_b.attack, cfg.garbage_delay);
-        game_b.garbage.push(outcome_a.attack, cfg.garbage_delay);
-
-        // Call next tick
-        game_a.garbage.tick();
-        game_b.garbage.tick();
-        ticks += 1;
 
         // Push any expired garbage
         // Must be on a non-line clear
@@ -182,6 +203,39 @@ pub fn run_game(
             for g in &incoming_garbage {
                 game_b.board.push_garbage(g);
             }
+        }
+
+        // Update board states with current move
+        // With the remaining attack, push garbage
+        game_a.garbage.push(outcome_b.attack, cfg.garbage_delay);
+        game_b.garbage.push(outcome_a.attack, cfg.garbage_delay);
+
+        // Call next tick
+        game_a.garbage.tick();
+        game_b.garbage.tick();
+        ticks += 1;
+
+        let flow = observer.on_tick(
+            &TickData {
+                game: &game_a,
+                chosen: &chosen_a,
+                candidates: &candidates_a,
+                outcome: &outcome_a,
+                stats: &bot_stats_a,
+                feature_names: bot_a.feature_names(),
+            },
+            &TickData {
+                game: &game_b,
+                chosen: &chosen_b,
+                candidates: &candidates_b,
+                outcome: &outcome_b,
+                stats: &bot_stats_b,
+                feature_names: bot_b.feature_names(),
+            },
+        );
+        if flow == Flow::Stop {
+            end_reason = EndReason::ViewerClosed;
+            break;
         }
 
         // println!("{}", game_a.board);

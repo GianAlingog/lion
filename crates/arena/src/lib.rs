@@ -26,6 +26,13 @@ pub struct Cli {
     pub game_mode: GameMode,
 }
 
+impl Cli {
+    #[must_use]
+    pub fn parse_args() -> Self {
+        Self::parse()
+    }
+}
+
 #[derive(Debug, Parser)]
 pub struct GameArgs {
     #[arg(long, default_value = "no_label")]

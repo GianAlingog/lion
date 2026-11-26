@@ -23,12 +23,14 @@ const BASE_ATTACK_TABLE: [[u32; 5]; 3] = [
 //     [0, 1, 2, 3, 0],
 // ];
 
+#[derive(Clone, Copy)]
 pub struct GarbageBatch {
     pub lines: u32,
     pub hole: u32,
     pub delay: u32, // in ticks
 }
 
+#[derive(Clone)]
 pub struct GarbageQueue {
     // Vec over VecDeque since this should remain small in size
     rng: Rng,
@@ -48,6 +50,15 @@ impl GarbageQueue {
     pub fn incoming(&self) -> u32 {
         // May use in the future for visuals, though maybe returning the lines is better
         self.pending.iter().map(|g| g.lines).sum()
+    }
+
+    #[must_use]
+    pub fn ready(&self) -> u32 {
+        self.pending
+            .iter()
+            .filter(|g| g.delay == 0)
+            .map(|g| g.lines)
+            .sum()
     }
 
     /// # Panics
