@@ -18,6 +18,11 @@ pub struct SoloConfig {
 }
 
 impl SoloConfig {
+    /// # Panics
+    ///
+    /// May panic on failure to read configuration file
+    // TODO: Change to move to default
+    #[must_use]
     pub fn new(game_args: &GameArgs, solo_args: &SoloArgs) -> Self {
         Self {
             run: RunConfig {
@@ -41,6 +46,7 @@ impl SoloConfig {
         }
     }
 
+    #[must_use]
     pub fn metadata<'a>(&'a self, label: &'a str, goal_kind: &GoalKind) -> SoloMetadata<'a> {
         let bot = self.bot.build();
 
