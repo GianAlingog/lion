@@ -366,16 +366,18 @@ pub fn render_versus(f: &mut Frame, v: &VersusViewState) {
     ])
     .areas(game_area_b);
 
-    let [hold_area_a, _, garbage_area_a] = Layout::vertical([
+    let [hold_area_a, _, garbage_area_a, _] = Layout::vertical([
         Constraint::Length(6),
         Constraint::Fill(1),
         Constraint::Length(10),
+        Constraint::Length(1),
     ])
     .areas(left_area_a);
-    let [hold_area_b, _, garbage_area_b] = Layout::vertical([
+    let [hold_area_b, _, garbage_area_b, _] = Layout::vertical([
         Constraint::Length(6),
         Constraint::Fill(1),
         Constraint::Length(10),
+        Constraint::Length(1),
     ])
     .areas(left_area_b);
 
