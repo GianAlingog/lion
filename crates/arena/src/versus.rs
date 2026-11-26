@@ -19,6 +19,11 @@ pub struct VersusConfig {
 }
 
 impl VersusConfig {
+    /// # Panics
+    ///
+    /// May panic on failure to read configuration file
+    // TODO: Change to move to default
+    #[must_use]
     pub fn new(game_args: &GameArgs, versus_args: &VersusArgs) -> Self {
         Self {
             run: RunConfig {
@@ -39,6 +44,7 @@ impl VersusConfig {
         }
     }
 
+    #[must_use]
     pub fn metadata<'a>(&'a self, label: &'a str) -> VersusMetadata<'a> {
         let bot_a = self.bot_a.build();
         let bot_b = self.bot_b.build();
@@ -224,7 +230,7 @@ pub fn run_game(
                 candidates: &candidates_b,
                 outcome: &outcome_b,
                 stats: &bot_stats_b,
-                feature_names: &bot_b.feature_names(),
+                feature_names: bot_b.feature_names(),
             },
         );
         if flow == Flow::Stop {
