@@ -12,6 +12,7 @@
 - Greedy bot with zero bumpiness weight completes only 6 of 100 games in 40L (same setup as above)
 - [Dellacherie bot](https://arxiv.org/pdf/1905.01652) with BFS move generation averages a max height of 4.64 and max at 7.00 across 100 games, median of 102 pieces
 - Dellacherie bot with beam search averages a max height of 4.29 and max at 5.00 across 100 games, median of 102 pieces
+- Attack-aware beam beats the survival (Dellacherie bot) with beam 134-65-1 over 200 games (67%, 95% CI 60% to 73%, about +125 Elo), commited at 0551d82. [CSV](benchmarks/2026-11-26-attack-vs-survival.csv)
 
 ## Recording
 
@@ -23,20 +24,12 @@ To create recordings via the TUI, see the `viewer.tape` script [here](docs/media
 
 ## Quickstart
 
-To watch the bot play via the TUI:
+Play the bots against themselves:
 ```
-cargo run -p viewer --release -- --step-mode
-```
-
-To simulate games headlessly:
-```
-cargo run -p arena --release
+cargo run --release -p arena -- --label "$(git describe --always --dirty)" --games=200 --csv 2026-11-26-attack-vs-survival.csv versus --bot-a ./bots/beam-3d-16w-with-attack.toml --bot-b ./bots/dellacherie-with-beam-3d-16w.toml
 ```
 
-To export a session:
-```
-cargo run -p arena --release -- --label "$(git describe --always --dirty)" --csv path/to/output.csv
-```
+Switch the crate from `arena` to `viewer` to watch them play in the terminal.
 
 ## Status
 
@@ -45,19 +38,29 @@ cargo run -p arena --release -- --label "$(git describe --always --dirty)" --csv
 - Deterministic 7-bag generation
 - SRS engine (kicks, spin detection)
 - Greedy heuristic bot with one-piece + hold depth
-- Headless arena and TUI viewer
+- Headless arena
+- Solo TUI viewer
 - Statistics library
 - CSV session export
-- Benchmarks of baseline
 - Complete move generation
 - Bot lookahead via beam search
 - Dellacherie feature set bot
-- Better benchmarking
+- Benchmarking with Criterion
+- Bot creation via TOML files
+- Garbage system (TETR.IO-style attack table, combo, b2b, cancelling, and delay)
+- Attack-aware beam search bot
+- 1v1 versus arena with seat-swappable matches
+- Match statistics (W/D/L, Wilson interval, Elo difference)
+- Versus TUI viewer
+- Profiled move generation (3.4 to 4.3x faster with identical play, write-up in progress)
+- Attack vs survival benchmark (200 games)
 
 **In progress**
-- Versus mode
-- Arena 1v1
-- More benchmarks
+- Seat-swapped evaluation (when bots are not tick-based)
+- Garbage messiness
+- Dynamic bot names through config files
+- Parallel match runner
+- Parallel beam search
 
 ## Contributing
 
