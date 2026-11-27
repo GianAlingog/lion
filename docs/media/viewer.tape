@@ -61,16 +61,19 @@ Output viewer.gif
 
 Set Shell "fish"
 Set FontFamily "JetBrainsMono Nerd Font"
-Set FontSize 24
-Set Width 1280
-Set Height 720
+Set FontSize 26
+# Set Width 1280
+Set Width 1920
+# Set Height 720
+Set Height 1080
 Set Theme "Catppuccin Mocha"
 Set Padding 10
 
 Hide
-Type "cargo run -p viewer --release -- --games 1 --mode endless --step-mode --bot beam --weights=-4,-1,-1,-1,-1,1"
+Type "cargo run --release -p viewer -- --step-mode --games=1 --seed=3735928631 versus --bot-a ./bots/beam-3d-16w-with-attack.toml --bot-b ./bots/dellacherie-with-beam-3d-16w.toml"
 Enter
 Sleep 5s
-Show
 Type "c"
+Sleep 10s
+Show
 Sleep 10s
