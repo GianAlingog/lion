@@ -242,7 +242,11 @@ impl SoloSession {
     pub fn export(&self, path: &PathBuf, m: &SoloMetadata) -> std::io::Result<()> {
         let mut w = BufWriter::new(File::create(path)?);
 
-        writeln!(w, "label,bot,weights,seed,mode,end_reason,{}", bot_header(""))?;
+        writeln!(
+            w,
+            "label,bot,weights,seed,mode,end_reason,{}",
+            bot_header("")
+        )?;
 
         for g in &self.games {
             writeln!(

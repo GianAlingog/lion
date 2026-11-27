@@ -103,7 +103,7 @@ pub struct Greedy {
 }
 
 impl Greedy {
-    const NAMES: [&'static str; N] = ["hol", "bmp", "agh", "lin"];
+    const NAMES: [&'static str; N] = ["holes", "bumpiness", "aggregate_height", "lines"];
 
     #[must_use]
     pub fn new(cfg: &Config) -> Self {
