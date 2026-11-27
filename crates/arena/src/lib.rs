@@ -103,6 +103,9 @@ pub struct VersusArgs {
 
     #[arg(long)]
     pub bot_b: PathBuf,
+
+    #[arg(long)]
+    pub seat_swap: bool,
 }
 
 pub struct SoloMetadata<'a> {
