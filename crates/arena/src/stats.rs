@@ -181,6 +181,14 @@ fn bot_row(b: &BotStats) -> String {
     bot_values(b).join(",")
 }
 
+fn weights_row(weights: &[f64], weight_names: &'static [&'static str]) -> String {
+    weights
+        .iter()
+        .zip(weight_names)
+        .map(|(weight, name)| format!("{name}={weight};"))
+        .collect()
+}
+
 #[derive(Default)]
 pub struct Pooled {
     pub pieces: f64,
@@ -234,14 +242,15 @@ impl SoloSession {
     pub fn export(&self, path: &PathBuf, m: &SoloMetadata) -> std::io::Result<()> {
         let mut w = BufWriter::new(File::create(path)?);
 
-        writeln!(w, "label,bot,seed,mode,end_reason,{}", bot_header(""))?;
+        writeln!(w, "label,bot,weights,seed,mode,end_reason,{}", bot_header(""))?;
 
         for g in &self.games {
             writeln!(
                 w,
-                "{},{},{},{},{:?},{}",
+                "{},{},{},{},{},{:?},{}",
                 m.label,
                 m.bot,
+                weights_row(&m.weights, m.weight_names),
                 g.seed,
                 m.mode,
                 g.end_reason,
@@ -381,7 +390,7 @@ impl VersusSession {
 
         writeln!(
             w,
-            "label,bot_a,bot_b,seed,result,end_reason,ticks,{},{}",
+            "label,bot_a,bot_b,weights_a,weights_b,seed,result,end_reason,ticks,{},{}",
             bot_header("a_"),
             bot_header("b_"),
         )?;
@@ -389,10 +398,12 @@ impl VersusSession {
         for g in &self.matches {
             writeln!(
                 w,
-                "{},{},{},{},{:?},{:?},{},{},{}",
+                "{},{},{},{},{},{},{:?},{:?},{},{},{}",
                 m.label,
                 m.bot_a,
                 m.bot_b,
+                weights_row(&m.weights_a, m.weight_names_a),
+                weights_row(&m.weights_b, m.weight_names_b),
                 g.seed,
                 g.match_result,
                 g.end_reason,
