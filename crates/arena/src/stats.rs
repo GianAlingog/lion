@@ -1,5 +1,5 @@
 use std::{
-    fmt,
+    fmt::{self, Write as FmtWrite},
     fs::File,
     io::{BufWriter, Write},
     path::PathBuf,
@@ -185,8 +185,10 @@ fn weights_row(weights: &[f64], weight_names: &'static [&'static str]) -> String
     weights
         .iter()
         .zip(weight_names)
-        .map(|(weight, name)| format!("{name}={weight};"))
-        .collect()
+        .fold(String::new(), |mut result, (weight, name)| {
+            write!(&mut result, "{name}={weight};").unwrap();
+            result
+        })
 }
 
 #[derive(Default)]
