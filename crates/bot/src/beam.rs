@@ -225,7 +225,15 @@ pub struct Beam {
 
 impl Beam {
     const NAMES: [&'static str; N] = [
-        "hol", "wel", "row", "col", "hei", "ero", "att", "b2b", "dng",
+        "holes",
+        "cumulative_wells",
+        "row_transitions",
+        "column_transitions",
+        "landing_height",
+        "eroded_cells",
+        "attack",
+        "b2b",
+        "danger",
     ];
 
     #[must_use]

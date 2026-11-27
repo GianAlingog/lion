@@ -139,7 +139,14 @@ pub struct Dellacherie {
 }
 
 impl Dellacherie {
-    const NAMES: [&'static str; N] = ["hol", "wel", "row", "col", "hei", "ero"];
+    const NAMES: [&'static str; N] = [
+        "holes",
+        "cumulative_wells",
+        "row_transitions",
+        "column_transitions",
+        "landing_height",
+        "eroded_cells",
+    ];
 
     #[must_use]
     pub fn new(cfg: &Config) -> Self {
