@@ -16,6 +16,7 @@ pub struct VersusConfig {
     pub bot_b: BotConfig,
     pub seed: u64,
     pub games: u32,
+    pub seat_swap: bool,
 }
 
 impl VersusConfig {
@@ -41,6 +42,7 @@ impl VersusConfig {
             bot_b: load_bot(&versus_args.bot_b).unwrap(),
             seed: game_args.seed,
             games: game_args.games,
+            seat_swap: versus_args.seat_swap,
         }
     }
 
@@ -101,6 +103,21 @@ pub struct MatchStats {
     pub elapsed: Duration,
 }
 
+impl MatchStats {
+    #[must_use]
+    pub fn flipped(self) -> Self {
+        Self {
+            seed: self.seed,
+            end_reason: self.end_reason,
+            match_result: self.match_result.flipped(),
+            ticks: self.ticks,
+            bot_stats_a: self.bot_stats_b,
+            bot_stats_b: self.bot_stats_a,
+            elapsed: self.elapsed,
+        }
+    }
+}
+
 impl PartialEq for MatchStats {
     fn eq(&self, other: &Self) -> bool {
         self.seed == other.seed
@@ -132,6 +149,19 @@ pub fn run_versus(cfg: &VersusConfig, observer: &mut dyn VersusObserver) -> Vers
             observer,
             &cfg.run,
         ));
+
+        if cfg.seat_swap {
+            session_stats.matches.push(
+                run_game(
+                    cfg.seed + u64::from(i),
+                    &mut *bot_b,
+                    &mut *bot_a,
+                    observer,
+                    &cfg.run,
+                )
+                .flipped(),
+            );
+        }
     }
 
     session_stats
